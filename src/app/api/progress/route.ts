@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       .from('watch_progress')
       .select('id')
       .eq('student_id', studentId)
-      .eq('lessonId', lessonId)
+      .eq('lesson_id', lessonId)
       .single()
 
     if (existingProgress) {
