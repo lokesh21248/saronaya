@@ -108,3 +108,4 @@ export function CategoryCard({ category, className = '' }: CategoryCardProps) {
     </Link>
   )
 }
+
