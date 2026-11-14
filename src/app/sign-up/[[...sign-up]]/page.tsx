@@ -94,7 +94,23 @@ export default function SignUpPage() {
         })
       )
 
-      // 2. Try authentic Clerk account creation
+      // 2. Sync profile to Supabase database (non-blocking)
+      fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          phone: `+91 ${phone.trim()}`,
+          educationLevel: education,
+          collegeName: college,
+          degree: education,
+          branchCode: studentData.branchCode,
+          passedOutYear: passedOutYear,
+        }),
+      }).catch((e) => console.warn('Supabase profile sync notice:', e))
+
+      // 3. Try authentic Clerk account creation
       if (clerk?.loaded && clerk?.client) {
         try {
           await clerk.client.signUp.create({
