@@ -95,7 +95,7 @@ export default function ProgressPage() {
 
         {/* Responsive Grid: Weekly Chart & Milestones */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
-          
+
           {/* Weekly Study Hours Card with Chart (7 cols on laptop) */}
           <div className="lg:col-span-7 bg-white rounded-2xl sm:rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] space-y-6">
             <div className="flex items-center justify-between">
