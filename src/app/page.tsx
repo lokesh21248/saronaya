@@ -231,9 +231,9 @@ export default function HomePage() {
       <main className="flex-1">
         
         {/* ========================================================================= */}
-        {/* MOBILE HERO BANNER (< md) — Exactly matching saryonaya-mobile-design.jpg  */}
+        {/* MOBILE HERO BANNER (< lg) — Exactly matching saryonaya-mobile-design.jpg  */}
         {/* ========================================================================= */}
-        <section className="md:hidden px-3 pt-3 pb-1 bg-gradient-to-b from-[#eef3f9] to-[#f4f7fb]">
+        <section className="lg:hidden px-3 pt-3 pb-1 bg-gradient-to-b from-[#eef3f9] to-[#f4f7fb]">
           <div className="relative rounded-2xl overflow-hidden shadow-[0_6px_20px_rgba(9,38,83,0.14)] border border-slate-200/90 active:scale-[0.99] transition-transform">
             <Link href="/courses" className="block relative group" aria-label="Explore Courses">
               <img
@@ -249,9 +249,9 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* DESKTOP HERO SECTION (>= md) — 4K Premium UI                              */}
+        {/* DESKTOP HERO SECTION (>= lg) — 4K Premium UI                              */}
         {/* ========================================================================= */}
-        <section className="hidden md:block relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-8 sm:pb-14">
+        <section className="hidden lg:block relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-8 sm:pb-14">
           
           {/* Sweeping 3D Royal Navy & Molten Gold Ribbon Waves */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -428,9 +428,9 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 3. PROMOTIONAL COURSE BANNERS (Carousel / Banners - Desktop view)         */}
+        {/* 3. PROMOTIONAL COURSE BANNERS (Carousel / Banners - Large Desktop view)   */}
         {/* ========================================================================= */}
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <PromotionalBanners />
         </div>
 
@@ -514,9 +514,9 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* MOBILE UNLIMITED ACCESS BANNER (< md)                                     */}
+        {/* MOBILE UNLIMITED ACCESS BANNER (< lg)                                     */}
         {/* ========================================================================= */}
-        <section className="md:hidden px-3 pt-1 pb-4">
+        <section className="lg:hidden px-3 pt-1 pb-4">
           <Link
             href="/subscriptions"
             className="block relative rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(9,38,83,0.12)] active:scale-[0.99] transition-transform"

@@ -172,10 +172,10 @@ export function Navbar() {
         <div className="flex items-center gap-2 shrink-0">
           
           {/* ========================================================= */}
-          {/* MOBILE ONLY (< md): Clean Bell + Circular Student Avatar */}
+          {/* MOBILE & TABLET (< lg): Clean Bell + Circular Student Avatar */}
           {/* Matches saryonaya-mobile-design.jpg pixel-for-pixel       */}
           {/* ========================================================= */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-2 sm:gap-2.5">
             <Link
               href="/notifications"
               className="relative p-2 rounded-full bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 active:scale-95 transition-all"
@@ -189,7 +189,7 @@ export function Navbar() {
 
             {isSignedIn ? (
               <Link href="/profile" className="relative group shrink-0" aria-label="Profile">
-                <div className="w-8 h-8 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-slate-100 shadow-sm flex items-center justify-center font-black text-xs text-[#07182e]">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-slate-100 shadow-sm flex items-center justify-center font-black text-xs text-[#07182e]">
                   {user?.imageUrl ? (
                     <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -199,7 +199,7 @@ export function Navbar() {
               </Link>
             ) : (
               <Link href="/login" className="relative group shrink-0" aria-label="Sign In">
-                <div className="w-8 h-8 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-white shadow-sm flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-white shadow-sm flex items-center justify-center">
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                     alt="Student Account"
@@ -211,13 +211,13 @@ export function Navbar() {
           </div>
 
           {/* ========================================================= */}
-          {/* DESKTOP / TABLET (>= md): Full Actions & Auth Controls     */}
+          {/* DESKTOP (>= lg): Full Actions & Auth Controls             */}
           {/* ========================================================= */}
-          <div className="hidden md:flex items-center gap-2 sm:gap-3">
+          <div className="hidden lg:flex items-center gap-2 sm:gap-3">
             {/* Search Bar (matching the mockup) */}
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white focus-within:shadow-md shadow-xs transition-all w-48 xl:w-64"
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white focus-within:shadow-md shadow-xs transition-all w-48 xl:w-64"
             >
               <Search size={14} className="text-slate-400 shrink-0" />
               <input
@@ -230,7 +230,7 @@ export function Navbar() {
             </form>
 
             {/* Go Premium Luxury Button */}
-            <Link href="/subscriptions" className="hidden sm:inline-block">
+            <Link href="/subscriptions">
               <PremiumButton size="sm">Go Premium</PremiumButton>
             </Link>
 
@@ -256,7 +256,7 @@ export function Navbar() {
                   <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#dfa32b] to-[#07182e] text-white flex items-center justify-center font-bold text-xs">
                     {user?.firstName?.[0] || 'U'}
                   </div>
-                  <span className="text-xs font-extrabold text-[#07182e] hidden sm:inline">
+                  <span className="text-xs font-extrabold text-[#07182e]">
                     {user?.firstName || 'Student'}
                   </span>
                 </Link>
@@ -272,7 +272,7 @@ export function Navbar() {
               <div className="flex items-center gap-2">
                 {/* Login Button (White pill with subtle shadow) */}
                 <Link href="/login">
-                  <button className="px-4 py-2 rounded-full text-xs font-black text-[#07182e] bg-white border border-slate-300/90 shadow-sm hover:border-[#07182e] hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-1.5">
+                  <button className="px-4 py-2 rounded-full text-xs font-black text-[#07182e] bg-white border border-slate-300/90 shadow-sm hover:border-[#07182e] hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
                     <User size={13} className="text-[#07182e]" />
                     <span>Login</span>
                   </button>
@@ -288,7 +288,7 @@ export function Navbar() {
               </div>
             )}
 
-            {/* Tablet Menu Toggle (Between md and xl only) */}
+            {/* Tablet Menu Toggle (Between lg and xl only) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="xl:hidden p-2 rounded-xl bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 transition-colors ml-1"
