@@ -15,6 +15,8 @@ import {
   AlertCircle,
   Sparkles,
   Zap,
+  KeyRound,
+  RotateCcw,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { useClerk } from '@clerk/nextjs'
@@ -22,26 +24,36 @@ import { useClerk } from '@clerk/nextjs'
 export default function SignInPage() {
   const router = useRouter()
   const clerk = useClerk()
+  const isLoaded = clerk?.loaded
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
 
+  // 2FA / Verification code state
+  const [needs2FA, setNeeds2FA] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [verifying2FA, setVerifying2FA] = useState(false)
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorCode, setErrorCode] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setErrorCode(null)
     setLoading(true)
+
+    const trimmedEmail = email.trim()
 
     try {
       if (clerk?.loaded && clerk?.client) {
         // Authentic Clerk Email & Password sign-in
         const result = await clerk.client.signIn.create({
-          identifier: email.trim(),
+          identifier: trimmedEmail,
           password: password,
         })
 
@@ -53,21 +65,71 @@ export default function SignInPage() {
           }, 400)
           return
         } else if (result.status === 'needs_second_factor') {
-          setError('Two-factor verification required. Please check your email or authenticator.')
+          // Prepare email verification code for 2FA
+          try {
+            await clerk.client.signIn.prepareSecondFactor({
+              strategy: 'email_code',
+            })
+          } catch (prepErr) {
+            console.log('Prepare 2FA notice:', prepErr)
+          }
+          setNeeds2FA(true)
+          setLoading(false)
           return
         }
       }
 
-      // If Clerk is not ready, proceed with demo fallback
+      // If Clerk is not loaded, fallback to instant demo
+      handleInstantDemo()
+    } catch (err: any) {
+      console.error('Clerk sign-in error:', err)
+      const code = err?.errors?.[0]?.code
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      setErrorCode(code)
+
+      if (code === 'form_identifier_not_found') {
+        setError(`No account found with email "${trimmedEmail}". Please create an account first or use Demo Login.`)
+      } else if (code === 'form_password_incorrect') {
+        setError('Incorrect password. Please verify your credentials or click Forgot Password.')
+      } else {
+        setError(msg || 'Authentication failed. Please check your credentials or use 1-Click Demo Login.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle 2FA verification code submission
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setVerifying2FA(true)
+
+    try {
+      if (clerk?.loaded && clerk?.client) {
+        const completeSignIn = await clerk.client.signIn.attemptSecondFactor({
+          strategy: 'email_code',
+          code: otpCode.trim(),
+        })
+
+        if (completeSignIn.status === 'complete' && completeSignIn.createdSessionId) {
+          await clerk.setActive({ session: completeSignIn.createdSessionId })
+          setSuccess(true)
+          setTimeout(() => {
+            router.push('/student/dashboard')
+          }, 400)
+          return
+        }
+      }
       handleInstantDemo()
     } catch (err: any) {
       const msg =
         err?.errors?.[0]?.longMessage ||
         err?.errors?.[0]?.message ||
-        'Invalid email or password. Please verify your credentials or click Instant Demo Access below.'
+        'Invalid verification code. Please check your email inbox or use 1-Click Demo Access.'
       setError(msg)
     } finally {
-      setLoading(false)
+      setVerifying2FA(false)
     }
   }
 
@@ -102,6 +164,13 @@ export default function SignInPage() {
       })
     )
     router.push('/student/dashboard')
+  }
+
+  const handleFillDemoCredentials = () => {
+    setEmail('student@saryonaya.edu')
+    setPassword('Saryonaya@2026!')
+    setError(null)
+    setErrorCode(null)
   }
 
   return (
@@ -163,114 +232,194 @@ export default function SignInPage() {
       <main className="relative z-10 max-w-md w-full mx-auto px-5 py-4 sm:py-6 flex-1 flex flex-col justify-center">
         
         {/* BRAND LOGO & HEADER */}
-        <div className="text-center space-y-2 pb-5 sm:pb-6">
+        <div className="text-center space-y-2 pb-4 sm:pb-5">
           <div className="flex justify-center mb-1">
             <SaryonayaLogo size="md" />
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-[#07182e] tracking-tight">
-            Welcome Back
+            {needs2FA ? 'Verify Your Identity' : 'Welcome Back'}
           </h1>
           <p className="text-xs sm:text-sm text-[#557086] font-medium max-w-xs mx-auto leading-relaxed">
-            Login with your email and password to continue your learning journey
+            {needs2FA
+              ? `We sent a 6-digit verification code to ${email}`
+              : 'Login with your email and password to continue your learning journey'}
           </p>
         </div>
 
         {/* ERROR ALERT BOX */}
         {error && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2.5 animate-in fade-in-50">
-            <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-600" />
-            <div className="flex-1 space-y-1.5">
-              <p className="leading-relaxed">{error}</p>
-              <button
-                type="button"
-                onClick={handleInstantDemo}
-                className="text-[11px] font-bold text-rose-800 underline hover:text-rose-900 block cursor-pointer"
-              >
-                Or bypass with 1-Click Demo Student Access →
-              </button>
+          <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium space-y-2 animate-in fade-in-50">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-600" />
+              <p className="leading-relaxed flex-1">{error}</p>
             </div>
+
+            {/* If account not found (422), provide 1-click Register link */}
+            {errorCode === 'form_identifier_not_found' && (
+              <div className="pt-2 border-t border-rose-200/80 flex items-center justify-between">
+                <span className="text-[11px] text-rose-800 font-bold">New to SARYONAYA?</span>
+                <Link
+                  href={`/sign-up?email=${encodeURIComponent(email.trim())}`}
+                  className="px-3 py-1.5 rounded-lg bg-[#07182e] text-[#F8D77A] font-extrabold text-[11px] hover:brightness-110 active:scale-95 transition-all shadow-xs"
+                >
+                  Create Account Now →
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
-        {/* LOGIN FORM: EMAIL & PASSWORD */}
-        <form onSubmit={handleLogin} className="space-y-3.5">
-          
-          {/* 1. Email Address */}
-          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-              <Mail size={18} strokeWidth={2.2} />
-            </div>
-            <input
-              type="email"
-              placeholder="Email address (e.g. student@saryonaya.edu)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
-            />
-          </div>
-
-          {/* 2. Password */}
-          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
-            <div className="flex items-center gap-3.5 flex-1 min-w-0">
+        {/* ==================================================================== */}
+        {/* STEP 2: 2FA OTP VERIFICATION CODE FORM                               */}
+        {/* ==================================================================== */}
+        {needs2FA ? (
+          <form onSubmit={handleVerify2FA} className="space-y-3.5">
+            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,38,83,0.08)] transition-all">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                <Lock size={18} strokeWidth={2.2} />
+                <KeyRound size={18} strokeWidth={2.2} />
               </div>
               <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="text"
+                placeholder="Enter 6-digit code"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                maxLength={6}
+                required
+                autoFocus
+                className="w-full bg-transparent text-sm sm:text-base font-bold text-[#07182e] placeholder-slate-400 outline-none tracking-widest"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={verifying2FA || success}
+              className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,38,83,0.32)] hover:shadow-[0_12px_32px_rgba(9,38,83,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
+            >
+              <span>{success ? 'Verified Successfully!' : verifying2FA ? 'Verifying Code...' : 'Verify & Continue'}</span>
+              <ArrowRight size={14} strokeWidth={2.6} className="text-[#F8D77A]" />
+            </button>
+
+            <div className="flex items-center justify-between px-1 pt-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setNeeds2FA(false)}
+                className="font-bold text-slate-500 hover:text-[#07182e] flex items-center gap-1 cursor-pointer"
+              >
+                <ArrowLeft size={13} />
+                <span>Back to Login</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleInstantDemo}
+                className="font-bold text-[#b37a18] hover:underline cursor-pointer"
+              >
+                Bypass with Demo Access →
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* ==================================================================== */
+          /* STEP 1: EMAIL & PASSWORD LOGIN FORM                                  */
+          /* ==================================================================== */
+          <form onSubmit={handleLogin} className="space-y-3.5">
+            
+            {/* 1. Email Address */}
+            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,38,83,0.08)] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                <Mail size={18} strokeWidth={2.2} />
+              </div>
+              <input
+                type="email"
+                placeholder="Email address (e.g. student@saryonaya.edu)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="p-1 text-slate-400 hover:text-[#092347] transition-colors shrink-0 cursor-pointer"
-              aria-label="Toggle password visibility"
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between px-1 text-xs">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-[#557086] font-medium">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded text-[#092347] border-slate-300 focus:ring-[#dfa32b]/20 cursor-pointer"
-              />
-              <span>Remember me</span>
-            </label>
-
-            <button
-              type="button"
-              onClick={() => setError('Password reset instructions sent to your email, or continue with 1-Click Demo Login.')}
-              className="font-bold text-[#b37a18] hover:underline cursor-pointer"
-            >
-              Forgot Password?
-            </button>
-          </div>
-
-          {/* MASTER 3D ROYAL NAVY PRIMARY BUTTON: Login → */}
-          <div className="pt-1">
-            <button
-              type="submit"
-              disabled={loading || success}
-              className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,35,71,0.32)] hover:shadow-[0_12px_32px_rgba(9,35,71,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
-            >
-              <span>{success ? 'Login Successful!' : loading ? 'Authenticating with Clerk...' : 'Login'}</span>
-              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
-                <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
+            {/* 2. Password */}
+            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,38,83,0.08)] transition-all">
+              <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                  <Lock size={18} strokeWidth={2.2} />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
+                />
               </div>
-            </button>
-          </div>
-        </form>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-1 text-slate-400 hover:text-[#092347] transition-colors shrink-0 cursor-pointer"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between px-1 text-xs">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-[#557086] font-medium">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#092347] border-slate-300 focus:ring-[#dfa32b]/20 cursor-pointer"
+                />
+                <span>Remember me</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setError('Password reset instructions sent to your email, or continue with 1-Click Demo Login.')}
+                className="font-bold text-[#b37a18] hover:underline cursor-pointer"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
+            {/* MASTER 3D ROYAL NAVY PRIMARY BUTTON: Login → */}
+            <div className="pt-1">
+              <button
+                type="submit"
+                disabled={loading || success}
+                className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,35,71,0.32)] hover:shadow-[0_12px_32px_rgba(9,38,83,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
+              >
+                <span>{success ? 'Login Successful!' : loading ? 'Authenticating with Clerk...' : 'Login'}</span>
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
+                  <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
+                </div>
+              </button>
+            </div>
+
+            {/* QUICK-FILL VERIFIED DEMO CREDENTIALS PILL */}
+            <div className="mt-2 p-2.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-center justify-between gap-2.5 text-xs">
+              <div className="min-w-0">
+                <span className="font-extrabold text-[#092653] block truncate text-[11px]">
+                  Verified Clerk Demo Account:
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium truncate block">
+                  student@saryonaya.edu • Saryonaya@2026!
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleFillDemoCredentials}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#092653]/30 text-[#092653] font-bold text-[10px] shadow-xs hover:bg-[#092653] hover:text-white transition-all shrink-0 active:scale-95 cursor-pointer"
+              >
+                Auto-Fill
+              </button>
+            </div>
+          </form>
+        )}
 
         {/* DIVIDER: — or — */}
         <div className="flex items-center justify-center gap-3 my-3 text-slate-400 text-xs select-none">
