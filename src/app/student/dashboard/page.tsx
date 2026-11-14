@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import {
   BookOpen,
@@ -17,6 +18,7 @@ import {
   Play,
   ArrowRight,
   Crown,
+  Loader2,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
@@ -24,24 +26,58 @@ import { BottomNav } from '@/components/layout/BottomNav'
 import { COURSES_DATA, ACADEMIC_BRANCHES } from '@/lib/data/lms-data'
 
 export default function StudentDashboard() {
-  const { user } = useUser()
+  const router = useRouter()
+  const { user, isLoaded, isSignedIn } = useUser()
   const [selectedBranch, setSelectedBranch] = useState('CSE')
   const [collegeName, setCollegeName] = useState('Engineering College')
-  const [demoStudentName, setDemoStudentName] = useState<string | null>(null)
 
+  // Route protection: redirect unauthenticated users to sign-in
   useEffect(() => {
-    const savedBranch = localStorage.getItem('saryonaya_user_branch')
-    const savedCollege = localStorage.getItem('saryonaya_user_college')
-    const demoSession = localStorage.getItem('saryonaya_demo_session')
-    if (savedBranch) setSelectedBranch(savedBranch)
-    if (savedCollege) setCollegeName(savedCollege)
-    if (demoSession) {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in')
+    }
+  }, [isLoaded, isSignedIn, router])
+
+  // Load real student academic profile
+  useEffect(() => {
+    async function fetchStudentProfile() {
       try {
-        const parsed = JSON.parse(demoSession)
-        if (parsed?.name) setDemoStudentName(parsed.name)
+        const res = await fetch('/api/profile')
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.qualification?.college_name) {
+            setCollegeName(data.qualification.college_name)
+          }
+          if (data?.qualification?.branch_code) {
+            setSelectedBranch(data.qualification.branch_code)
+            return
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch remote profile:', e)
+      }
+
+      // Check local registration cache
+      try {
+        const savedProfileStr = localStorage.getItem('saryonaya_user_profile')
+        if (savedProfileStr) {
+          const parsed = JSON.parse(savedProfileStr)
+          if (parsed.collegeName) setCollegeName(parsed.collegeName)
+          if (parsed.branchCode) setSelectedBranch(parsed.branchCode)
+          return
+        }
+
+        const savedBranch = localStorage.getItem('saryonaya_user_branch')
+        const savedCollege = localStorage.getItem('saryonaya_user_college')
+        if (savedBranch) setSelectedBranch(savedBranch)
+        if (savedCollege) setCollegeName(savedCollege)
       } catch (e) {}
     }
-  }, [])
+
+    if (isSignedIn) {
+      fetchStudentProfile()
+    }
+  }, [isSignedIn])
 
   const currentBranchInfo =
     ACADEMIC_BRANCHES.find((b) => b.code === selectedBranch) || ACADEMIC_BRANCHES[0]
@@ -57,16 +93,20 @@ export default function StudentDashboard() {
     { label: 'Certificates', value: '1', icon: Award, color: 'text-purple-600 bg-purple-50' },
   ]
 
-  const navLinks = [
-    { label: 'Explore', href: '/courses' },
-    { label: 'Subscriptions', href: '/pricing' },
-    { label: 'My Learning', href: '/student/dashboard' },
-    { label: 'My Courses', href: '/student/courses' },
-    { label: 'Progress', href: '/student/progress' },
-    { label: 'Certificates', href: '/student/certificates' },
-  ]
-
   const continueCourse = COURSES_DATA[0] // Python for Beginners
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-[#f6f9fd] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#092347] mx-auto" />
+          <p className="text-xs font-bold text-slate-500">Loading student dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const studentDisplayName = user?.fullName || user?.firstName || 'Student'
 
   return (
     <div className="min-h-screen bg-[#f6f9fd] text-[#092347] pb-24 md:pb-12 font-sans antialiased selection:bg-[#dfa32b]/30">
@@ -84,10 +124,10 @@ export default function StudentDashboard() {
                 <span>{currentBranchInfo.code} • {currentBranchInfo.name}</span>
               </div>
               <h1 className="text-xl sm:text-3xl font-black text-[#092347] tracking-tight">
-                Welcome back, {user?.firstName || demoStudentName || 'Learner'}! 👋
+                Welcome back, {studentDisplayName}! 👋
               </h1>
               <p className="text-xs sm:text-sm text-[#557086] font-medium mt-1">
-                Enrolled at {collegeName}. You are on a 5-day learning streak!
+                Enrolled at {collegeName}. Ready to continue your degree track?
               </p>
             </div>
 

@@ -13,11 +13,9 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
   AlertCircle,
   KeyRound,
-  GraduationCap,
-  Zap,
+  Loader2,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 
@@ -56,32 +54,50 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
   // Handle Sign In submission
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!clerk.loaded || !clerk.client) {
-      handleDemoAccess()
+    setError(null)
+
+    const trimmedEmail = email.trim().toLowerCase()
+    if (!trimmedEmail || !password) {
+      setError('Please provide both your email address and password.')
       return
     }
 
-    setError(null)
+    if (!clerk.loaded || !clerk.client) {
+      setError('Authentication service is initializing. Please wait a moment.')
+      return
+    }
+
     setLoading(true)
 
     try {
       const result = await clerk.client.signIn.create({
-        identifier: email.trim(),
+        identifier: trimmedEmail,
         password,
       })
 
       if (result.status === 'complete' && result.createdSessionId) {
         await clerk.setActive({ session: result.createdSessionId })
         router.push('/student/dashboard')
+      } else if (result.status === 'needs_second_factor') {
+        await clerk.client.signIn.prepareSecondFactor({ strategy: 'email_code' })
+        setVerifying(true)
+        setSuccessMsg(`We sent a 6-digit verification code to ${trimmedEmail}.`)
       } else {
-        setError('Additional verification is required. Please check your email or use Instant Demo Login.')
+        setError('Additional verification is required for this account.')
       }
     } catch (err: any) {
+      const code = err?.errors?.[0]?.code
       const message =
         err?.errors?.[0]?.longMessage ||
         err?.errors?.[0]?.message ||
-        'Unable to sign in. Please verify your credentials or click Instant Student Demo Login below.'
-      setError(message)
+        'Unable to sign in. Please verify your credentials.'
+      if (code === 'form_identifier_not_found') {
+        setError('No account found with this email. Please switch to Create Account.')
+      } else if (code === 'form_password_incorrect') {
+        setError('Incorrect password. Please try again or reset your password.')
+      } else {
+        setError(message)
+      }
     } finally {
       setLoading(false)
     }
@@ -90,41 +106,71 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
   // Handle Sign Up submission
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!clerk.loaded || !clerk.client) {
-      handleDemoAccess()
+    setError(null)
+
+    const trimmedEmail = email.trim().toLowerCase()
+    const trimmedName = name.trim()
+
+    if (!trimmedEmail || !password) {
+      setError('Please enter your email and a secure password.')
       return
     }
 
-    setError(null)
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+
+    if (!clerk.loaded || !clerk.client) {
+      setError('Authentication service is initializing. Please wait a moment.')
+      return
+    }
+
     setLoading(true)
 
     try {
-      await clerk.client.signUp.create({
-        emailAddress: email.trim(),
+      const parts = trimmedName.split(' ')
+      const firstName = parts[0] || 'Student'
+      const lastName = parts.slice(1).join(' ') || undefined
+
+      const signUpAttempt = await clerk.client.signUp.create({
+        emailAddress: trimmedEmail,
         password,
-        firstName: name.trim() || undefined,
+        firstName,
+        lastName,
       })
+
+      if (signUpAttempt.status === 'complete' && signUpAttempt.createdSessionId) {
+        await clerk.setActive({ session: signUpAttempt.createdSessionId })
+        router.push('/student/dashboard')
+        return
+      }
 
       // Send email verification code
       await clerk.client.signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
       setVerifying(true)
-      setSuccessMsg(`We sent a 6-digit verification code to ${email.trim()}.`)
+      setSuccessMsg(`We sent a 6-digit verification code to ${trimmedEmail}.`)
     } catch (err: any) {
+      const code = err?.errors?.[0]?.code
       const message =
         err?.errors?.[0]?.longMessage ||
         err?.errors?.[0]?.message ||
-        'Registration could not be completed. Please check your information or try Instant Student Demo Login.'
-      setError(message)
+        'Registration could not be completed.'
+      if (code === 'form_identifier_exists') {
+        setError('An account with this email already exists. Please switch to Sign In.')
+      } else {
+        setError(message)
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  // Handle OTP verification for Sign Up
+  // Handle OTP verification for Sign Up / 2FA
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!clerk.loaded || !clerk.client) {
-      handleDemoAccess()
+      setError('Authentication service is initializing.')
       return
     }
 
@@ -132,16 +178,30 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
     setLoading(true)
 
     try {
-      const completeSignUp = await clerk.client.signUp.attemptEmailAddressVerification({
-        code: otpCode.trim(),
-      })
+      if (mode === 'sign-up') {
+        const completeSignUp = await clerk.client.signUp.attemptEmailAddressVerification({
+          code: otpCode.trim(),
+        })
 
-      if (completeSignUp.status === 'complete' && completeSignUp.createdSessionId) {
-        await clerk.setActive({ session: completeSignUp.createdSessionId })
-        router.push('/student/dashboard')
+        if (completeSignUp.status === 'complete' && completeSignUp.createdSessionId) {
+          await clerk.setActive({ session: completeSignUp.createdSessionId })
+          router.push('/student/dashboard')
+          return
+        }
       } else {
-        setError('Verification could not be finalized. Please try again.')
+        const completeSignIn = await clerk.client.signIn.attemptSecondFactor({
+          strategy: 'email_code',
+          code: otpCode.trim(),
+        })
+
+        if (completeSignIn.status === 'complete' && completeSignIn.createdSessionId) {
+          await clerk.setActive({ session: completeSignIn.createdSessionId })
+          router.push('/student/dashboard')
+          return
+        }
       }
+
+      setError('Verification could not be finalized. Please verify the code.')
     } catch (err: any) {
       const message =
         err?.errors?.[0]?.longMessage ||
@@ -164,28 +224,13 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
         redirectUrlComplete: '/student/dashboard',
       })
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || 'Google sign-in could not be initiated.')
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      if (msg && msg.includes('oauth_google does not match')) {
+        setError('Google Sign-In is not currently enabled in Clerk Dashboard. Please sign in with email and password.')
+      } else {
+        setError(msg || 'Google Sign-In is currently unavailable.')
+      }
     }
-  }
-
-  // One-click Demo Student Access
-  const handleDemoAccess = () => {
-    try {
-      localStorage.setItem(
-        'saryonaya_demo_session',
-        JSON.stringify({
-          active: true,
-          name: name.trim() || 'Aarav Patel',
-          email: email.trim() || 'student@saryonaya.edu',
-          branch: 'Computer Science & AI',
-          semester: '6th Semester',
-          enrolledAt: new Date().toISOString(),
-        })
-      )
-    } catch (e) {
-      // ignore
-    }
-    router.push('/student/dashboard')
   }
 
   return (
@@ -219,10 +264,10 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
             <button
               type="button"
               onClick={() => handleModeChange('sign-in')}
-              className={`py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              className={`py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
                 mode === 'sign-in'
-                  ? 'bg-gradient-to-r from-[#07182e] to-[#092347] text-[#f5cb68] shadow-sm border border-[#dfa32b]/30'
-                  : 'text-[#557086] hover:text-[#092347]'
+                  ? 'bg-white text-[#092347] shadow-sm'
+                  : 'text-slate-500 hover:text-[#092347]'
               }`}
             >
               Sign In
@@ -230,10 +275,10 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
             <button
               type="button"
               onClick={() => handleModeChange('sign-up')}
-              className={`py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              className={`py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
                 mode === 'sign-up'
-                  ? 'bg-gradient-to-r from-[#07182e] to-[#092347] text-[#f5cb68] shadow-sm border border-[#dfa32b]/30'
-                  : 'text-[#557086] hover:text-[#092347]'
+                  ? 'bg-white text-[#092347] shadow-sm'
+                  : 'text-slate-500 hover:text-[#092347]'
               }`}
             >
               Create Account
@@ -241,78 +286,77 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
           </div>
         )}
 
-        {/* Alert Error Box */}
+        {/* Status Alerts */}
         {error && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2.5 animate-in fade-in-50">
-            <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-600" />
-            <div className="flex-1 space-y-1.5">
-              <p className="leading-relaxed">{error}</p>
-              <button
-                type="button"
-                onClick={handleDemoAccess}
-                className="text-[11px] font-bold text-rose-800 underline hover:text-rose-900 block"
-              >
-                Or bypass with Instant Demo Student Access →
-              </button>
-            </div>
+          <div className="mb-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle size={15} className="shrink-0 text-rose-600" />
+            <span>{error}</span>
           </div>
         )}
 
-        {/* Success Message Box */}
         {successMsg && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-start gap-2.5 animate-in fade-in-50">
-            <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-emerald-600" />
-            <p className="leading-relaxed">{successMsg}</p>
+          <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+            {successMsg}
           </div>
         )}
 
-        {/* VERIFICATION CODE FORM (When user is signing up) */}
+        {/* ==================================================================== */}
+        {/* EMAIL VERIFICATION STEP                                              */}
+        {/* ==================================================================== */}
         {verifying ? (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
-            <div className="text-center space-y-1 pb-1">
-              <div className="w-12 h-12 rounded-full bg-amber-50 text-[#b37a18] border border-[#dfa32b]/40 flex items-center justify-center mx-auto mb-2">
-                <KeyRound size={22} />
-              </div>
-              <h3 className="text-base font-black text-[#092347]">Enter 6-Digit Code</h3>
-              <p className="text-xs text-[#557086]">
-                Enter the verification code sent to your email to activate your account.
-              </p>
-            </div>
-
             <div className="space-y-1.5">
               <label className="text-[11px] font-black uppercase tracking-wider text-[#092347]">
                 Verification Code
               </label>
-              <input
-                type="text"
-                placeholder="123456"
-                maxLength={6}
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                required
-                className="w-full text-center tracking-[0.5em] text-lg font-bold font-mono px-4 py-3 bg-[#f8fafc] border border-slate-200 rounded-2xl text-[#092347] focus:bg-white focus:border-[#dfa32b] focus:ring-2 focus:ring-[#dfa32b]/20 outline-none transition-all"
-              />
+              <div className="relative">
+                <KeyRound
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit code"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  maxLength={6}
+                  required
+                  autoFocus
+                  className="w-full pl-10 pr-4 py-3 bg-[#f8fafc] border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold tracking-widest text-[#092347] placeholder-slate-400 focus:bg-white focus:border-[#dfa32b] focus:ring-2 focus:ring-[#dfa32b]/20 outline-none transition-all"
+                />
+              </div>
             </div>
 
-            {/* Master Luxury Gold Submit Button */}
             <button
               type="submit"
-              disabled={loading || otpCode.length < 6}
-              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#07182e] font-black text-xs uppercase tracking-wider border-t border-[#ffe8a3]/80 shadow-[0_4px_18px_rgba(223,163,43,0.35)] hover:shadow-[0_6px_24px_rgba(223,163,43,0.5)] hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              disabled={loading}
+              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#123963] hover:brightness-110 active:scale-[0.98] text-white font-black text-xs sm:text-sm tracking-wide border-t border-white/20 border-b border-black/30 shadow-[0_6px_20px_rgba(9,35,71,0.25)] flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
             >
-              <span>{loading ? 'Verifying Code...' : 'Verify & Continue →'}</span>
+              {loading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin text-[#F8D77A]" />
+                  <span>Verifying Code...</span>
+                </>
+              ) : (
+                <>
+                  <span>Verify & Continue</span>
+                  <ArrowRight size={14} className="text-[#F8D77A]" />
+                </>
+              )}
             </button>
 
             <button
               type="button"
               onClick={() => setVerifying(false)}
-              className="w-full text-center text-xs font-bold text-[#557086] hover:text-[#092347] py-1 transition-colors"
+              className="w-full text-center text-xs font-bold text-slate-500 hover:text-[#092347] transition-colors cursor-pointer"
             >
-              ← Back to Registration
+              ← Back to {mode === 'sign-in' ? 'Sign In' : 'Registration'}
             </button>
           </form>
         ) : (
-          /* STANDARD SIGN IN / SIGN UP FORM */
+          /* ==================================================================== */
+          /* SIGN IN / SIGN UP FORM                                               */
+          /* ==================================================================== */
           <form
             onSubmit={mode === 'sign-in' ? handleSignInSubmit : handleSignUpSubmit}
             className="space-y-4"
@@ -330,7 +374,7 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
                   />
                   <input
                     type="text"
-                    placeholder="e.g. Aarav Patel"
+                    placeholder="Your Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={mode === 'sign-up'}
@@ -352,7 +396,7 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
                 />
                 <input
                   type="email"
-                  placeholder="student@university.edu"
+                  placeholder="student@saryonaya.edu"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -368,13 +412,12 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
                   Password
                 </label>
                 {mode === 'sign-in' && (
-                  <button
-                    type="button"
-                    onClick={() => setError('Please use Instant Student Demo Login below or contact platform admin.')}
-                    className="text-[11px] font-bold text-[#b37a18] hover:underline cursor-pointer"
+                  <Link
+                    href="/forgot-password"
+                    className="text-[11px] font-bold text-[#b37a18] hover:underline"
                   >
                     Forgot Password?
-                  </button>
+                  </Link>
                 )}
               </div>
               <div className="relative">
@@ -384,57 +427,60 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
                 />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••••••"
+                  placeholder={mode === 'sign-up' ? 'Minimum 8 characters' : 'Enter password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={8}
-                  className="w-full pl-10 pr-11 py-3 bg-[#f8fafc] border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-[#092347] placeholder-slate-400 focus:bg-white focus:border-[#dfa32b] focus:ring-2 focus:ring-[#dfa32b]/20 outline-none transition-all"
+                  minLength={mode === 'sign-up' ? 8 : undefined}
+                  className="w-full pl-10 pr-10 py-3 bg-[#f8fafc] border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-[#092347] placeholder-slate-400 focus:bg-white focus:border-[#dfa32b] focus:ring-2 focus:ring-[#dfa32b]/20 outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#092347] transition-colors"
-                  aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
-            {/* Remember Me Checkbox */}
+            {/* Remember Me */}
             {mode === 'sign-in' && (
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-0.5">
                 <input
                   type="checkbox"
                   id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#dfa32b] border-slate-300 focus:ring-[#dfa32b]/20 cursor-pointer"
+                  className="w-4 h-4 rounded text-[#092347] border-slate-300 focus:ring-[#dfa32b]/20 cursor-pointer"
                 />
                 <label
                   htmlFor="rememberMe"
-                  className="text-xs font-semibold text-[#557086] cursor-pointer select-none"
+                  className="text-xs text-slate-600 font-medium select-none cursor-pointer"
                 >
-                  Keep me signed in on this device
+                  Remember my credentials
                 </label>
               </div>
             )}
 
-            {/* MASTER LUXURY GOLD SUBMIT BUTTON */}
+            {/* Master Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#07182e] font-black text-xs uppercase tracking-wider border-t border-[#ffe8a3]/80 shadow-[0_4px_18px_rgba(223,163,43,0.35)] hover:shadow-[0_6px_24px_rgba(223,163,43,0.5)] hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#123963] hover:brightness-110 active:scale-[0.98] text-white font-black text-xs sm:text-sm tracking-wide border-t border-white/20 border-b border-black/30 shadow-[0_6px_20px_rgba(9,35,71,0.25)] flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
               >
-                <span>
-                  {loading
-                    ? 'Processing...'
-                    : mode === 'sign-in'
-                    ? 'Sign In to SARVONAYA →'
-                    : 'Create Free Student Account →'}
-                </span>
+                {loading ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin text-[#F8D77A]" />
+                    <span>{mode === 'sign-in' ? 'Signing In...' : 'Registering...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{mode === 'sign-in' ? 'Sign In to Portal' : 'Create Student Account'}</span>
+                    <ArrowRight size={14} className="text-[#F8D77A]" />
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -443,7 +489,7 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
         {/* Divider */}
         {!verifying && (
           <>
-            <div className="relative my-6 text-center">
+            <div className="relative my-5 text-center">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200" />
               </div>
@@ -452,9 +498,8 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
               </span>
             </div>
 
-            {/* Social & Fast Access Buttons */}
-            <div className="space-y-2.5">
-              {/* Google Sign In Button */}
+            {/* Google Sign In */}
+            <div>
               <button
                 type="button"
                 onClick={handleGoogleAuth}
@@ -479,16 +524,6 @@ export function AuthCard({ initialMode = 'sign-in' }: AuthCardProps) {
                   />
                 </svg>
                 <span>Continue with Google</span>
-              </button>
-
-              {/* Instant Student Demo Access Button */}
-              <button
-                type="button"
-                onClick={handleDemoAccess}
-                className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#123963] text-[#f5cb68] font-bold text-xs flex items-center justify-center gap-2 border border-[#dfa32b]/40 shadow-xs hover:border-[#dfa32b] hover:brightness-110 transition-all cursor-pointer active:scale-98"
-              >
-                <Zap size={14} className="text-[#dfa32b] fill-[#dfa32b]" />
-                <span>Instant Student Demo Login (1-Click)</span>
               </button>
             </div>
           </>

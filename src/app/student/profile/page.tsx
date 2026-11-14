@@ -18,16 +18,16 @@ import {
   Crown,
   BookOpen,
   LogOut,
-  LogIn,
   KeyRound,
   Settings,
   Lock,
+  Loader2,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { ACADEMIC_BRANCHES } from '@/lib/data/lms-data'
-import { PrimaryButton, SecondaryButton } from '@/components/ui/Buttons'
+import { PrimaryButton } from '@/components/ui/Buttons'
 
 export default function StudentProfilePage() {
   const { user, isSignedIn, isLoaded } = useUser()
@@ -35,40 +35,105 @@ export default function StudentProfilePage() {
   const router = useRouter()
 
   const [profile, setProfile] = useState({
-    fullName: user?.fullName || 'Naveen Kumar',
-    email: user?.primaryEmailAddress?.emailAddress || 'student@saryonaya.edu',
-    phone: '+91 98765 43210',
-    educationLevel: 'B.Tech / B.E. (Engineering)',
-    collegeName: 'Anna University, Chennai',
+    fullName: '',
+    email: '',
+    phone: '',
+    educationLevel: 'B.Tech / B.E (Engineering)',
+    collegeName: '',
     degree: 'Bachelor of Technology',
     branchCode: 'CSE',
     passedOutYear: '2026',
   })
 
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
 
+  // Protect route
   useEffect(() => {
-    const savedBranch = localStorage.getItem('saryonaya_user_branch')
-    const savedCollege = localStorage.getItem('saryonaya_user_college')
-    const savedProfileStr = localStorage.getItem('saryonaya_user_profile')
-
-    if (savedProfileStr) {
-      try {
-        setProfile((prev) => ({ ...prev, ...JSON.parse(savedProfileStr) }))
-      } catch {}
-    } else {
-      if (savedBranch) setProfile((prev) => ({ ...prev, branchCode: savedBranch }))
-      if (savedCollege) setProfile((prev) => ({ ...prev, collegeName: savedCollege }))
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in')
     }
-  }, [])
+  }, [isLoaded, isSignedIn, router])
 
-  const handleSave = (e: React.FormEvent) => {
+  // Sync profile from Clerk user and Supabase database
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({
+        ...prev,
+        fullName: prev.fullName || user.fullName || user.firstName || '',
+        email: user.primaryEmailAddress?.emailAddress || prev.email,
+      }))
+    }
+
+    async function loadRemoteProfile() {
+      try {
+        const res = await fetch('/api/profile')
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.profile || data?.qualification) {
+            setProfile((prev) => ({
+              ...prev,
+              fullName: data.profile?.full_name || prev.fullName || user?.fullName || '',
+              email: data.profile?.email || prev.email || user?.primaryEmailAddress?.emailAddress || '',
+              phone: data.profile?.phone || prev.phone,
+              collegeName: data.qualification?.college_name || prev.collegeName,
+              branchCode: data.qualification?.branch_code || prev.branchCode,
+              educationLevel: data.qualification?.education_level || prev.educationLevel,
+              degree: data.qualification?.degree || prev.degree,
+              passedOutYear: data.qualification?.passed_out_year || prev.passedOutYear,
+            }))
+            return
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch remote profile:', e)
+      }
+
+      // Check local registration cache
+      try {
+        const savedProfileStr = localStorage.getItem('saryonaya_user_profile')
+        if (savedProfileStr) {
+          const parsed = JSON.parse(savedProfileStr)
+          setProfile((prev) => ({ ...prev, ...parsed }))
+        } else {
+          const savedBranch = localStorage.getItem('saryonaya_user_branch')
+          const savedCollege = localStorage.getItem('saryonaya_user_college')
+          if (savedBranch) setProfile((prev) => ({ ...prev, branchCode: savedBranch }))
+          if (savedCollege) setProfile((prev) => ({ ...prev, collegeName: savedCollege }))
+        }
+      } catch (e) {}
+    }
+
+    if (isSignedIn) {
+      loadRemoteProfile()
+    }
+  }, [user, isSignedIn])
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    localStorage.setItem('saryonaya_user_branch', profile.branchCode)
-    localStorage.setItem('saryonaya_user_college', profile.collegeName)
-    localStorage.setItem('saryonaya_user_profile', JSON.stringify(profile))
+    setSaving(true)
+
+    // Save to database
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
+      })
+    } catch (e) {
+      console.warn('Failed to sync profile to database:', e)
+    }
+
+    // Save to local cache
+    try {
+      localStorage.setItem('saryonaya_user_branch', profile.branchCode)
+      localStorage.setItem('saryonaya_user_college', profile.collegeName)
+      localStorage.setItem('saryonaya_user_profile', JSON.stringify(profile))
+    } catch (e) {}
+
+    setSaving(false)
     setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    setTimeout(() => setSaved(false), 3500)
   }
 
   const handleSignOut = async () => {
@@ -77,14 +142,25 @@ export default function StudentProfilePage() {
         await signOut({ redirectUrl: '/' })
       }
     } catch (e) {}
-    try {
-      localStorage.removeItem('saryonaya_demo_session')
-    } catch (e) {}
     router.push('/')
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-[#F4F7FC] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#092653] mx-auto" />
+          <p className="text-xs font-bold text-slate-500">Loading student profile...</p>
+        </div>
+      </div>
+    )
   }
 
   const currentBranch =
     ACADEMIC_BRANCHES.find((b) => b.code === profile.branchCode) || ACADEMIC_BRANCHES[0]
+
+  const displayName = profile.fullName || user?.fullName || user?.firstName || 'Student'
+  const displayEmail = profile.email || user?.primaryEmailAddress?.emailAddress || 'student@saryonaya.edu'
 
   return (
     <div className="min-h-screen bg-[#F4F7FC] text-[#102B50] flex flex-col font-sans antialiased selection:bg-[#E9AC32]/30">
@@ -97,15 +173,18 @@ export default function StudentProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             
             {/* Student Photograph */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-[#E9AC32] p-1 overflow-hidden shadow-lg bg-white shrink-0">
-              <img
-                src={
-                  user?.imageUrl ||
-                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'
-                }
-                alt="Student Profile Photo"
-                className="w-full h-full object-cover rounded-full"
-              />
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-[#E9AC32] p-1 overflow-hidden shadow-lg bg-white shrink-0 flex items-center justify-center">
+              {user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  alt="Student Profile Photo"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-gradient-to-tr from-[#092653] to-[#1456A0] text-white flex items-center justify-center font-black text-2xl">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+              )}
             </div>
 
             {/* Profile Credentials */}
@@ -116,20 +195,28 @@ export default function StudentProfilePage() {
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-[#102B50] tracking-tight">
-                {profile.fullName}
+                {displayName}
               </h1>
 
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-y-1 gap-x-4 text-xs sm:text-sm text-slate-500 font-medium">
-                <span className="flex items-center gap-1">
-                  <Building2 size={14} className="text-slate-400" />
-                  {profile.collegeName}
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Calendar size={14} className="text-slate-400" />
-                  Passed Out Year: {profile.passedOutYear}
-                </span>
-                <span>•</span>
+                {profile.collegeName && (
+                  <>
+                    <span className="flex items-center gap-1">
+                      <Building2 size={14} className="text-slate-400" />
+                      {profile.collegeName}
+                    </span>
+                    <span>•</span>
+                  </>
+                )}
+                {profile.passedOutYear && (
+                  <>
+                    <span className="flex items-center gap-1">
+                      <Calendar size={14} className="text-slate-400" />
+                      Graduation Year: {profile.passedOutYear}
+                    </span>
+                    <span>•</span>
+                  </>
+                )}
                 <span className="text-[#092653] font-semibold">{profile.educationLevel}</span>
               </div>
             </div>
@@ -137,7 +224,7 @@ export default function StudentProfilePage() {
             {/* Quick Settings Shortcut */}
             <div className="shrink-0">
               <Link href="/settings">
-                <button className="px-4 py-2 rounded-full text-xs font-bold text-[#092653] bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all flex items-center gap-1.5">
+                <button className="px-4 py-2 rounded-full text-xs font-bold text-[#092653] bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer">
                   <Settings size={14} />
                   <span>Settings</span>
                 </button>
@@ -147,7 +234,7 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
-        {/* 2. Quick Statistics Bar (Enrolled Courses, Certificates, Membership) */}
+        {/* 2. Quick Statistics Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
           {/* Enrolled Courses */}
           <Link
@@ -200,9 +287,9 @@ export default function StudentProfilePage() {
                 Membership Status
               </span>
               <span className="text-lg sm:text-xl font-black text-white block">
-                Annual Premium
+                Active Member
               </span>
-              <span className="text-[11px] text-slate-300">Renews Nov 2027 • Manage →</span>
+              <span className="text-[11px] text-slate-300">Upgrade or Manage →</span>
             </div>
           </Link>
         </div>
@@ -223,10 +310,10 @@ export default function StudentProfilePage() {
                 <span className="text-slate-400 block text-[10px] font-bold uppercase">Auth Status</span>
                 <span className="font-bold text-[#102B50] flex items-center gap-1.5">
                   <ShieldCheck size={14} className="text-emerald-600" />
-                  {isSignedIn ? 'Active Clerk Session' : 'Guest Demo Session'}
+                  Active Session
                 </span>
                 <span className="text-[11px] text-slate-500 block truncate">
-                  {user?.primaryEmailAddress?.emailAddress || profile.email}
+                  {displayEmail}
                 </span>
               </div>
 
@@ -286,7 +373,7 @@ export default function StudentProfilePage() {
             </div>
 
             {saved && (
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2 animate-in fade-in-50">
                 <ShieldCheck size={16} />
                 <span>Profile saved successfully!</span>
               </div>
@@ -308,13 +395,13 @@ export default function StudentProfilePage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">Email Address</label>
-                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
+                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-500">
                   <Mail size={15} className="text-slate-400" />
                   <input
                     type="email"
                     disabled
-                    value={profile.email}
-                    className="w-full bg-transparent text-xs sm:text-sm font-semibold outline-none cursor-not-allowed"
+                    value={displayEmail}
+                    className="w-full bg-transparent text-xs sm:text-sm font-semibold outline-none cursor-not-allowed text-slate-500"
                   />
                 </div>
               </div>
@@ -327,6 +414,7 @@ export default function StudentProfilePage() {
                     type="tel"
                     value={profile.phone}
                     onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    placeholder="e.g. +91 9876543210"
                     className="w-full bg-transparent text-xs sm:text-sm font-semibold outline-none text-[#102B50]"
                   />
                 </div>
@@ -358,6 +446,7 @@ export default function StudentProfilePage() {
                     type="text"
                     value={profile.collegeName}
                     onChange={(e) => setProfile({ ...profile, collegeName: e.target.value })}
+                    placeholder="Enter College or University Name"
                     className="w-full bg-transparent text-xs sm:text-sm font-semibold outline-none text-[#102B50]"
                   />
                 </div>
@@ -371,6 +460,7 @@ export default function StudentProfilePage() {
                     type="text"
                     value={profile.passedOutYear}
                     onChange={(e) => setProfile({ ...profile, passedOutYear: e.target.value })}
+                    placeholder="e.g. 2026"
                     className="w-full bg-transparent text-xs sm:text-sm font-semibold outline-none text-[#102B50]"
                   />
                 </div>
@@ -381,9 +471,10 @@ export default function StudentProfilePage() {
               <PrimaryButton
                 type="submit"
                 size="md"
+                disabled={saving}
                 icon={<Save size={15} className="mr-1 text-[#F8D77A]" />}
               >
-                Save Academic Profile
+                {saving ? 'Saving...' : 'Save Academic Profile'}
               </PrimaryButton>
             </div>
           </form>

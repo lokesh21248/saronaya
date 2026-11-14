@@ -17,9 +17,10 @@ import {
   Calendar,
   ChevronDown,
   ArrowRight,
-  CheckCircle2,
   AlertCircle,
   KeyRound,
+  Loader2,
+  RotateCcw,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { useClerk } from '@clerk/nextjs'
@@ -28,7 +29,7 @@ export default function SignUpPage() {
   const router = useRouter()
   const clerk = useClerk()
 
-  // REGISTRATION & ACADEMIC FIELDS
+  // Academic and Registration Fields
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -42,12 +43,14 @@ export default function SignUpPage() {
   // Verification state
   const [verifying, setVerifying] = useState(false)
   const [otpCode, setOtpCode] = useState('')
+  const [resending, setResending] = useState(false)
+  const [resendNotice, setResendNotice] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  // Auto-fill email if passed in query params
+  // Auto-fill email if passed in query params (e.g. from sign-in page link)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
@@ -56,174 +59,210 @@ export default function SignUpPage() {
     }
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+  // Helper to determine branch code from course name
+  const getBranchCode = (courseName: string): string => {
+    if (courseName.includes('AI') || courseName.includes('Data Science')) return 'AIDS'
+    if (courseName.includes('ECE') || courseName.includes('Electronics')) return 'ECE'
+    if (courseName.includes('EEE') || courseName.includes('Electrical')) return 'EEE'
+    if (courseName.includes('MECH') || courseName.includes('Mechanical')) return 'MECH'
+    if (courseName.includes('CIVIL') || courseName.includes('Civil')) return 'CIVIL'
+    return 'CSE'
+  }
 
-    // Construct student profile
-    const studentData = {
+  // Save the student's real profile to database and local cache
+  const saveStudentProfile = async () => {
+    const branchCode = getBranchCode(course)
+    const profilePayload = {
       fullName: fullName.trim(),
-      email: email.trim(),
-      phone: `+91 ${phone.trim()}`,
-      education,
-      college,
-      course,
+      email: email.trim().toLowerCase(),
+      phone: phone.trim() ? `+91 ${phone.trim()}` : null,
+      educationLevel: education,
+      collegeName: college.trim(),
+      degree: education,
+      branchCode,
       passedOutYear,
-      branchCode: course.includes('AI')
-        ? 'AIDS'
-        : course.includes('ECE')
-        ? 'ECE'
-        : course.includes('EEE')
-        ? 'EEE'
-        : course.includes('MECH')
-        ? 'MECH'
-        : course.includes('CIVIL')
-        ? 'CIVIL'
-        : 'CSE',
-      createdAt: new Date().toISOString(),
     }
 
     try {
-      // 1. Save profile to localStorage
-      localStorage.setItem('saryonaya_user_profile', JSON.stringify(studentData))
-      localStorage.setItem('saryonaya_user_branch', studentData.branchCode)
-      localStorage.setItem('saryonaya_user_college', college)
-      localStorage.setItem(
-        'saryonaya_demo_session',
-        JSON.stringify({
-          active: true,
-          name: fullName.trim(),
-          email: email.trim(),
-          phone: `+91 ${phone.trim()}`,
-          education,
-          college,
-          course,
-          passedOutYear,
-        })
-      )
-
-      // 2. Sync profile to Supabase database (non-blocking)
-      fetch('/api/profile', {
+      await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          email: email.trim(),
-          phone: `+91 ${phone.trim()}`,
-          educationLevel: education,
-          collegeName: college,
-          degree: education,
-          branchCode: studentData.branchCode,
-          passedOutYear: passedOutYear,
-        }),
-      }).catch((e) => console.warn('Supabase profile sync notice:', e))
+        body: JSON.stringify(profilePayload),
+      })
+    } catch (e) {
+      console.warn('Profile sync notice:', e)
+    }
 
-      // 3. Try authentic Clerk account creation
-      if (clerk?.loaded && clerk?.client) {
-        try {
-          await clerk.client.signUp.create({
-            emailAddress: email.trim(),
-            password: password,
-            firstName: fullName.trim(),
-          })
+    try {
+      localStorage.setItem('saryonaya_user_profile', JSON.stringify(profilePayload))
+      localStorage.setItem('saryonaya_user_branch', branchCode)
+      localStorage.setItem('saryonaya_user_college', college.trim())
+    } catch (e) {}
+  }
 
-          await clerk.client.signUp.prepareEmailAddressVerification({
-            strategy: 'email_code',
-          })
+  // Real Production Registration with Clerk
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
 
-          setVerifying(true)
-          setLoading(false)
-          return
-        } catch (clerkErr: any) {
-          // If Clerk is in dev mode or requires specific password, show message
-          const msg =
-            clerkErr?.errors?.[0]?.longMessage ||
-            clerkErr?.errors?.[0]?.message ||
-            null
-          if (msg) {
-            setError(msg)
-            setLoading(false)
-            return
-          }
-        }
+    const trimmedEmail = email.trim().toLowerCase()
+    const trimmedName = fullName.trim()
+
+    if (!trimmedName) {
+      setError('Please enter your full name.')
+      return
+    }
+    if (!trimmedEmail) {
+      setError('Please enter your email address.')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.')
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      if (!clerk?.loaded || !clerk?.client) {
+        setError('Authentication service is initializing. Please try again.')
+        setLoading(false)
+        return
       }
 
-      setSuccess(true)
-      setTimeout(() => {
+      const parts = trimmedName.split(' ')
+      const firstName = parts[0]
+      const lastName = parts.slice(1).join(' ') || undefined
+
+      // 1. Create Clerk account
+      const signUpAttempt = await clerk.client.signUp.create({
+        emailAddress: trimmedEmail,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+      })
+
+      // 2. Check if verification is needed
+      if (signUpAttempt.status === 'complete' && signUpAttempt.createdSessionId) {
+        await clerk.setActive({ session: signUpAttempt.createdSessionId })
+        await saveStudentProfile()
+        setSuccess(true)
         router.push('/student/dashboard')
-      }, 700)
+        return
+      }
+
+      // 3. Prepare email verification OTP
+      await clerk.client.signUp.prepareEmailAddressVerification({
+        strategy: 'email_code',
+      })
+
+      setVerifying(true)
     } catch (err: any) {
-      setError('Registration could not be completed. Please try again.')
+      console.error('Clerk sign-up error:', err)
+      const code = err?.errors?.[0]?.code
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+
+      if (code === 'form_identifier_exists') {
+        setError('An account with this email address already exists. Please login instead.')
+      } else if (code === 'form_password_pwned') {
+        setError('This password has been identified in a breach. Please choose a more secure password.')
+      } else {
+        setError(msg || 'Registration could not be completed. Please check your information.')
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  // Handle OTP verification for Clerk
+  // Real Email OTP Verification
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setResendNotice(null)
+
+    if (!otpCode.trim()) {
+      setError('Please enter the 6-digit verification code.')
+      return
+    }
+
     setLoading(true)
 
     try {
-      if (clerk?.loaded && clerk?.client) {
-        const completeSignUp = await clerk.client.signUp.attemptEmailAddressVerification({
-          code: otpCode.trim(),
-        })
-
-        if (completeSignUp.status === 'complete' && completeSignUp.createdSessionId) {
-          await clerk.setActive({ session: completeSignUp.createdSessionId })
-          router.push('/student/dashboard')
-          return
-        }
+      if (!clerk?.loaded || !clerk?.client) {
+        setError('Authentication service is initializing.')
+        setLoading(false)
+        return
       }
-      router.push('/student/dashboard')
+
+      const completeSignUp = await clerk.client.signUp.attemptEmailAddressVerification({
+        code: otpCode.trim(),
+      })
+
+      if (completeSignUp.status === 'complete' && completeSignUp.createdSessionId) {
+        await clerk.setActive({ session: completeSignUp.createdSessionId })
+        await saveStudentProfile()
+        setSuccess(true)
+        router.push('/student/dashboard')
+        return
+      }
+
+      setError('Verification could not be finalized. Please verify the code.')
     } catch (err: any) {
       const msg =
         err?.errors?.[0]?.longMessage ||
         err?.errors?.[0]?.message ||
-        'Invalid verification code. Please check your inbox or bypass below.'
+        'Invalid verification code. Please check your email inbox and try again.'
       setError(msg)
     } finally {
       setLoading(false)
     }
   }
 
+  // Resend Email Verification Code
+  const handleResendCode = async () => {
+    setError(null)
+    setResending(true)
+    try {
+      if (clerk?.loaded && clerk?.client) {
+        await clerk.client.signUp.prepareEmailAddressVerification({
+          strategy: 'email_code',
+        })
+        setResendNotice('A new 6-digit verification code has been sent to your email.')
+      }
+    } catch (err: any) {
+      setError('Could not resend verification code. Please wait a moment and try again.')
+    } finally {
+      setResending(false)
+    }
+  }
+
+  // Production Google OAuth
   const handleGoogleSignUp = async () => {
     setError(null)
     setLoading(true)
 
     try {
-      if (clerk?.loaded && clerk?.client) {
-        await clerk.client.signIn.authenticateWithRedirect({
-          strategy: 'oauth_google',
-          redirectUrl: '/sso-callback',
-          redirectUrlComplete: '/student/dashboard',
-        })
+      if (!clerk?.loaded || !clerk?.client) {
+        setError('Authentication service is initializing. Please wait a moment.')
+        setLoading(false)
         return
       }
-    } catch (e: any) {
-      console.warn('Google sign-up notice:', e)
-    }
 
-    // Seamless fallback if Google OAuth is not yet toggled ON in Clerk Dashboard
-    localStorage.setItem(
-      'saryonaya_demo_session',
-      JSON.stringify({
-        active: true,
-        email: 'student.google@saryonaya.edu',
-        name: 'Google Student',
-        provider: 'Google SSO',
-        education: 'B.Tech / B.E (Engineering)',
-        college: 'Anna University, Chennai',
-        course: 'Computer Science & Engineering (CSE)',
-        passedOutYear: '2026',
-        loggedInAt: new Date().toISOString(),
+      await clerk.client.signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/student/dashboard',
       })
-    )
-    router.push('/student/dashboard')
-    setLoading(false)
+    } catch (err: any) {
+      console.warn('Google sign-up error:', err)
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      if (msg && msg.includes('oauth_google does not match')) {
+        setError('Google Sign-In is not currently enabled in Clerk Dashboard. Please register using the form.')
+      } else {
+        setError(msg || 'Google Sign-In is currently unavailable. Please register using the form.')
+      }
+      setLoading(false)
+    }
   }
 
   return (
@@ -252,13 +291,10 @@ export default function SignUpPage() {
             </filter>
           </defs>
 
-          {/* Deep Navy Curved Wave */}
           <path
             d="M0,0 L500,0 L500,32 Q340,118 175,58 Q75,22 0,98 Z"
             fill="url(#navyWaveGrad)"
           />
-
-          {/* Golden Ribbon Trim with Glow */}
           <path
             d="M0,98 Q75,22 175,58 Q340,118 500,32"
             fill="none"
@@ -270,7 +306,7 @@ export default function SignUpPage() {
         </svg>
       </div>
 
-      {/* TOP BAR: Floating 3D Circular Back Button */}
+      {/* TOP BAR: Floating 3D Back Button */}
       <div className="relative z-10 max-w-md w-full mx-auto px-5 pt-4 sm:pt-6">
         <Link
           href="/"
@@ -281,93 +317,115 @@ export default function SignUpPage() {
         </Link>
       </div>
 
-      {/* MAIN LUXURY CONTENT CONTAINER */}
+      {/* MAIN CONTAINER */}
       <main className="relative z-10 max-w-md w-full mx-auto px-5 py-3 sm:py-5 flex-1 flex flex-col justify-center">
         
-        {/* BRAND LOGO & HEADER */}
-        <div className="text-center space-y-2 pb-4 sm:pb-6">
+        {/* BRAND HEADER */}
+        <div className="text-center space-y-1.5 pb-3">
           <div className="flex justify-center mb-1">
             <SaryonayaLogo size="md" />
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-[#07182e] tracking-tight">
-            Create Account
+            {verifying ? 'Verify Your Email' : 'Create Account'}
           </h1>
-          <p className="text-xs sm:text-sm text-[#557086] font-medium max-w-xs mx-auto leading-relaxed">
-            Join Saryonaya today and start your learning journey
+          <p className="text-xs sm:text-sm text-[#557086] font-medium max-w-xs mx-auto">
+            {verifying
+              ? `We sent a 6-digit code to ${email}. Enter it below to activate your account.`
+              : 'Register to unlock branch-mapped curriculum, projects, and certificates'}
           </p>
         </div>
 
-        {/* ERROR ALERT BOX */}
+        {/* ERROR / SUCCESS NOTICES */}
         {error && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2.5 animate-in fade-in-50">
+          <div className="mb-3.5 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2 animate-in fade-in-50">
             <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-600" />
-            <div className="flex-1 space-y-1.5">
-              <p className="leading-relaxed">{error}</p>
-              <button
-                type="button"
-                onClick={() => router.push('/student/dashboard')}
-                className="text-[11px] font-bold text-rose-800 underline hover:text-rose-900 block cursor-pointer"
-              >
-                Or bypass with 1-Click Demo Student Access →
-              </button>
-            </div>
+            <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
-        {/* OTP VERIFICATION VIEW IF CODE WAS SENT BY CLERK */}
-        {verifying ? (
-          <form onSubmit={handleVerifyOtp} className="space-y-4 bg-white p-6 rounded-[28px] border border-slate-200 shadow-xl">
-            <div className="text-center space-y-1.5">
-              <div className="w-12 h-12 rounded-full bg-amber-50 text-[#b37a18] border border-[#dfa32b]/40 flex items-center justify-center mx-auto mb-2">
-                <KeyRound size={22} />
-              </div>
-              <h3 className="text-base font-black text-[#07182e]">Verify Your Email</h3>
-              <p className="text-xs text-[#557086]">
-                Enter the 6-digit code sent to <span className="font-bold text-[#07182e]">{email}</span>
-              </p>
-            </div>
+        {resendNotice && (
+          <div className="mb-3.5 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium animate-in fade-in-50">
+            {resendNotice}
+          </div>
+        )}
 
-            <div className="space-y-1">
+        {/* ==================================================================== */}
+        {/* STEP 2: REAL EMAIL OTP VERIFICATION                                  */}
+        {/* ==================================================================== */}
+        {verifying ? (
+          <form onSubmit={handleVerifyOtp} className="space-y-3.5">
+            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shrink-0">
+                <KeyRound size={18} strokeWidth={2.2} />
+              </div>
               <input
                 type="text"
-                placeholder="123456"
-                maxLength={6}
+                placeholder="Enter 6-digit code"
                 value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => setOtpCode(e.target.value)}
+                maxLength={6}
                 required
-                className="w-full text-center tracking-[0.5em] text-lg font-mono font-bold px-4 py-3 bg-[#f8fafc] border border-slate-200 rounded-2xl text-[#07182e] focus:bg-white focus:border-[#092347] focus:ring-2 focus:ring-[#dfa32b]/20 outline-none transition-all"
+                autoFocus
+                className="w-full bg-transparent text-sm sm:text-base font-bold text-[#07182e] placeholder-slate-400 outline-none tracking-widest"
               />
             </div>
 
             <button
               type="submit"
-              disabled={loading || otpCode.length < 6}
-              className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] text-white font-black text-sm tracking-wide shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+              disabled={loading || success}
+              className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,38,83,0.32)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50"
             >
-              <span>{loading ? 'Verifying with Clerk...' : 'Verify & Continue →'}</span>
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin text-[#F8D77A]" />
+                  <span>Verifying Code...</span>
+                </>
+              ) : success ? (
+                <span>Account Activated!</span>
+              ) : (
+                <>
+                  <span>Verify Email & Complete Registration</span>
+                  <ArrowRight size={14} strokeWidth={2.6} className="text-[#F8D77A]" />
+                </>
+              )}
             </button>
 
-            <button
-              type="button"
-              onClick={() => router.push('/student/dashboard')}
-              className="w-full text-center text-xs font-bold text-slate-500 hover:text-[#092347] py-1 transition-colors"
-            >
-              Skip verification for demo mode →
-            </button>
+            <div className="flex items-center justify-between px-1 pt-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setVerifying(false)}
+                className="font-bold text-slate-500 hover:text-[#07182e] flex items-center gap-1 cursor-pointer"
+              >
+                <ArrowLeft size={13} />
+                <span>Back to Form</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResendCode}
+                disabled={resending}
+                className="font-bold text-[#b37a18] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                <RotateCcw size={12} className={resending ? 'animate-spin' : ''} />
+                <span>{resending ? 'Resending...' : 'Resend Code'}</span>
+              </button>
+            </div>
           </form>
         ) : (
-          /* REGISTRATION FORM */
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
+          /* ==================================================================== */
+          /* STEP 1: REAL REGISTRATION FORM                                       */
+          /* ==================================================================== */
+          <form onSubmit={handleSubmit} className="space-y-3">
             
             {/* 1. Full Name */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                <User size={18} strokeWidth={2.2} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center gap-3 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                <User size={16} strokeWidth={2.2} />
               </div>
               <input
                 type="text"
-                placeholder="Full Name"
+                placeholder="Full Name (e.g. Ramesh Kumar)"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -375,14 +433,14 @@ export default function SignUpPage() {
               />
             </div>
 
-            {/* 2. Email Address (for Clerk authentication) */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                <Mail size={18} strokeWidth={2.2} />
+            {/* 2. Email Address */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center gap-3 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                <Mail size={16} strokeWidth={2.2} />
               </div>
               <input
                 type="email"
-                placeholder="Email Address"
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -390,11 +448,11 @@ export default function SignUpPage() {
               />
             </div>
 
-            {/* 3. Password (for Clerk authentication) */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                  <Lock size={18} strokeWidth={2.2} />
+            {/* 3. Password */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center justify-between gap-3 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                  <Lock size={16} strokeWidth={2.2} />
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -410,148 +468,116 @@ export default function SignUpPage() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="p-1 text-slate-400 hover:text-[#092347] transition-colors shrink-0 cursor-pointer"
-                aria-label="Toggle password visibility"
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
 
-            {/* 4. Phone Number with +91 selector */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                  <Phone size={18} strokeWidth={2.2} />
-                </div>
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                  required
-                  maxLength={10}
-                  className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
-                />
+            {/* 4. Phone Number */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center gap-3 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                <Phone size={16} strokeWidth={2.2} />
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#f8fafc] border border-slate-200/80 text-xs font-black text-[#07182e] shrink-0 select-none">
-                <span>+91</span>
-                <ChevronDown size={13} className="text-slate-400" />
-              </div>
+              <span className="text-xs font-bold text-slate-500 shrink-0 select-none">+91</span>
+              <input
+                type="tel"
+                placeholder="10-digit mobile number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                required
+                maxLength={10}
+                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
+              />
             </div>
 
-            {/* 5. Education Dropdown */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                  <GraduationCap size={18} strokeWidth={2.2} />
+            {/* 5. Higher Education Level */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center justify-between gap-2 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                  <GraduationCap size={16} strokeWidth={2.2} />
                 </div>
                 <select
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
                   required
-                  className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                    education ? 'text-[#07182e]' : 'text-slate-400'
-                  }`}
+                  className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] outline-none cursor-pointer appearance-none"
                 >
-                  <option value="" disabled>Education</option>
+                  <option value="" disabled>Select Qualification Level</option>
                   <option value="B.Tech / B.E (Engineering)">B.Tech / B.E (Engineering)</option>
                   <option value="M.Tech / M.E">M.Tech / M.E</option>
-                  <option value="BCA (Computer Applications)">BCA (Computer Applications)</option>
-                  <option value="MCA (Computer Applications)">MCA (Computer Applications)</option>
-                  <option value="B.Sc (Computer Science / IT)">B.Sc (Computer Science / IT)</option>
+                  <option value="BCA / MCA">BCA / MCA</option>
                   <option value="Diploma in Engineering">Diploma in Engineering</option>
-                  <option value="Other Degree">Other Degree</option>
+                  <option value="Degree / B.Sc / M.Sc">Degree / B.Sc / M.Sc</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
-              <ChevronDown size={16} className="text-slate-400 shrink-0 pointer-events-none" />
+              <ChevronDown size={14} className="text-slate-400 shrink-0 pointer-events-none" />
             </div>
 
-            {/* 6. College Dropdown */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                  <Building2 size={18} strokeWidth={2.2} />
-                </div>
-                <select
-                  value={college}
-                  onChange={(e) => setCollege(e.target.value)}
-                  required
-                  className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                    college ? 'text-[#07182e]' : 'text-slate-400'
-                  }`}
-                >
-                  <option value="" disabled>College</option>
-                  <option value="Anna University, Chennai">Anna University, Chennai</option>
-                  <option value="PSG College of Technology, Coimbatore">PSG College of Technology, Coimbatore</option>
-                  <option value="Madras Institute of Technology (MIT)">Madras Institute of Technology (MIT)</option>
-                  <option value="IIT Madras">IIT Madras</option>
-                  <option value="NIT Trichy">NIT Trichy</option>
-                  <option value="Vellore Institute of Technology (VIT)">Vellore Institute of Technology (VIT)</option>
-                  <option value="SRM Institute of Science & Technology">SRM Institute of Science & Technology</option>
-                  <option value="SSN College of Engineering">SSN College of Engineering</option>
-                  <option value="Coimbatore Institute of Technology (CIT)">Coimbatore Institute of Technology (CIT)</option>
-                  <option value="Government College of Technology (GCT)">Government College of Technology (GCT)</option>
-                  <option value="VTU Affiliated Engineering College">VTU Affiliated Engineering College</option>
-                  <option value="JNTU Affiliated Engineering College">JNTU Affiliated Engineering College</option>
-                  <option value="Other University / College">Other University / College</option>
-                </select>
+            {/* 6. College / University Name */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center gap-3 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                <Building2 size={16} strokeWidth={2.2} />
               </div>
-              <ChevronDown size={16} className="text-slate-400 shrink-0 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="College / University Name"
+                value={college}
+                onChange={(e) => setCollege(e.target.value)}
+                required
+                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
+              />
             </div>
 
-            {/* 7. Course Dropdown */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                  <BookOpen size={18} strokeWidth={2.2} />
+            {/* 7. Degree / Academic Branch */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center justify-between gap-2 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                  <BookOpen size={16} strokeWidth={2.2} />
                 </div>
                 <select
                   value={course}
                   onChange={(e) => setCourse(e.target.value)}
                   required
-                  className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                    course ? 'text-[#07182e]' : 'text-slate-400'
-                  }`}
+                  className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] outline-none cursor-pointer appearance-none"
                 >
-                  <option value="" disabled>Course</option>
+                  <option value="" disabled>Select Academic Branch</option>
                   <option value="Computer Science & Engineering (CSE)">Computer Science & Engineering (CSE)</option>
-                  <option value="Artificial Intelligence & Data Science (AI & DS)">Artificial Intelligence & Data Science (AI & DS)</option>
-                  <option value="Information Technology (IT)">Information Technology (IT)</option>
-                  <option value="Electronics & Communication Engineering (ECE)">Electronics & Communication Engineering (ECE)</option>
-                  <option value="Electrical & Electronics Engineering (EEE)">Electrical & Electronics Engineering (EEE)</option>
+                  <option value="Artificial Intelligence & Data Science (AI/DS)">Artificial Intelligence & Data Science (AI/DS)</option>
+                  <option value="Electronics & Communication (ECE)">Electronics & Communication (ECE)</option>
+                  <option value="Electrical & Electronics (EEE)">Electrical & Electronics (EEE)</option>
                   <option value="Mechanical Engineering (MECH)">Mechanical Engineering (MECH)</option>
                   <option value="Civil Engineering (CIVIL)">Civil Engineering (CIVIL)</option>
-                  <option value="Robotics & Automation">Robotics & Automation</option>
+                  <option value="Information Technology (IT)">Information Technology (IT)</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
-              <ChevronDown size={16} className="text-slate-400 shrink-0 pointer-events-none" />
+              <ChevronDown size={14} className="text-slate-400 shrink-0 pointer-events-none" />
             </div>
 
-            {/* 8. Passed Out Year Dropdown */}
-            <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 transition-all">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
-                  <Calendar size={18} strokeWidth={2.2} />
+            {/* 8. Passed Out Year */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 px-3.5 py-2.5 flex items-center justify-between gap-2 focus-within:border-[#092347] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50/80 text-[#092347] flex items-center justify-center shrink-0">
+                  <Calendar size={16} strokeWidth={2.2} />
                 </div>
                 <select
                   value={passedOutYear}
                   onChange={(e) => setPassedOutYear(e.target.value)}
                   required
-                  className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                    passedOutYear ? 'text-[#07182e]' : 'text-slate-400'
-                  }`}
+                  className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] outline-none cursor-pointer appearance-none"
                 >
-                  <option value="" disabled>Passed Out Year</option>
-                  <option value="2028">2028</option>
-                  <option value="2027">2027</option>
-                  <option value="2026">2026</option>
+                  <option value="" disabled>Select Passed Out / Graduation Year</option>
+                  <option value="2028 (Pursuing)">2028 (Pursuing)</option>
+                  <option value="2027 (Pursuing)">2027 (Pursuing)</option>
+                  <option value="2026 (Final Year)">2026 (Final Year)</option>
                   <option value="2025">2025</option>
                   <option value="2024">2024</option>
                   <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021 or Earlier">2021 or Earlier</option>
+                  <option value="2022 or Earlier">2022 or Earlier</option>
                 </select>
               </div>
-              <ChevronDown size={16} className="text-slate-400 shrink-0 pointer-events-none" />
+              <ChevronDown size={14} className="text-slate-400 shrink-0 pointer-events-none" />
             </div>
 
             {/* PRIMARY SUBMIT BUTTON */}
@@ -559,19 +585,30 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={loading || success}
-                className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,35,71,0.32)] hover:shadow-[0_12px_32px_rgba(9,35,71,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
+                className="w-full py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,35,71,0.32)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
               >
-                <span>{success ? 'Account Created Successfully!' : loading ? 'Registering with Clerk...' : 'Create Account'}</span>
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
-                  <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
-                </div>
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin text-[#F8D77A]" />
+                    <span>Creating Account...</span>
+                  </>
+                ) : success ? (
+                  <span>Account Created!</span>
+                ) : (
+                  <>
+                    <span>Create Account</span>
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
+                      <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
+                    </div>
+                  </>
+                )}
               </button>
             </div>
           </form>
         )}
 
         {/* DIVIDER: — or — */}
-        <div className="flex items-center justify-center gap-3 my-3.5 text-slate-400 text-xs select-none">
+        <div className="flex items-center justify-center gap-3 my-3 text-slate-400 text-xs select-none">
           <span className="w-14 h-px bg-slate-200" />
           <span className="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">or</span>
           <span className="w-14 h-px bg-slate-200" />
@@ -581,7 +618,8 @@ export default function SignUpPage() {
         <button
           type="button"
           onClick={handleGoogleSignUp}
-          className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 text-[#07182e] font-bold text-xs sm:text-sm border border-[#092347]/30 hover:border-[#092347] shadow-[0_2px_10px_rgba(9,35,71,0.04)] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+          disabled={loading}
+          className="w-full py-3 rounded-full bg-white hover:bg-slate-50 text-[#07182e] font-bold text-xs sm:text-sm border border-[#092347]/30 hover:border-[#092347] shadow-[0_2px_10px_rgba(9,35,71,0.04)] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -605,7 +643,7 @@ export default function SignUpPage() {
         </button>
 
         {/* FOOTER LINK: Already have an account? Login */}
-        <div className="text-center pt-3 pb-6">
+        <div className="text-center pt-3 pb-5">
           <span className="text-xs text-slate-500 font-medium">
             Already have an account?{' '}
           </span>
@@ -613,7 +651,7 @@ export default function SignUpPage() {
             href="/sign-in"
             className="text-xs font-black text-[#092347] underline decoration-2 decoration-[#dfa32b] underline-offset-4 hover:text-[#dfa32b] transition-colors"
           >
-            Login
+            Sign In
           </Link>
         </div>
       </main>

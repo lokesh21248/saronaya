@@ -41,9 +41,6 @@ export function Navbar() {
         await signOut({ redirectUrl: '/' })
       }
     } catch (e) {}
-    try {
-      localStorage.removeItem('saryonaya_demo_session')
-    } catch (e) {}
     router.push('/')
   }
 
@@ -199,12 +196,8 @@ export function Navbar() {
               </Link>
             ) : (
               <Link href="/login" className="relative group shrink-0" aria-label="Sign In">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-white shadow-sm flex items-center justify-center">
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                    alt="Student Account"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-slate-50 shadow-sm flex items-center justify-center text-[#07182e] hover:bg-slate-100 active:scale-95 transition-all">
+                  <User size={16} strokeWidth={2.2} />
                 </div>
               </Link>
             )}

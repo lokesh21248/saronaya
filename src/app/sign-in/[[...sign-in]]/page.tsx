@@ -11,12 +11,9 @@ import {
   EyeOff,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
   AlertCircle,
-  Sparkles,
-  Zap,
   KeyRound,
-  RotateCcw,
+  Loader2,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { useClerk } from '@clerk/nextjs'
@@ -24,7 +21,6 @@ import { useClerk } from '@clerk/nextjs'
 export default function SignInPage() {
   const router = useRouter()
   const clerk = useClerk()
-  const isLoaded = clerk?.loaded
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -41,87 +37,82 @@ export default function SignInPage() {
   const [errorCode, setErrorCode] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  // Real Production Sign-In via Clerk
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setErrorCode(null)
+
+    const trimmedEmail = email.trim().toLowerCase()
+    if (!trimmedEmail) {
+      setError('Please enter your email address.')
+      return
+    }
+    if (!password) {
+      setError('Please enter your password.')
+      return
+    }
+
     setLoading(true)
 
-    const trimmedEmail = email.trim()
-
     try {
-      // 1. Call server-side auth route: creates user in Clerk on-the-fly if needed, generates ticket
-      const apiRes = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: trimmedEmail,
-          password: password,
-        }),
+      if (!clerk?.loaded || !clerk?.client) {
+        setError('Authentication service is initializing. Please try again in a moment.')
+        setLoading(false)
+        return
+      }
+
+      // Authenticate against Clerk backend
+      const result = await clerk.client.signIn.create({
+        identifier: trimmedEmail,
+        password: password,
       })
 
-      if (apiRes.ok) {
-        const data = await apiRes.json()
-        if (data.token && clerk?.loaded && clerk?.client) {
-          const result = await clerk.client.signIn.create({
-            strategy: 'ticket',
-            ticket: data.token,
+      if (result.status === 'complete' && result.createdSessionId) {
+        await clerk.setActive({ session: result.createdSessionId })
+        setSuccess(true)
+        router.push('/student/dashboard')
+        return
+      }
+
+      if (result.status === 'needs_second_factor') {
+        try {
+          await clerk.client.signIn.prepareSecondFactor({
+            strategy: 'email_code',
           })
-
-          if (result.status === 'complete' && result.createdSessionId) {
-            await clerk.setActive({ session: result.createdSessionId })
-            setSuccess(true)
-            setTimeout(() => {
-              router.push('/student/dashboard')
-            }, 300)
-            return
-          }
+        } catch (prepErr) {
+          console.warn('Prepare 2FA notice:', prepErr)
         }
+        setNeeds2FA(true)
+        setLoading(false)
+        return
       }
 
-      // 2. Fallback to direct Clerk client sign-in if server didn't return ticket
-      if (clerk?.loaded && clerk?.client) {
-        const result = await clerk.client.signIn.create({
-          identifier: trimmedEmail,
-          password: password,
-        })
-
-        if (result.status === 'complete' && result.createdSessionId) {
-          await clerk.setActive({ session: result.createdSessionId })
-          setSuccess(true)
-          setTimeout(() => {
-            router.push('/student/dashboard')
-          }, 300)
-          return
-        } else if (result.status === 'needs_second_factor') {
-          try {
-            await clerk.client.signIn.prepareSecondFactor({
-              strategy: 'email_code',
-            })
-          } catch (prepErr) {
-            console.log('Prepare 2FA notice:', prepErr)
-          }
-          setNeeds2FA(true)
-          setLoading(false)
-          return
-        }
+      if (result.status === 'needs_first_factor') {
+        setError('Please complete the authentication steps for your account.')
+        setLoading(false)
+        return
       }
 
-      // 3. Fallback to instant demo
-      handleInstantDemo()
+      setError('Sign-in could not be completed. Please verify your credentials.')
     } catch (err: any) {
       console.error('Clerk sign-in error:', err)
       const code = err?.errors?.[0]?.code
-      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      const longMsg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
       setErrorCode(code)
 
       if (code === 'form_identifier_not_found') {
-        setError(`No account found with email "${trimmedEmail}". Please create an account first or use Demo Login.`)
+        setError(`No account found with email "${trimmedEmail}". Please check your email or create a new account.`)
       } else if (code === 'form_password_incorrect') {
-        setError('Incorrect password. Please verify your credentials or click Forgot Password.')
+        setError('Incorrect password. Please verify your password or use Forgot Password.')
+      } else if (code === 'session_exists') {
+        setSuccess(true)
+        router.push('/student/dashboard')
+        return
+      } else if (code === 'strategy_for_user_invalid') {
+        setError('This account was created with a social provider (e.g. Google). Please use Sign in with Google.')
       } else {
-        // Automatically bypass so user is never blocked
-        handleInstantDemo()
+        setError(longMsg || 'Invalid email or password. Please try again.')
       }
     } finally {
       setLoading(false)
@@ -132,6 +123,12 @@ export default function SignInPage() {
   const handleVerify2FA = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!otpCode.trim()) {
+      setError('Please enter the 6-digit verification code.')
+      return
+    }
+
     setVerifying2FA(true)
 
     try {
@@ -144,82 +141,49 @@ export default function SignInPage() {
         if (completeSignIn.status === 'complete' && completeSignIn.createdSessionId) {
           await clerk.setActive({ session: completeSignIn.createdSessionId })
           setSuccess(true)
-          setTimeout(() => {
-            router.push('/student/dashboard')
-          }, 400)
+          router.push('/student/dashboard')
           return
         }
       }
-      handleInstantDemo()
+      setError('Verification code was not accepted. Please verify and try again.')
     } catch (err: any) {
       const msg =
         err?.errors?.[0]?.longMessage ||
         err?.errors?.[0]?.message ||
-        'Invalid verification code. Please check your email inbox or use 1-Click Demo Access.'
+        'Invalid verification code. Please check your inbox and try again.'
       setError(msg)
     } finally {
       setVerifying2FA(false)
     }
   }
 
+  // Production Google OAuth
   const handleGoogleLogin = async () => {
     setError(null)
     setLoading(true)
 
     try {
-      if (clerk?.loaded && clerk?.client) {
-        await clerk.client.signIn.authenticateWithRedirect({
-          strategy: 'oauth_google',
-          redirectUrl: '/sso-callback',
-          redirectUrlComplete: '/student/dashboard',
-        })
+      if (!clerk?.loaded || !clerk?.client) {
+        setError('Authentication service is initializing. Please wait a moment.')
+        setLoading(false)
         return
       }
-    } catch (e: any) {
-      console.warn('Google sign-in notice:', e)
+
+      await clerk.client.signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/student/dashboard',
+      })
+    } catch (err: any) {
+      console.warn('Google sign-in error:', err)
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      if (msg && msg.includes('oauth_google does not match')) {
+        setError('Google Sign-In is not currently enabled in Clerk Dashboard. Please sign in with email and password.')
+      } else {
+        setError(msg || 'Google Sign-In is currently unavailable. Please sign in with email and password.')
+      }
+      setLoading(false)
     }
-
-    // Seamless fallback if Google OAuth is not yet toggled ON in Clerk Dashboard
-    localStorage.setItem(
-      'saryonaya_demo_session',
-      JSON.stringify({
-        active: true,
-        email: 'student.google@saryonaya.edu',
-        name: 'Google Student',
-        provider: 'Google SSO',
-        education: 'B.Tech / B.E (Engineering)',
-        college: 'Anna University, Chennai',
-        course: 'Computer Science & Engineering (CSE)',
-        passedOutYear: '2026',
-        loggedInAt: new Date().toISOString(),
-      })
-    )
-    router.push('/student/dashboard')
-    setLoading(false)
-  }
-
-  const handleInstantDemo = () => {
-    localStorage.setItem(
-      'saryonaya_demo_session',
-      JSON.stringify({
-        active: true,
-        email: email.trim() || 'student@saryonaya.edu',
-        name: 'Aarav Patel',
-        education: 'B.Tech / B.E (Engineering)',
-        college: 'Anna University, Chennai',
-        course: 'Computer Science & Engineering (CSE)',
-        passedOutYear: '2026',
-        loggedInAt: new Date().toISOString(),
-      })
-    )
-    router.push('/student/dashboard')
-  }
-
-  const handleFillDemoCredentials = () => {
-    setEmail('student@saryonaya.edu')
-    setPassword('Saryonaya@2026!')
-    setError(null)
-    setErrorCode(null)
   }
 
   return (
@@ -292,7 +256,7 @@ export default function SignInPage() {
           <p className="text-xs sm:text-sm text-[#557086] font-medium max-w-xs mx-auto leading-relaxed">
             {needs2FA
               ? `We sent a 6-digit verification code to ${email}`
-              : 'Login with your email and password to continue your learning journey'}
+              : 'Login with your registered credentials to access your courses'}
           </p>
         </div>
 
@@ -345,8 +309,19 @@ export default function SignInPage() {
               disabled={verifying2FA || success}
               className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,38,83,0.32)] hover:shadow-[0_12px_32px_rgba(9,38,83,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
             >
-              <span>{success ? 'Verified Successfully!' : verifying2FA ? 'Verifying Code...' : 'Verify & Continue'}</span>
-              <ArrowRight size={14} strokeWidth={2.6} className="text-[#F8D77A]" />
+              {verifying2FA ? (
+                <>
+                  <Loader2 size={16} className="animate-spin text-[#F8D77A]" />
+                  <span>Verifying Code...</span>
+                </>
+              ) : success ? (
+                <span>Verified! Redirecting...</span>
+              ) : (
+                <>
+                  <span>Verify & Sign In</span>
+                  <ArrowRight size={14} strokeWidth={2.6} className="text-[#F8D77A]" />
+                </>
+              )}
             </button>
 
             <div className="flex items-center justify-between px-1 pt-1 text-xs">
@@ -357,14 +332,6 @@ export default function SignInPage() {
               >
                 <ArrowLeft size={13} />
                 <span>Back to Login</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleInstantDemo}
-                className="font-bold text-[#b37a18] hover:underline cursor-pointer"
-              >
-                Bypass with Demo Access →
               </button>
             </div>
           </form>
@@ -381,7 +348,7 @@ export default function SignInPage() {
               </div>
               <input
                 type="email"
-                placeholder="Email address (e.g. student@saryonaya.edu)"
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -426,52 +393,43 @@ export default function SignInPage() {
                 <span>Remember me</span>
               </label>
 
-              <button
-                type="button"
-                onClick={() => setError('Password reset instructions sent to your email, or continue with 1-Click Demo Login.')}
+              <Link
+                href="/forgot-password"
                 className="font-bold text-[#b37a18] hover:underline cursor-pointer"
               >
                 Forgot Password?
-              </button>
+              </Link>
             </div>
 
-            {/* MASTER 3D ROYAL NAVY PRIMARY BUTTON: Login → */}
+            {/* MASTER 3D ROYAL NAVY PRIMARY BUTTON: Sign In */}
             <div className="pt-1">
               <button
                 type="submit"
                 disabled={loading || success}
                 className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,35,71,0.32)] hover:shadow-[0_12px_32px_rgba(9,38,83,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
               >
-                <span>{success ? 'Login Successful!' : loading ? 'Authenticating with Clerk...' : 'Login'}</span>
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
-                  <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
-                </div>
-              </button>
-            </div>
-
-            {/* QUICK-FILL VERIFIED DEMO CREDENTIALS PILL */}
-            <div className="mt-2 p-2.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-center justify-between gap-2.5 text-xs">
-              <div className="min-w-0">
-                <span className="font-extrabold text-[#092653] block truncate text-[11px]">
-                  Verified Clerk Demo Account:
-                </span>
-                <span className="text-[10px] text-slate-500 font-medium truncate block">
-                  student@saryonaya.edu • Saryonaya@2026!
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleFillDemoCredentials}
-                className="px-2.5 py-1 rounded-full bg-white border border-[#092653]/30 text-[#092653] font-bold text-[10px] shadow-xs hover:bg-[#092653] hover:text-white transition-all shrink-0 active:scale-95 cursor-pointer"
-              >
-                Auto-Fill
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin text-[#F8D77A]" />
+                    <span>Signing In...</span>
+                  </>
+                ) : success ? (
+                  <span>Success! Redirecting...</span>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
+                      <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
+                    </div>
+                  </>
+                )}
               </button>
             </div>
           </form>
         )}
 
-        {/* DIVIDER: — or — */}
-        <div className="flex items-center justify-center gap-3 my-3 text-slate-400 text-xs select-none">
+        {/* DIVIDER: — or continue with — */}
+        <div className="flex items-center justify-center gap-3 my-4 text-slate-400 text-xs select-none">
           <span className="w-14 h-px bg-slate-200" />
           <span className="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">or</span>
           <span className="w-14 h-px bg-slate-200" />
@@ -481,7 +439,8 @@ export default function SignInPage() {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 text-[#07182e] font-bold text-xs sm:text-sm border border-[#092347]/30 hover:border-[#092347] shadow-[0_2px_10px_rgba(9,35,71,0.04)] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer mb-2.5"
+          disabled={loading}
+          className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 text-[#07182e] font-bold text-xs sm:text-sm border border-[#092347]/30 hover:border-[#092347] shadow-[0_2px_10px_rgba(9,35,71,0.04)] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -501,23 +460,13 @@ export default function SignInPage() {
               d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.28 6.59l4.04 3.15c.94-2.84 3.58-4.99 6.68-4.99z"
             />
           </svg>
-          <span>Sign in with Google</span>
-        </button>
-
-        {/* INSTANT STUDENT DEMO BUTTON (1-Click) */}
-        <button
-          type="button"
-          onClick={handleInstantDemo}
-          className="w-full py-2.5 rounded-full bg-gradient-to-r from-amber-50 to-amber-100/60 border border-[#dfa32b]/50 text-[#916110] font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs hover:brightness-95 transition-all cursor-pointer active:scale-98"
-        >
-          <Zap size={14} className="text-[#dfa32b] fill-[#dfa32b]" />
-          <span>Instant Student Demo Access (1-Click)</span>
+          <span>Continue with Google</span>
         </button>
 
         {/* FOOTER LINK: Don't have an account? Create Account */}
-        <div className="text-center pt-3 pb-6">
+        <div className="text-center pt-4 pb-6">
           <span className="text-xs text-slate-500 font-medium">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
           </span>
           <Link
             href="/sign-up"
