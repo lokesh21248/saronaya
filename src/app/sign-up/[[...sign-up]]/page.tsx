@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ArrowRight,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { useClerk } from '@clerk/nextjs'
@@ -114,78 +115,101 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#eaf2fc] via-white to-[#f4f8fc] text-[#092347] relative flex flex-col justify-between overflow-x-hidden font-sans antialiased selection:bg-[#dfa32b]/30">
+    <div className="min-h-screen bg-[#f8fafc] text-[#07182e] relative flex flex-col justify-between overflow-x-hidden font-sans antialiased selection:bg-[#dfa32b]/30">
       
-      {/* TOP DECORATIVE WAVE CURVE (Navy + Gold accent) */}
-      <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden h-32 sm:h-44 z-0">
+      {/* 3D LUXURY TOP DECORATIVE WAVE (Royal Navy with Molten Gold Trim) */}
+      <div className="absolute top-0 left-0 right-0 pointer-events-none overflow-hidden h-36 sm:h-48 z-0">
         <svg
-          viewBox="0 0 500 150"
+          viewBox="0 0 500 160"
           preserveAspectRatio="none"
-          className="w-full h-full"
+          className="w-full h-full drop-shadow-md"
         >
+          <defs>
+            <linearGradient id="navyWaveGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#051325" />
+              <stop offset="60%" stopColor="#092347" />
+              <stop offset="100%" stopColor="#0e3463" />
+            </linearGradient>
+            <linearGradient id="goldWaveGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#dfa32b" />
+              <stop offset="50%" stopColor="#fced9f" />
+              <stop offset="100%" stopColor="#b37a18" />
+            </linearGradient>
+            <filter id="goldGlow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#dfa32b" floodOpacity="0.4" />
+            </filter>
+          </defs>
+
           {/* Deep Navy Curved Wave */}
           <path
-            d="M0,0 L500,0 L500,35 Q350,115 180,60 Q80,25 0,95 Z"
-            fill="#071d38"
+            d="M0,0 L500,0 L500,32 Q340,118 175,58 Q75,22 0,98 Z"
+            fill="url(#navyWaveGrad)"
           />
-          {/* Rich Gold Ribbon Border */}
+
+          {/* Golden Ribbon Trim with Glow */}
           <path
-            d="M0,95 Q80,25 180,60 Q350,115 500,35"
+            d="M0,98 Q75,22 175,58 Q340,118 500,32"
             fill="none"
-            stroke="#dfa32b"
-            strokeWidth="4"
+            stroke="url(#goldWaveGrad)"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            filter="url(#goldGlow)"
           />
         </svg>
       </div>
 
-      {/* TOP BAR: Round Back Button */}
+      {/* TOP BAR: Floating 3D Circular Back Button */}
       <div className="relative z-10 max-w-md w-full mx-auto px-5 pt-4 sm:pt-6">
         <Link
           href="/"
-          className="w-10 h-10 rounded-full bg-white shadow-md border border-slate-100 flex items-center justify-center text-[#071d38] hover:bg-slate-50 transition-transform active:scale-90"
+          className="w-11 h-11 rounded-full bg-white/95 backdrop-blur-md shadow-[0_4px_18px_rgba(9,35,71,0.08)] border border-slate-200/90 flex items-center justify-center text-[#07182e] hover:bg-white hover:scale-105 active:scale-95 transition-all cursor-pointer group"
           aria-label="Back to home"
         >
-          <ArrowLeft size={18} strokeWidth={2.5} />
+          <ArrowLeft size={19} strokeWidth={2.5} className="group-hover:-translate-x-0.5 transition-transform" />
         </Link>
       </div>
 
-      {/* MAIN CONTENT CONTAINER */}
-      <main className="relative z-10 max-w-md w-full mx-auto px-5 py-3 sm:py-6 flex-1 flex flex-col justify-center">
+      {/* MAIN LUXURY CONTENT CONTAINER */}
+      <main className="relative z-10 max-w-md w-full mx-auto px-5 py-3 sm:py-5 flex-1 flex flex-col justify-center">
         
         {/* BRAND LOGO & HEADER */}
-        <div className="text-center space-y-1.5 pb-4 sm:pb-6">
+        <div className="text-center space-y-2 pb-4 sm:pb-6">
           <div className="flex justify-center mb-1">
             <SaryonayaLogo size="md" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-[#071d38] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#07182e] tracking-tight">
             Create Account
           </h1>
-          <p className="text-xs sm:text-sm text-[#557086] font-medium max-w-xs mx-auto">
+          <p className="text-xs sm:text-sm text-[#557086] font-medium max-w-xs mx-auto leading-relaxed">
             Join Saryonaya today and start your learning journey
           </p>
         </div>
 
-        {/* 6 FIELDS FORM */}
+        {/* 6 FIELDS LUXURY FORM */}
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
           
           {/* 1. Full Name */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(9,35,71,0.03)] px-4 py-3.5 flex items-center gap-3.5 focus-within:border-[#071d38] focus-within:ring-2 focus-within:ring-[#071d38]/10 transition-all">
-            <User size={19} className="text-[#1a4a84] shrink-0" strokeWidth={2.2} />
+          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center gap-3.5 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+              <User size={18} strokeWidth={2.2} />
+            </div>
             <input
               type="text"
               placeholder="Full Name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full bg-transparent text-sm font-semibold text-[#092347] placeholder-slate-400 outline-none"
+              className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
             />
           </div>
 
           {/* 2. Phone Number with +91 selector */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(9,35,71,0.03)] px-4 py-3.5 flex items-center justify-between gap-3 focus-within:border-[#071d38] focus-within:ring-2 focus-within:ring-[#071d38]/10 transition-all">
-            <div className="flex items-center gap-3.5 flex-1">
-              <Phone size={19} className="text-[#1a4a84] shrink-0" strokeWidth={2.2} />
+          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
+            <div className="flex items-center gap-3.5 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                <Phone size={18} strokeWidth={2.2} />
+              </div>
               <input
                 type="tel"
                 placeholder="Phone Number"
@@ -193,25 +217,27 @@ export default function SignUpPage() {
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                 required
                 maxLength={10}
-                className="w-full bg-transparent text-sm font-semibold text-[#092347] placeholder-slate-400 outline-none"
+                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#07182e] placeholder-slate-400 outline-none"
               />
             </div>
-            <div className="flex items-center gap-1 text-xs font-bold text-[#092347] pl-3 border-l border-slate-200 shrink-0 select-none">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#f8fafc] border border-slate-200/80 text-xs font-black text-[#07182e] shrink-0 select-none">
               <span>+91</span>
-              <ChevronDown size={14} className="text-slate-400" />
+              <ChevronDown size={13} className="text-slate-400" />
             </div>
           </div>
 
           {/* 3. Education Dropdown */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(9,35,71,0.03)] px-4 py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#071d38] focus-within:ring-2 focus-within:ring-[#071d38]/10 transition-all">
+          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
             <div className="flex items-center gap-3.5 flex-1 min-w-0">
-              <GraduationCap size={19} className="text-[#1a4a84] shrink-0" strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                <GraduationCap size={18} strokeWidth={2.2} />
+              </div>
               <select
                 value={education}
                 onChange={(e) => setEducation(e.target.value)}
                 required
-                className={`w-full bg-transparent text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                  education ? 'text-[#092347]' : 'text-slate-400'
+                className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
+                  education ? 'text-[#07182e]' : 'text-slate-400'
                 }`}
               >
                 <option value="" disabled>Education</option>
@@ -228,15 +254,17 @@ export default function SignUpPage() {
           </div>
 
           {/* 4. College Dropdown */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(9,35,71,0.03)] px-4 py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#071d38] focus-within:ring-2 focus-within:ring-[#071d38]/10 transition-all">
+          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
             <div className="flex items-center gap-3.5 flex-1 min-w-0">
-              <Building2 size={19} className="text-[#1a4a84] shrink-0" strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                <Building2 size={18} strokeWidth={2.2} />
+              </div>
               <select
                 value={college}
                 onChange={(e) => setCollege(e.target.value)}
                 required
-                className={`w-full bg-transparent text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                  college ? 'text-[#092347]' : 'text-slate-400'
+                className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
+                  college ? 'text-[#07182e]' : 'text-slate-400'
                 }`}
               >
                 <option value="" disabled>College</option>
@@ -259,15 +287,17 @@ export default function SignUpPage() {
           </div>
 
           {/* 5. Course Dropdown */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(9,35,71,0.03)] px-4 py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#071d38] focus-within:ring-2 focus-within:ring-[#071d38]/10 transition-all">
+          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
             <div className="flex items-center gap-3.5 flex-1 min-w-0">
-              <BookOpen size={19} className="text-[#1a4a84] shrink-0" strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                <BookOpen size={18} strokeWidth={2.2} />
+              </div>
               <select
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 required
-                className={`w-full bg-transparent text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                  course ? 'text-[#092347]' : 'text-slate-400'
+                className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
+                  course ? 'text-[#07182e]' : 'text-slate-400'
                 }`}
               >
                 <option value="" disabled>Course</option>
@@ -285,15 +315,17 @@ export default function SignUpPage() {
           </div>
 
           {/* 6. Passed Out Year Dropdown */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(9,35,71,0.03)] px-4 py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#071d38] focus-within:ring-2 focus-within:ring-[#071d38]/10 transition-all">
+          <div className="bg-white rounded-[22px] border border-slate-200/90 shadow-[0_3px_14px_rgba(9,35,71,0.03)] hover:border-slate-300 px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 relative focus-within:border-[#092347] focus-within:ring-4 focus-within:ring-[#dfa32b]/15 focus-within:shadow-[0_4px_20px_rgba(9,35,71,0.08)] transition-all">
             <div className="flex items-center gap-3.5 flex-1 min-w-0">
-              <Calendar size={19} className="text-[#1a4a84] shrink-0" strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f0f5fc] to-[#e4eefb] text-[#092347] flex items-center justify-center border border-blue-100/60 shadow-2xs shrink-0">
+                <Calendar size={18} strokeWidth={2.2} />
+              </div>
               <select
                 value={passedOutYear}
                 onChange={(e) => setPassedOutYear(e.target.value)}
                 required
-                className={`w-full bg-transparent text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
-                  passedOutYear ? 'text-[#092347]' : 'text-slate-400'
+                className={`w-full bg-transparent text-xs sm:text-sm font-semibold outline-none appearance-none cursor-pointer truncate ${
+                  passedOutYear ? 'text-[#07182e]' : 'text-slate-400'
                 }`}
               >
                 <option value="" disabled>Passed Out Year</option>
@@ -310,23 +342,25 @@ export default function SignUpPage() {
             <ChevronDown size={16} className="text-slate-400 shrink-0 pointer-events-none" />
           </div>
 
-          {/* PRIMARY BUTTON: Create Account → */}
+          {/* MASTER 3D ROYAL NAVY PRIMARY BUTTON: Create Account → */}
           <div className="pt-2">
             <button
               type="submit"
               disabled={loading || success}
-              className="w-full py-3.5 sm:py-4 rounded-full bg-[#071d38] hover:bg-[#0a274b] active:scale-[0.98] text-white font-bold text-sm tracking-wide shadow-[0_6px_22px_rgba(7,29,56,0.28)] flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+              className="w-full py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0d315d] hover:brightness-110 active:scale-[0.98] text-white font-black text-sm tracking-wide border-t border-white/20 border-b border-black/40 shadow-[0_8px_25px_rgba(9,35,71,0.32)] hover:shadow-[0_12px_32px_rgba(9,35,71,0.45)] flex items-center justify-center gap-2.5 cursor-pointer transition-all disabled:opacity-50 group"
             >
-              <span>{success ? 'Account Created!' : loading ? 'Creating Account...' : 'Create Account'}</span>
-              <ArrowRight size={17} strokeWidth={2.4} />
+              <span>{success ? 'Account Created Successfully!' : loading ? 'Creating Account...' : 'Create Account'}</span>
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-0.5 transition-transform">
+                <ArrowRight size={14} strokeWidth={2.6} className="text-white" />
+              </div>
             </button>
           </div>
         </form>
 
         {/* DIVIDER: — or — */}
-        <div className="flex items-center justify-center gap-3 my-3 text-slate-400 text-xs select-none">
+        <div className="flex items-center justify-center gap-3 my-3.5 text-slate-400 text-xs select-none">
           <span className="w-14 h-px bg-slate-200" />
-          <span className="font-medium">or</span>
+          <span className="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">or</span>
           <span className="w-14 h-px bg-slate-200" />
         </div>
 
@@ -334,7 +368,7 @@ export default function SignUpPage() {
         <button
           type="button"
           onClick={handleGoogleSignUp}
-          className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 text-[#071d38] font-bold text-xs sm:text-sm border border-[#071d38] flex items-center justify-center gap-2.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+          className="w-full py-3.5 rounded-full bg-white hover:bg-slate-50 text-[#07182e] font-bold text-xs sm:text-sm border border-[#092347]/30 hover:border-[#092347] shadow-[0_2px_10px_rgba(9,35,71,0.04)] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -364,31 +398,32 @@ export default function SignUpPage() {
           </span>
           <Link
             href="/sign-in"
-            className="text-xs font-bold text-[#1a4a84] hover:underline"
+            className="text-xs font-black text-[#092347] underline decoration-2 decoration-[#dfa32b] underline-offset-4 hover:text-[#dfa32b] transition-colors"
           >
             Login
           </Link>
         </div>
       </main>
 
-      {/* BOTTOM DECORATIVE WAVE CURVE (Navy + Gold accent) */}
+      {/* 3D LUXURY BOTTOM DECORATIVE WAVE (Royal Navy with Molten Gold Trim) */}
       <div className="relative pointer-events-none overflow-hidden h-20 sm:h-28 w-full z-0 mt-auto">
         <svg
           viewBox="0 0 500 100"
           preserveAspectRatio="none"
-          className="w-full h-full"
+          className="w-full h-full drop-shadow-md"
         >
-          {/* Rich Gold Ribbon Border */}
+          {/* Golden Ribbon Border with Glow */}
           <path
             d="M0,70 Q140,25 280,65 Q410,95 500,30"
             fill="none"
-            stroke="#dfa32b"
+            stroke="url(#goldWaveGrad)"
             strokeWidth="4"
+            filter="url(#goldGlow)"
           />
           {/* Deep Navy Curved Wave */}
           <path
             d="M0,70 Q140,25 280,65 Q410,95 500,30 L500,100 L0,100 Z"
-            fill="#071d38"
+            fill="url(#navyWaveGrad)"
           />
         </svg>
       </div>
