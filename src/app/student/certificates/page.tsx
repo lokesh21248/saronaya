@@ -13,6 +13,7 @@ import {
   Share2,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { SAMPLE_CERTIFICATES } from '@/lib/data/lms-data'
@@ -171,6 +172,7 @@ export default function CertificatesPage() {
       </main>
 
       <div className="print:hidden">
+        <Footer />
         <BottomNav />
       </div>
     </div>

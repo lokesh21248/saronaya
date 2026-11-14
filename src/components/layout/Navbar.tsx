@@ -14,10 +14,17 @@ import {
   LogIn,
   UserPlus,
   User,
+  LayoutGrid,
+  ChevronDown,
   Sparkles,
-  ChevronRight,
+  BookOpen,
+  Award,
+  BarChart3,
+  CreditCard,
+  GraduationCap,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { PremiumButton, SecondaryButton } from '@/components/ui/Buttons'
 
 export function Navbar() {
   const { isSignedIn, isLoaded, user } = useUser()
@@ -26,16 +33,14 @@ export function Navbar() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [exploreDropdownOpen, setExploreDropdownOpen] = useState(false)
 
   const handleSignOut = async () => {
     try {
       if (signOut) {
         await signOut({ redirectUrl: '/' })
       }
-    } catch (e) {
-      // fallback
-    }
-    // Also clear any demo session
+    } catch (e) {}
     try {
       localStorage.removeItem('saryonaya_demo_session')
     } catch (e) {}
@@ -43,12 +48,22 @@ export function Navbar() {
   }
 
   const navLinks = [
-    { label: 'Explore', href: '/courses' },
-    { label: 'Subscriptions', href: '/pricing' },
-    { label: 'My Learning', href: '/student/dashboard' },
-    { label: 'My Courses', href: '/student/courses' },
-    { label: 'Progress', href: '/student/progress' },
-    { label: 'Certificates', href: '/student/certificates' },
+    { label: 'Subscriptions', href: '/subscriptions' },
+    { label: 'My Learning', href: '/my-learning' },
+    { label: 'My Courses', href: '/my-courses' },
+    { label: 'Progress', href: '/progress' },
+    { label: 'Certificates', href: '/certificates' },
+  ]
+
+  const exploreCategories = [
+    { name: 'Computer Science & Engineering (CSE)', href: '/courses?category=CSE', icon: '💻' },
+    { name: 'Artificial Intelligence & ML (AI/ML)', href: '/courses?category=AI_ML', icon: '🤖' },
+    { name: 'Electronics & Communication (ECE)', href: '/courses?category=ECE', icon: '⚡' },
+    { name: 'Electrical & Electronics (EEE)', href: '/courses?category=EEE', icon: '🔋' },
+    { name: 'Mechanical Engineering (MECH)', href: '/courses?category=MECH', icon: '⚙️' },
+    { name: 'Civil & Structural (CIVIL)', href: '/courses?category=CIVIL', icon: '🏗️' },
+    { name: 'Full-Stack Web & Cloud', href: '/courses?category=Web', icon: '🌐' },
+    { name: 'Business & Management Analytics', href: '/courses?category=Business', icon: '📊' },
   ]
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -60,26 +75,90 @@ export function Navbar() {
   }
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_2px_15px_rgba(9,35,71,0.04)] sticky top-0 z-40 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-3 sm:px-6 lg:px-8 h-16 sm:h-20">
+    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 shadow-[0_2px_16px_rgba(9,35,71,0.05)] transition-all">
+      <div className="max-w-[1920px] mx-auto flex items-center justify-between px-3 sm:px-6 lg:px-8 xl:px-12 h-16 sm:h-20 gap-3">
         
-        {/* Left Side: Brand Logo & Desktop Navigation */}
-        <div className="flex items-center gap-3 sm:gap-6 lg:gap-8 shrink-0">
-          {/* Official SARVONAYA Logo */}
-          <SaryonayaLogo size="md" />
+        {/* Left Side: Brand Logo, Explore Button, Navigation Links */}
+        <div className="flex items-center gap-3 lg:gap-5 xl:gap-7 shrink-0">
+          
+          {/* Logo with Seal + Brand Text */}
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+            {/* 3D Gold Seal Emblem */}
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shrink-0 shadow-md ring-2 ring-[#e5a93b]/70 bg-white group-hover:scale-105 transition-transform flex items-center justify-center">
+              <svg viewBox="20 110 320 355" className="w-full h-full">
+                <image href="/images/sarvonaya-logo.jpg" width="1024" height="576" />
+              </svg>
+            </div>
+            
+            {/* Typography */}
+            <div className="flex flex-col">
+              <span className="font-black text-base sm:text-xl tracking-tight text-[#07182e] group-hover:text-[#092347] transition-colors leading-none">
+                SARYONAYA
+              </span>
+              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-[#b87e1a] mt-0.5 leading-none">
+                Learn • Grow • Excel
+              </span>
+            </div>
+          </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 ml-2">
+          {/* Explore Dropdown Button (matching the mockup) */}
+          <div className="relative hidden md:block">
+            <button
+              onClick={() => setExploreDropdownOpen(!exploreDropdownOpen)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-gradient-to-r from-[#07182e] to-[#0e2a4d] text-white text-xs font-extrabold shadow-sm border border-slate-700/50 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              <LayoutGrid className="w-3.5 h-3.5 text-[#e5a93b]" />
+              <span>Explore</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-300 transition-transform ${exploreDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {exploreDropdownOpen && (
+              <div
+                className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                onMouseLeave={() => setExploreDropdownOpen(false)}
+              >
+                <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-[#07182e] uppercase tracking-wider">
+                    Academic Branches
+                  </span>
+                  <Link
+                    href="/courses"
+                    onClick={() => setExploreDropdownOpen(false)}
+                    className="text-[11px] font-bold text-[#b87e1a] hover:underline"
+                  >
+                    All Courses →
+                  </Link>
+                </div>
+                <div className="max-h-80 overflow-y-auto py-1">
+                  {exploreCategories.map((cat) => (
+                    <Link
+                      key={cat.href}
+                      href={cat.href}
+                      onClick={() => setExploreDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-xs font-bold text-[#07182e] hover:text-[#b87e1a] transition-colors"
+                    >
+                      <span className="text-base shrink-0">{cat.icon}</span>
+                      <span className="truncate">{cat.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden xl:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all tracking-wide ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all tracking-wide ${
                     isActive
                       ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/40 shadow-xs'
-                      : 'text-[#092347]/80 hover:text-[#092347] hover:bg-slate-50'
+                      : 'text-[#07182e]/80 hover:text-[#07182e] hover:bg-slate-50'
                   }`}
                 >
                   {link.label}
@@ -89,245 +168,171 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* Right Side: Search, Actions, Login & Logout Buttons */}
+        {/* Center / Right: Search Bar & Actions */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
-          {/* Desktop Quick Search */}
+          {/* Search Bar (matching the mockup) */}
           <form
             onSubmit={handleSearchSubmit}
-            className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white shadow-xs transition-all"
+            className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white focus-within:shadow-md shadow-xs transition-all w-48 xl:w-64"
           >
-            <Search size={14} className="text-slate-400" />
+            <Search size={14} className="text-slate-400 shrink-0" />
             <input
               type="text"
               placeholder="Search courses, AI, VLSI..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent text-xs text-[#092347] placeholder-slate-400 outline-none w-36 lg:w-44 font-medium"
+              className="bg-transparent text-xs text-[#07182e] placeholder-slate-400 outline-none w-full font-medium"
             />
           </form>
 
-          {/* Go Premium Golden Badge Button (Desktop/Tablet) */}
-          <Link
-            href="/pricing"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0f3460] text-[#f5cb68] border border-[#dfa32b]/40 text-xs font-black shadow-xs hover:border-[#dfa32b] hover:scale-[1.02] active:scale-[0.98] transition-all tracking-wide"
-          >
-            <Crown size={13} className="text-[#f5cb68]" />
-            <span>Go Premium</span>
+          {/* Go Premium Luxury Button */}
+          <Link href="/subscriptions" className="hidden sm:inline-block">
+            <PremiumButton size="sm">Go Premium</PremiumButton>
           </Link>
 
-          {/* Notification Bell */}
+          {/* Notification Bell with Badge */}
           <Link
-            href="/student/progress"
-            className="relative p-2 sm:p-2.5 rounded-full text-[#092347] hover:bg-slate-100 transition-colors"
+            href="/notifications"
+            className="relative p-2 sm:p-2.5 rounded-full bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 hover:text-[#b87e1a] transition-colors"
             aria-label="Notifications"
           >
-            <Bell size={19} strokeWidth={2.2} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            <Bell size={16} />
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+              2
+            </span>
           </Link>
 
-          {/* AUTHENTICATION CONTROLS: Login & Logout */}
-          {isLoaded && (
-            <>
-              {isSignedIn ? (
-                /* SIGNED IN STATE: User Profile + Dedicated Log Out Button */
-                <div className="flex items-center gap-2">
-                  {/* User Profile Avatar Pill */}
-                  <Link
-                    href="/student/profile"
-                    className="flex items-center gap-2 p-1 sm:pr-3 rounded-full hover:bg-slate-100/80 transition-colors border border-transparent hover:border-slate-200"
-                  >
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-[#dfa32b] p-0.5 overflow-hidden bg-white shadow-xs">
-                      <img
-                        src={
-                          user?.imageUrl ||
-                          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'
-                        }
-                        alt={user?.fullName || 'Student'}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    </div>
-                    <span className="hidden md:inline-block text-xs font-black text-[#092347] max-w-[100px] truncate">
-                      {user?.firstName || 'Student'}
-                    </span>
-                  </Link>
-
-                  {/* Dedicated Logout Button */}
-                  <button
-                    onClick={handleSignOut}
-                    className="hidden sm:inline-flex px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold text-rose-600 bg-rose-50/80 hover:bg-rose-100 border border-rose-200/80 hover:border-rose-300 transition-all items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
-                    title="Log Out of Saryonaya"
-                  >
-                    <LogOut size={14} strokeWidth={2.2} />
-                    <span>Logout</span>
-                  </button>
+          {/* Authentication Actions: Login / Register OR User Profile / Logout */}
+          {isSignedIn ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 hover:border-[#dfa32b] transition-all"
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#dfa32b] to-[#07182e] text-white flex items-center justify-center font-bold text-xs">
+                  {user?.firstName?.[0] || 'U'}
                 </div>
-              ) : (
-                /* SIGNED OUT STATE: Perfectly Sized & Aligned Buttons */
-                <>
-                  {/* Mobile Screen (< 640px): 1 Sleek Luxury Button */}
-                  <Link
-                    href="/sign-in"
-                    className="sm:hidden px-3.5 py-1.5 rounded-full text-xs font-black bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#07182e] border-t border-[#ffe8a3]/80 shadow-[0_2px_10px_rgba(223,163,43,0.3)] active:scale-95 flex items-center gap-1 tracking-wide"
-                  >
-                    <LogIn size={13} strokeWidth={2.5} />
-                    <span>Sign In</span>
-                  </Link>
+                <span className="text-xs font-extrabold text-[#07182e] hidden sm:inline">
+                  {user?.firstName || 'Student'}
+                </span>
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="p-2 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                title="Sign Out"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              {/* Login Button (White pill with subtle shadow) */}
+              <Link href="/login">
+                <button className="px-4 py-2 rounded-full text-xs font-black text-[#07182e] bg-white border border-slate-300/90 shadow-sm hover:border-[#07182e] hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-1.5">
+                  <User size={13} className="text-[#07182e]" />
+                  <span>Login</span>
+                </button>
+              </Link>
 
-                  {/* Tablet & Desktop (>= 640px): Both Login & Register Buttons */}
-                  <div className="hidden sm:flex items-center gap-2">
-                    <Link
-                      href="/sign-in"
-                      className="px-4 py-2 rounded-full text-xs font-bold text-[#092347] bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#dfa32b] shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
-                    >
-                      <LogIn size={13} className="text-[#b87e1a]" />
-                      <span>Login</span>
-                    </Link>
-
-                    <Link
-                      href="/sign-up"
-                      className="px-4 sm:px-5 py-2 rounded-full text-xs font-black bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#07182e] border-t border-[#ffe8a3]/80 shadow-[0_3px_14px_rgba(223,163,43,0.35)] hover:shadow-[0_5px_20px_rgba(223,163,43,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all tracking-wide flex items-center gap-1.5"
-                    >
-                      <UserPlus size={13} />
-                      <span>Register</span>
-                    </Link>
-                  </div>
-                </>
-              )}
-            </>
+              {/* Register Button (Golden 3D pill button matching mockup) */}
+              <Link href="/register">
+                <button className="px-4 sm:px-5 py-2 rounded-full text-xs font-black text-[#07182e] bg-gradient-to-r from-[#dfa32b] via-[#f7d685] to-[#d99222] border-t border-white/60 border-b-[2px] border-b-[#a66d0e] shadow-[0_3px_12px_rgba(223,163,43,0.35)] hover:shadow-[0_5px_18px_rgba(223,163,43,0.5)] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <UserPlus size={13} className="text-[#07182e]" />
+                  <span>Register</span>
+                </button>
+              </Link>
+            </div>
           )}
 
-          {/* Mobile hamburger menu toggle (far right) */}
+          {/* Mobile Drawer Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 sm:p-2 lg:hidden rounded-xl text-[#092347] hover:bg-slate-100 transition-colors"
-            aria-label="Toggle navigation menu"
+            className="xl:hidden p-2 rounded-xl bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 transition-colors ml-1"
+            aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-100 bg-white px-4 py-4 space-y-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <div className="xl:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-4 duration-200 shadow-xl">
           {/* Mobile Search */}
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <Search size={15} className="text-slate-400" />
             <input
               type="text"
               placeholder="Search courses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-xs text-[#092347] border border-slate-200 outline-none font-medium"
+              className="bg-transparent text-xs text-[#07182e] outline-none w-full font-medium"
             />
           </form>
 
-          {/* Mobile Auth Actions */}
-          <div className="p-3 bg-gradient-to-r from-[#f7fafd] to-[#f0f5fc] rounded-2xl border border-slate-200/80">
-            {isSignedIn ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full ring-2 ring-[#dfa32b] p-0.5 overflow-hidden bg-white shadow-xs">
-                    <img
-                      src={
-                        user?.imageUrl ||
-                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'
-                      }
-                      alt="Student"
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-[#092347] block">
-                      {user?.fullName || 'Student'}
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-medium">
-                      {user?.primaryEmailAddress?.emailAddress}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href="/student/profile"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="py-2 px-3 rounded-full text-center text-xs font-bold text-[#092347] bg-white border border-slate-200 shadow-xs"
-                  >
-                    My Profile
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="py-2 px-3 rounded-full text-center text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 flex items-center justify-center gap-1.5 shadow-xs"
-                  >
-                    <LogOut size={13} />
-                    <span>Log Out</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-black text-[#092347]">
-                  <Sparkles size={14} className="text-[#dfa32b]" />
-                  <span>Welcome to SARVONAYA</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href="/sign-in"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="py-2.5 rounded-full text-center text-xs font-bold text-[#092347] border border-slate-200 bg-white shadow-xs active:scale-95 transition-all"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="py-2.5 rounded-full text-center text-xs font-black bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#07182e] border-t border-[#ffe8a3]/80 shadow-[0_2px_10px_rgba(223,163,43,0.3)] active:scale-95 transition-all"
-                  >
-                    Register
-                  </Link>
-                </div>
-              </div>
-            )}
+          {/* Nav links */}
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            <Link
+              href="/courses"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl bg-slate-50 text-xs font-bold text-[#07182e] hover:bg-amber-50 hover:text-[#b87e1a] flex items-center gap-2"
+            >
+              <LayoutGrid size={15} className="text-[#b87e1a]" />
+              <span>Explore Courses</span>
+            </Link>
+            <Link
+              href="/subscriptions"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl bg-slate-50 text-xs font-bold text-[#07182e] hover:bg-amber-50 hover:text-[#b87e1a] flex items-center gap-2"
+            >
+              <CreditCard size={15} className="text-[#b87e1a]" />
+              <span>Subscriptions</span>
+            </Link>
+            <Link
+              href="/my-learning"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl bg-slate-50 text-xs font-bold text-[#07182e] hover:bg-amber-50 hover:text-[#b87e1a] flex items-center gap-2"
+            >
+              <BookOpen size={15} className="text-[#b87e1a]" />
+              <span>My Learning</span>
+            </Link>
+            <Link
+              href="/progress"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl bg-slate-50 text-xs font-bold text-[#07182e] hover:bg-amber-50 hover:text-[#b87e1a] flex items-center gap-2"
+            >
+              <BarChart3 size={15} className="text-[#b87e1a]" />
+              <span>Progress</span>
+            </Link>
+            <Link
+              href="/certificates"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl bg-slate-50 text-xs font-bold text-[#07182e] hover:bg-amber-50 hover:text-[#b87e1a] flex items-center gap-2"
+            >
+              <Award size={15} className="text-[#b87e1a]" />
+              <span>Certificates</span>
+            </Link>
+            <Link
+              href="/profile"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl bg-slate-50 text-xs font-bold text-[#07182e] hover:bg-amber-50 hover:text-[#b87e1a] flex items-center gap-2"
+            >
+              <User size={15} className="text-[#b87e1a]" />
+              <span>Profile</span>
+            </Link>
           </div>
 
-          {/* Links */}
-          <div className="space-y-1">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/30'
-                      : 'text-[#092347] hover:bg-slate-50'
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  <ChevronRight size={14} className="text-slate-400" />
-                </Link>
-              )
-            })}
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <Link
+              href="/subscriptions"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#07182e] to-[#0f2d57] text-[#fced9f] text-xs font-extrabold border border-[#dfa32b]/50 shadow-sm"
+            >
+              <Crown size={14} className="text-[#e5a93b]" />
+              <span>Upgrade to Premium Membership</span>
+            </Link>
           </div>
-
-          {/* Go Premium in Drawer */}
-          <Link
-            href="/pricing"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-[#07182e] to-[#092347] text-[#f5cb68] border border-[#dfa32b]/40 shadow-sm"
-          >
-            <div className="flex items-center gap-2">
-              <Crown size={18} className="text-[#f5cb68]" />
-              <div>
-                <span className="text-xs font-black block">Go Premium</span>
-                <span className="text-[10px] text-slate-300">Unlock all engineering courses</span>
-              </div>
-            </div>
-            <span className="text-xs font-bold text-[#dfa32b]">Explore →</span>
-          </Link>
         </div>
       )}
     </header>

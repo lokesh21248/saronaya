@@ -19,6 +19,7 @@ import {
   ArrowRight,
   Star,
 } from 'lucide-react'
+import { Footer } from '@/components/layout/Footer'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { COURSES_DATA, CourseData } from '@/lib/data/lms-data'
@@ -319,6 +320,7 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
         </div>
       )}
 
+      <Footer />
       <BottomNav />
     </div>
   )

@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
 import { BottomNav } from '@/components/layout/BottomNav'
 
 export default function ProgressPage() {
@@ -176,6 +177,7 @@ export default function ProgressPage() {
         </div>
       </main>
 
+      <Footer />
       <BottomNav />
     </div>
   )

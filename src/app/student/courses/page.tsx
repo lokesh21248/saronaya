@@ -17,6 +17,7 @@ import {
   Crown,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { COURSES_DATA } from '@/lib/data/lms-data'
 
@@ -192,6 +193,7 @@ export default function StudentCoursesPage() {
         </div>
       </div>
 
+      <Footer />
       <BottomNav />
     </div>
   )

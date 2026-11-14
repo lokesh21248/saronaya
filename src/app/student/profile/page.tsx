@@ -24,6 +24,7 @@ import {
   KeyRound,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { ACADEMIC_BRANCHES } from '@/lib/data/lms-data'
 
@@ -298,6 +299,7 @@ export default function StudentProfilePage() {
         </div>
       </div>
 
+      <Footer />
       <BottomNav />
     </div>
   )

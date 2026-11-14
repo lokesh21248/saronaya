@@ -2,388 +2,851 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import {
   Search,
   SlidersHorizontal,
-  Bell,
-  Code2,
-  BarChart3,
-  Palette,
-  Briefcase,
-  Clock,
   Play,
   ArrowRight,
-  Crown,
-  ChevronRight,
   Star,
-  Sparkles,
+  CheckCircle2,
+  Award,
   BookOpen,
+  GraduationCap,
+  Users,
+  Video,
+  Clock,
+  Sparkles,
+  Crown,
+  ChevronDown,
+  HelpCircle,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { CategoryCard, CategoryData } from '@/components/ui/CategoryCard'
+import { CourseCard, CourseCardData } from '@/components/ui/CourseCard'
+import {
+  PrimaryButton,
+  SecondaryButton,
+  PremiumButton,
+  EnrollButton,
+  SubscribeButton,
+} from '@/components/ui/Buttons'
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState<string>('Programming')
-  const [carouselIndex, setCarouselIndex] = useState(0)
+  const [filterActive, setFilterActive] = useState(false)
+  const [faqOpen, setFaqOpen] = useState<number | null>(0)
 
-  const categories = [
-    { name: 'Programming', icon: Code2, label: '</>' },
-    { name: 'Data Science', icon: BarChart3, label: 'chart' },
-    { name: 'Design', icon: Palette, label: 'palette' },
-    { name: 'Business', icon: Briefcase, label: 'briefcase' },
+  // 4 Core Category Cards matching the mockup
+  const categories: CategoryData[] = [
+    {
+      id: 'cat-prog',
+      name: 'Programming',
+      subtitle: 'Code • Build • Innovate',
+      slug: 'programming',
+      iconType: 'programming',
+    },
+    {
+      id: 'cat-ds',
+      name: 'Data Science',
+      subtitle: 'Analyze • Predict • Grow',
+      slug: 'datascience',
+      iconType: 'datascience',
+    },
+    {
+      id: 'cat-design',
+      name: 'Design',
+      subtitle: 'Create • Inspire • Design',
+      slug: 'design',
+      iconType: 'design',
+    },
+    {
+      id: 'cat-biz',
+      name: 'Business',
+      subtitle: 'Plan • Grow • Succeed',
+      slug: 'business',
+      iconType: 'business',
+    },
   ]
 
-  const popularCourses = [
+  // 4 Popular Courses matching the mockup
+  const popularCourses: CourseCardData[] = [
     {
       id: 'course-py-01',
       slug: 'python-for-beginners',
       title: 'Python for Beginners',
-      subtitle: 'Start your coding journey',
-      rating: '4.5',
-      reviews: '12k',
-      duration: '8h 30m',
-      level: 'Beginner',
-      price: '₹999',
+      instructor: {
+        name: 'Dr. Priya Sharma',
+      },
+      rating: 4.8,
+      reviews: '12.5K',
+      duration: '40h',
+      lessonsCount: 120,
+      price: 1999,
+      originalPrice: 3999,
+      badge: 'Bestseller',
       imageType: 'python',
-      thumbnailBg: 'from-[#07182e] to-[#0d2a4d]',
     },
     {
-      id: 'course-ai-03',
+      id: 'course-ds-02',
       slug: 'applied-machine-learning',
       title: 'Data Science with Python',
-      subtitle: 'Analyze • Visualize • Predict',
-      rating: '4.6',
-      reviews: '8k',
-      duration: '12h 15m',
-      level: 'Intermediate',
-      price: '₹1,499',
+      instructor: {
+        name: 'Prof. Arun Kumar',
+      },
+      rating: 4.8,
+      reviews: '8.9K',
+      duration: '35h',
+      lessonsCount: 90,
+      price: 1799,
+      originalPrice: 3499,
+      badge: 'New',
       imageType: 'datascience',
-      thumbnailBg: 'from-[#07182e] to-[#0a2f58]',
     },
     {
-      id: 'course-web-02',
+      id: 'course-uiux-03',
       slug: 'full-stack-web-development',
-      title: 'Full-Stack Web Dev',
-      subtitle: 'React, Node.js & Cloud',
-      rating: '4.8',
-      reviews: '15k',
-      duration: '16h 40m',
-      level: 'Beginner',
-      price: '₹1,299',
-      imageType: 'web',
-      thumbnailBg: 'from-[#07182e] to-[#12365e]',
+      title: 'UI/UX Design Mastery',
+      instructor: {
+        name: 'Sneha Reddy',
+      },
+      rating: 4.8,
+      reviews: '7.2K',
+      duration: '28h',
+      lessonsCount: 75,
+      price: 1499,
+      originalPrice: 2999,
+      badge: 'Popular',
+      imageType: 'design',
     },
     {
-      id: 'course-ai-04',
+      id: 'course-biz-04',
       slug: 'deep-learning-ai',
-      title: 'Machine Learning & AI',
-      subtitle: 'Neural Nets & LLMs',
-      rating: '4.9',
-      reviews: '10k',
-      duration: '20h 10m',
-      level: 'Advanced',
-      price: '₹1,899',
-      imageType: 'ai',
-      thumbnailBg: 'from-[#07182e] to-[#0e3057]',
+      title: 'Business Analytics',
+      instructor: {
+        name: 'Vikram Reddy',
+      },
+      rating: 4.8,
+      reviews: '6.1K',
+      duration: '32h',
+      lessonsCount: 80,
+      price: 1699,
+      originalPrice: 3499,
+      badge: 'Top Rated',
+      imageType: 'business',
     },
   ]
 
-  const navLinks = [
-    { label: 'Explore', href: '/courses' },
-    { label: 'Subscriptions', href: '/pricing' },
-    { label: 'My Learning', href: '/student/dashboard' },
-    { label: 'My Courses', href: '/student/courses' },
-    { label: 'Progress', href: '/student/progress' },
-    { label: 'Certificates', href: '/student/certificates' },
+  // Featured Engineering Courses
+  const featuredCourses: CourseCardData[] = [
+    {
+      id: 'course-embedded-05',
+      slug: 'embedded-systems-iot',
+      title: 'Embedded Systems & IoT with ARM',
+      instructor: { name: 'Karthik Raman' },
+      rating: 4.9,
+      reviews: '4.8K',
+      duration: '38h',
+      lessonsCount: 85,
+      price: 2199,
+      originalPrice: 4299,
+      badge: 'Bestseller',
+      imageType: 'general',
+    },
+    {
+      id: 'course-cad-06',
+      slug: 'solidworks-cad-design',
+      title: 'Mechanical CAD Modeling (SolidWorks)',
+      instructor: { name: 'Rajesh Nair' },
+      rating: 4.8,
+      reviews: '3.9K',
+      duration: '30h',
+      lessonsCount: 70,
+      price: 1899,
+      originalPrice: 3799,
+      badge: 'Top Rated',
+      imageType: 'general',
+    },
+    {
+      id: 'course-civil-07',
+      slug: 'structural-analysis-autocad',
+      title: 'Civil & Structural Design (AutoCAD)',
+      instructor: { name: 'Ananya Deshmukh' },
+      rating: 4.7,
+      reviews: '3.2K',
+      duration: '26h',
+      lessonsCount: 65,
+      price: 1599,
+      originalPrice: 3199,
+      badge: 'Popular',
+      imageType: 'general',
+    },
+    {
+      id: 'course-cloud-08',
+      slug: 'cloud-devops-kubernetes',
+      title: 'Cloud Architecture & DevOps CI/CD',
+      instructor: { name: 'Sanjay Mehra' },
+      rating: 4.9,
+      reviews: '5.5K',
+      duration: '42h',
+      lessonsCount: 110,
+      price: 2499,
+      originalPrice: 4999,
+      badge: 'New',
+      imageType: 'general',
+    },
+  ]
+
+  // FAQs
+  const faqs = [
+    {
+      q: 'Are SARYONAYA course certificates recognized by top engineering companies?',
+      a: 'Yes! Every certificate issued by SARYONAYA carries a unique verifiable credential ID and QR code, recognized by premier IT, electronics, core engineering firms, and top MNC hiring partners across India.',
+    },
+    {
+      q: 'Can I access the video lectures and downloadable notes on mobile?',
+      a: 'Absolutely. The entire SARYONAYA platform is 100% responsive and optimized for smartphones, tablets, and 4K desktops. You can pause on mobile and resume seamlessly on your laptop.',
+    },
+    {
+      q: 'What is included in the SARYONAYA Premium Membership?',
+      a: 'Premium members get unlimited access to all 500+ engineering courses, GATE preparation modules, live mentor doubt-clearing sessions, unlimited quiz practice tests, and verified graduation certificates at zero extra cost.',
+    },
+    {
+      q: 'Do you offer individual course purchases or only subscriptions?',
+      a: 'We offer both! You can either enroll in an individual course with lifetime access or join the all-access yearly membership for maximum savings.',
+    },
   ]
 
   return (
-    <div className="min-h-screen bg-[#f6f9fd] text-[#092347] pb-24 md:pb-12 font-sans antialiased selection:bg-[#dfa32b]/30">
-      {/* Master Navbar with Login/Logout & Official Logo */}
+    <div className="min-h-screen bg-[#f4f7fb] text-[#07182e] flex flex-col font-sans antialiased selection:bg-[#dfa32b]/30">
+      
+      {/* 1. Global Navbar */}
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 space-y-6 sm:space-y-8">
-        {/* Hero Banner Section */}
-        <section className="relative rounded-[28px] sm:rounded-[32px] bg-gradient-to-r from-white via-white to-[#f0f6ff] border border-slate-100 shadow-[0_8px_30px_rgba(9,35,71,0.06)] overflow-hidden p-5 sm:p-8 lg:p-10">
-          {/* Decorative Navy & Gold Waves Background */}
-          <div className="absolute top-0 right-0 w-2/3 sm:w-1/2 h-full pointer-events-none overflow-hidden">
-            <div className="absolute -top-12 -right-8 w-64 sm:w-96 h-64 sm:h-96 bg-gradient-to-bl from-[#092347] to-[#07182e] rounded-full blur-[2px] opacity-95" />
-            <div className="absolute top-1/3 -right-6 w-52 sm:w-80 h-44 sm:h-64 border-[6px] border-[#dfa32b] rounded-full opacity-80" />
-            <div className="absolute top-6 right-8 sm:right-16 text-white/20">
-              <Play size={40} fill="currentColor" />
-            </div>
+      <main className="flex-1">
+        
+        {/* ========================================================================= */}
+        {/* HERO SECTION — Matching the 4K Mockup exactly */}
+        {/* ========================================================================= */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-12 sm:pb-16">
+          
+          {/* Sweeping 3D Royal Navy & Molten Gold Ribbon Waves (Mockup Accent) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+            {/* Top right golden ribbon */}
+            <div className="absolute -top-24 right-0 w-[55vw] h-[55vw] max-w-[850px] max-h-[850px] bg-gradient-to-bl from-amber-400/20 via-blue-900/10 to-transparent rounded-full blur-3xl" />
+            
+            {/* 3D Wave SVG background curves */}
+            <svg
+              className="absolute right-0 top-0 w-full lg:w-[65%] h-full object-cover opacity-90 hidden sm:block"
+              viewBox="0 0 900 600"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="heroNavyGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#07182e" stopOpacity="0.05" />
+                  <stop offset="50%" stopColor="#0e3a6c" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#1e5ba3" stopOpacity="0.25" />
+                </linearGradient>
+                <linearGradient id="heroGoldRibbon" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#dfa32b" />
+                  <stop offset="50%" stopColor="#fced9f" />
+                  <stop offset="100%" stopColor="#b37a18" />
+                </linearGradient>
+              </defs>
+              {/* Backing wave curve */}
+              <path
+                d="M300 0 C450 150 550 200 900 120 L900 600 L200 600 C350 400 200 250 300 0 Z"
+                fill="url(#heroNavyGrad)"
+              />
+              {/* Gold Ribbon Trim */}
+              <path
+                d="M200 600 C380 380 480 280 900 200"
+                stroke="url(#heroGoldRibbon)"
+                strokeWidth="5"
+                strokeLinecap="round"
+                className="drop-shadow-md"
+              />
+              <path
+                d="M160 600 C350 400 450 300 900 220"
+                stroke="#092347"
+                strokeWidth="8"
+                strokeLinecap="round"
+                opacity="0.85"
+              />
+            </svg>
           </div>
 
-          <div className="grid grid-cols-12 gap-3 sm:gap-6 items-center relative z-10">
-            {/* Left Content */}
-            <div className="col-span-7 sm:col-span-7 lg:col-span-8 space-y-2.5 sm:space-y-4 pr-1 sm:pr-4">
-              <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#092347] leading-[1.15] tracking-tight">
-                Learn Anytime, <br />
-                <span className="bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#b87e1a] bg-clip-text text-transparent font-serif italic">
-                  Anywhere
-                </span>
-              </h1>
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              
+              {/* LEFT COLUMN: Headlines, CTAs & Social Proof */}
+              <div className="lg:col-span-7 xl:col-span-6 space-y-6 sm:space-y-8">
+                
+                {/* Hero Title */}
+                <div className="space-y-2">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black text-[#07182e] tracking-tight leading-[1.08]"
+                  >
+                    Learn Anytime,{' '}
+                    <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] bg-clip-text text-transparent drop-shadow-xs">
+                      Anywhere
+                    </span>
+                  </motion.h1>
 
-              <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-[#557086] font-medium leading-relaxed max-w-sm sm:max-w-md">
-                Upgrade your skills with expert-led online courses
+                  {/* Subtitle */}
+                  <motion.p
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    className="text-base sm:text-lg md:text-xl text-slate-600 font-medium max-w-xl leading-relaxed pt-2"
+                  >
+                    Upgrade your skills with expert-led online courses and take your career to the next level.
+                  </motion.p>
+                </div>
+
+                {/* 3D Action Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1"
+                >
+                  <Link href="/courses">
+                    <PrimaryButton
+                      size="lg"
+                      icon={<Play className="w-4 h-4 text-white fill-white shrink-0 mr-1" />}
+                      rightIcon={<ArrowRight className="w-4 h-4 text-[#e5a93b] shrink-0" />}
+                    >
+                      Explore Courses
+                    </PrimaryButton>
+                  </Link>
+
+                  <Link href="/courses/python-for-beginners">
+                    <SecondaryButton
+                      size="lg"
+                      icon={<Play className="w-4 h-4 text-[#07182e] fill-[#07182e] shrink-0 mr-1" />}
+                    >
+                      Watch Demo
+                    </SecondaryButton>
+                  </Link>
+                </motion.div>
+
+                {/* Trust Indicators (Learner Avatars + Rating) */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="pt-2 flex flex-wrap items-center gap-4 sm:gap-6"
+                >
+                  {/* Overlapping Avatars */}
+                  <div className="flex items-center -space-x-2.5">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                      <img
+                        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                        alt="Student"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                      <img
+                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
+                        alt="Student"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                      <img
+                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
+                        alt="Student"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gradient-to-tr from-[#07182e] to-[#0e3a6c] text-[#fced9f] text-xs font-black flex items-center justify-center shadow-sm">
+                      +10K
+                    </div>
+                  </div>
+
+                  {/* Rating Stars & Text */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center text-amber-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
+                        ))}
+                      </div>
+                      <span className="font-extrabold text-sm text-[#07182e]">4.8/5</span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-500">
+                      Trusted by 10,000+ Learners
+                    </span>
+                  </div>
+                </motion.div>
+
+              </div>
+
+              {/* RIGHT COLUMN: Professional Education Visual with 3D Floating Elements */}
+              <div className="lg:col-span-5 xl:col-span-6 relative flex items-center justify-center">
+                
+                {/* Visual Backdrop Frame */}
+                <div className="relative w-full max-w-lg lg:max-w-xl aspect-[4/3] sm:aspect-square flex items-center justify-center">
+                  
+                  {/* Subtle University Building Background */}
+                  <div className="absolute inset-4 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/80 bg-slate-100">
+                    <img
+                      src="/images/saryonaya-hero-banner.jpg"
+                      alt="SARYONAYA Student Experience"
+                      className="w-full h-full object-cover object-right"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#07182e]/40 via-transparent to-transparent" />
+                  </div>
+
+                  {/* Floating 3D White Glass Trust Card (Mockup Accent) */}
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
+                    className="absolute -bottom-4 right-2 sm:right-6 bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-[0_12px_36px_rgba(9,35,71,0.18)] border border-slate-200/90 z-20 space-y-2.5 min-w-[190px]"
+                  >
+                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[#07182e]">
+                      <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Expert Mentors</span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[#07182e]">
+                      <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Live Classes</span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[#07182e]">
+                      <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Certificates</span>
+                    </div>
+                  </motion.div>
+
+                  {/* Floating 3D Graduation Cap element */}
+                  <motion.div
+                    animate={{ y: [0, -10, 0], rotate: [0, 2, 0] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut', delay: 0.5 }}
+                    className="absolute -top-4 right-6 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#07182e] to-[#0f3460] shadow-xl border border-white/20 flex items-center justify-center z-20"
+                  >
+                    <GraduationCap className="w-8 h-8 text-[#e5a93b]" />
+                  </motion.div>
+
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* SEARCH & FILTER BAR (Matching Mockup) */}
+        {/* ========================================================================= */}
+        <section className="relative -mt-6 z-20">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            <div className="flex items-center gap-3 max-w-4xl mx-auto">
+              
+              {/* Large Rounded White Search Bar */}
+              <div className="flex-1 flex items-center gap-3 px-5 sm:px-6 py-3.5 sm:py-4 bg-white rounded-full border border-slate-200/90 shadow-[0_6px_24px_rgba(9,35,71,0.07)] focus-within:border-[#dfa32b] focus-within:shadow-[0_8px_30px_rgba(9,35,71,0.12)] transition-all">
+                <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search for courses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-transparent text-sm sm:text-base text-[#07182e] placeholder-slate-400 outline-none w-full font-medium"
+                />
+              </div>
+
+              {/* 3D Filter Button */}
+              <button
+                onClick={() => setFilterActive(!filterActive)}
+                className="px-5 sm:px-7 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#123963] text-white font-extrabold text-sm sm:text-base border-t border-white/20 border-b-[2px] border-b-[#030b14] shadow-[0_4px_14px_rgba(7,24,46,0.3)] hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer shrink-0"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-[#e5a93b]" />
+                <span>Filter</span>
+              </button>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business) */}
+        {/* ========================================================================= */}
+        <section className="pt-10 sm:pt-14 pb-10">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {categories.map((cat) => (
+                <CategoryCard key={cat.id} category={cat} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* POPULAR COURSES SECTION (Matching Mockup) */}
+        {/* ========================================================================= */}
+        <section className="py-10 sm:py-12">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            
+            {/* Header row: Yellow bar | Popular Courses  and  View All Courses -> */}
+            <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 sm:w-2 h-7 sm:h-8 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
+                  Popular Courses
+                </h2>
+              </div>
+
+              <Link
+                href="/courses"
+                className="text-xs sm:text-sm font-extrabold text-[#092347] hover:text-[#b87e1a] flex items-center gap-1 transition-colors group"
+              >
+                <span>View All Courses</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            {/* 4 Popular Course Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+              {popularCourses.map((c) => (
+                <CourseCard key={c.id} course={c} />
+              ))}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* BOTTOM TRUST STATS BAR (Matching Mockup exactly) */}
+        {/* ========================================================================= */}
+        <section className="py-6 sm:py-8 bg-white border-y border-slate-200/80 shadow-[0_2px_15px_rgba(9,35,71,0.03)] my-8">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center justify-center text-center">
+              
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xl sm:text-2xl">🏆</span>
+                <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
+                  Trusted by 10,000+ Students
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xl sm:text-2xl">📹</span>
+                <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
+                  500+ Premium Courses
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xl sm:text-2xl">🎓</span>
+                <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
+                  Get Certified
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xl sm:text-2xl">🎧</span>
+                <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
+                  24/7 Support
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* FEATURED / TRENDING ENGINEERING COURSES */}
+        {/* ========================================================================= */}
+        <section className="py-12 sm:py-16">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            
+            <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 sm:w-2 h-7 sm:h-8 rounded-full bg-gradient-to-b from-[#092347] to-[#1e40af]" />
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
+                  Featured Engineering Programs
+                </h2>
+              </div>
+
+              <Link
+                href="/courses"
+                className="text-xs sm:text-sm font-extrabold text-[#092347] hover:text-[#b87e1a] flex items-center gap-1 transition-colors group"
+              >
+                <span>Browse All</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+              {featuredCourses.map((c) => (
+                <CourseCard key={c.id} course={c} />
+              ))}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* WHY CHOOSE SARYONAYA — 3D Cards */}
+        {/* ========================================================================= */}
+        <section className="py-14 sm:py-20 bg-white border-y border-slate-200/80">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            
+            <div className="text-center max-w-2xl mx-auto space-y-3 mb-12 sm:mb-16">
+              <span className="text-xs font-black text-[#b87e1a] uppercase tracking-wider px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300/40">
+                The SARYONAYA Advantage
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#07182e] tracking-tight">
+                Why Top Engineering Students Choose Us
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600">
+                Bridging academic university curriculum with practical production engineering skills.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              
+              <div className="bg-[#f8fafc] rounded-3xl p-6 sm:p-8 border border-slate-200/90 border-b-[3px] border-b-slate-300 shadow-sm hover:shadow-xl transition-all space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#dfa32b] to-[#f5cb68] text-[#07182e] flex items-center justify-center font-black shadow-md">
+                  <Award className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-[#07182e]">
+                  100% Verifiable Credentials
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Every completed course issues an ISO-compliant, cryptographic certificate with public shareable link for LinkedIn and resume verification.
+                </p>
+              </div>
+
+              <div className="bg-[#f8fafc] rounded-3xl p-6 sm:p-8 border border-slate-200/90 border-b-[3px] border-b-slate-300 shadow-sm hover:shadow-xl transition-all space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#07182e] to-[#123963] text-white flex items-center justify-center font-black shadow-md">
+                  <Video className="w-7 h-7 text-[#e5a93b]" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-[#07182e]">
+                  Ultra-Fast 4K Streaming
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Watch buffer-free video lectures on any device with variable speed controls, chapter indexing, interactive quizzes, and downloadable PDF notes.
+                </p>
+              </div>
+
+              <div className="bg-[#f8fafc] rounded-3xl p-6 sm:p-8 border border-slate-200/90 border-b-[3px] border-b-slate-300 shadow-sm hover:shadow-xl transition-all space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-black shadow-md">
+                  <Users className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-[#07182e]">
+                  Industry Mentors & Q&A
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Learn directly from verified university professors and senior engineers currently working at Google, Microsoft, Qualcomm, and TCS.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* SUBSCRIPTION PROMOTION (3D Luxury Gold Banner) */}
+        {/* ========================================================================= */}
+        <section className="py-14 sm:py-20 relative overflow-hidden bg-gradient-to-r from-[#051325] via-[#092347] to-[#051325] text-white">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#dfa32b]/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-[#dfa32b]/60 text-xs font-black text-[#fced9f]">
+                <Crown className="w-4 h-4 text-[#e5a93b] fill-[#e5a93b]" />
+                <span>ALL-ACCESS MEMBERSHIP</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+                Unlock Unlimited Learning with{' '}
+                <span className="bg-gradient-to-r from-[#fced9f] via-[#e5a93b] to-[#dfa32b] bg-clip-text text-transparent">
+                  SARYONAYA Premium
+                </span>
+              </h2>
+
+              <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Gain full access to all 500+ courses across CSE, AI/ML, ECE, EEE, MECH, and Civil. Includes live doubt-clearing sessions, project reviews, and certificates.
               </p>
 
-              {/* Master Premium Gold Button */}
-              <div className="pt-1 sm:pt-2">
+              <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+                <Link href="/subscriptions">
+                  <button className="px-8 py-4 rounded-full font-black text-sm sm:text-base bg-gradient-to-r from-[#dfa32b] via-[#f7d685] to-[#d99222] text-[#07182e] border-t border-white/60 border-b-[3px] border-b-[#a66d0e] shadow-[0_6px_24px_rgba(223,163,43,0.45)] hover:shadow-[0_10px_32px_rgba(223,163,43,0.6)] active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                    <Crown className="w-4 h-4" />
+                    <span>Join Premium for ₹499/mo</span>
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </button>
+                </Link>
+
                 <Link href="/courses">
-                  <button className="px-5 sm:px-7 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#092347] font-black text-xs sm:text-sm border-t border-[#ffe8a3]/60 shadow-[0_4px_18px_rgba(223,163,43,0.35)] hover:shadow-[0_6px_24px_rgba(223,163,43,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 tracking-wide">
-                    <span>Explore Courses</span>
-                    <ArrowRight size={15} strokeWidth={2.5} />
+                  <button className="px-6 py-4 rounded-full font-bold text-sm sm:text-base bg-white/10 hover:bg-white/15 text-white border border-white/20 active:scale-95 transition-all">
+                    Browse All Courses
                   </button>
                 </Link>
               </div>
-            </div>
 
-            {/* Right Hero Image */}
-            <div className="col-span-5 sm:col-span-5 lg:col-span-4 flex justify-end relative">
-              <div className="relative w-28 h-28 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg border-2 border-white ring-2 ring-[#dfa32b]/30">
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=80"
-                  alt="Student with laptop and headphones"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-              </div>
             </div>
-          </div>
-
-          {/* Carousel Pagination Dots */}
-          <div className="flex items-center justify-center gap-1.5 pt-3 sm:pt-5">
-            <span
-              onClick={() => setCarouselIndex(0)}
-              className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                carouselIndex === 0 ? 'w-6 bg-[#092347]' : 'w-1.5 bg-slate-300'
-              }`}
-            />
-            <span
-              onClick={() => setCarouselIndex(1)}
-              className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                carouselIndex === 1 ? 'w-6 bg-[#092347]' : 'w-1.5 bg-slate-300'
-              }`}
-            />
-            <span
-              onClick={() => setCarouselIndex(2)}
-              className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                carouselIndex === 2 ? 'w-6 bg-[#092347]' : 'w-1.5 bg-slate-300'
-              }`}
-            />
           </div>
         </section>
 
-        {/* Floating Search Bar */}
-        <div className="relative">
-          <div className="flex items-center justify-between px-4 py-3 sm:py-3.5 bg-white rounded-2xl shadow-[0_4px_20px_rgba(9,35,71,0.05)] border border-slate-100 focus-within:border-[#dfa32b] focus-within:ring-2 focus-within:ring-[#dfa32b]/20 transition-all">
-            <div className="flex items-center gap-3 flex-1">
-              <Search size={19} className="text-[#557086]" strokeWidth={2.2} />
-              <input
-                type="text"
-                placeholder="Search for courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-xs sm:text-sm text-[#092347] placeholder-[#557086]/70 outline-none font-medium"
-              />
+        {/* ========================================================================= */}
+        {/* STUDENT TESTIMONIALS */}
+        {/* ========================================================================= */}
+        <section className="py-14 sm:py-20">
+          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            
+            <div className="text-center max-w-2xl mx-auto space-y-3 mb-12 sm:mb-16">
+              <span className="text-xs font-black text-[#b87e1a] uppercase tracking-wider px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300/40">
+                Student Success Stories
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#07182e] tracking-tight">
+                Trusted by Students from Top Colleges
+              </h2>
             </div>
 
-            <Link
-              href="/courses"
-              className="p-2 sm:p-2.5 rounded-xl hover:bg-slate-50 text-[#092347] transition-colors ml-2"
-              aria-label="Filter courses"
-            >
-              <SlidersHorizontal size={19} strokeWidth={2.2} />
-            </Link>
-          </div>
-        </div>
-
-        {/* 4 Category Cards */}
-        <div className="grid grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
-          {categories.map((cat) => {
-            const isSelected = activeCategory === cat.name
-            return (
-              <button
-                key={cat.name}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`py-3 sm:py-5 px-2 sm:px-4 rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-amber-50/70 border-[#dfa32b] shadow-md ring-1 ring-[#dfa32b]/40 scale-[1.02]'
-                    : 'bg-white border-slate-100 hover:border-slate-200 shadow-[0_4px_20px_rgba(9,35,71,0.04)] hover:shadow-md hover:-translate-y-0.5'
-                }`}
-              >
-                <div
-                  className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${
-                    isSelected ? 'text-[#b87e1a]' : 'text-[#092347]'
-                  }`}
-                >
-                  {cat.name === 'Programming' && (
-                    <span className="font-mono text-sm sm:text-xl font-bold tracking-tighter">&lt;/&gt;</span>
-                  )}
-                  {cat.name === 'Data Science' && (
-                    <div className="flex items-end gap-0.5 h-5 sm:h-6">
-                      <span className="w-1 sm:w-1.5 h-2.5 bg-current rounded-xs" />
-                      <span className="w-1 sm:w-1.5 h-4 bg-current rounded-xs" />
-                      <span className="w-1 sm:w-1.5 h-5 sm:h-6 bg-current rounded-xs" />
-                    </div>
-                  )}
-                  {cat.name === 'Design' && <Palette size={20} className="sm:w-6 sm:h-6" strokeWidth={2.2} />}
-                  {cat.name === 'Business' && <Briefcase size={20} className="sm:w-6 sm:h-6" strokeWidth={2.2} />}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 border-b-[3px] border-b-slate-300 shadow-sm space-y-4">
+                <div className="flex items-center gap-1 text-amber-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-500" />
+                  ))}
                 </div>
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+                  &ldquo;SARYONAYA&apos;s Python and Data Science roadmap helped me secure a high-package campus placement at Infosys. The video lessons and downloadable lecture notes are world class!&rdquo;
+                </p>
+                <div className="pt-2 flex items-center gap-3 border-t border-slate-100">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden font-bold text-xs flex items-center justify-center">
+                    AP
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-[#07182e]">Aarav Patel</h4>
+                    <p className="text-[11px] text-slate-500">CSE Student • Anna University</p>
+                  </div>
+                </div>
+              </div>
 
-                <span
-                  className={`text-[10px] sm:text-xs md:text-sm font-bold tracking-tight text-center leading-tight ${
-                    isSelected ? 'text-[#092347]' : 'text-[#557086]'
-                  }`}
-                >
-                  {cat.name}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 border-b-[3px] border-b-slate-300 shadow-sm space-y-4">
+                <div className="flex items-center gap-1 text-amber-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-500" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+                  &ldquo;The Embedded Systems and IoT curriculum is unmatched. Finding practical ARM Cortex hardware tutorials online was impossible until I found SARYONAYA.&rdquo;
+                </p>
+                <div className="pt-2 flex items-center gap-3 border-t border-slate-100">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden font-bold text-xs flex items-center justify-center">
+                    SN
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-[#07182e]">Sneha Narayanan</h4>
+                    <p className="text-[11px] text-slate-500">ECE Graduate • NIT Trichy</p>
+                  </div>
+                </div>
+              </div>
 
-        {/* Popular Courses Section */}
-        <div className="space-y-3.5 sm:space-y-4 pt-1">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-2xl font-black text-[#092347] tracking-tight">
-              Popular Courses
-            </h2>
-            <Link
-              href="/courses"
-              className="text-xs sm:text-sm font-bold text-[#b87e1a] hover:text-[#916110] transition-colors flex items-center gap-1"
-            >
-              <span>View All</span>
-              <ArrowRight size={14} strokeWidth={2.5} />
-            </Link>
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 border-b-[3px] border-b-slate-300 shadow-sm space-y-4">
+                <div className="flex items-center gap-1 text-amber-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-500" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+                  &ldquo;The certificates are verified directly by recruiters. The progress tracking dashboard kept me consistent every single day of my semester exam prep.&rdquo;
+                </p>
+                <div className="pt-2 flex items-center gap-3 border-t border-slate-100">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden font-bold text-xs flex items-center justify-center">
+                    RV
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-[#07182e]">Rahul Verma</h4>
+                    <p className="text-[11px] text-slate-500">AI/ML Major • IIT Madras</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
+        </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {popularCourses.map((course) => (
-              <div
-                key={course.id}
-                className="bg-white rounded-2xl sm:rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(9,35,71,0.05)] hover:shadow-lg transition-all overflow-hidden flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Card Header Media */}
+        {/* ========================================================================= */}
+        {/* FREQUENTLY ASKED QUESTIONS */}
+        {/* ========================================================================= */}
+        <section className="py-14 sm:py-20 bg-white border-t border-slate-200/80">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div className="text-center space-y-3 mb-12">
+              <span className="text-xs font-black text-[#b87e1a] uppercase tracking-wider px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300/40">
+                Got Questions?
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#07182e] tracking-tight">
+                Frequently Asked Questions
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, index) => {
+                const isOpen = faqOpen === index
+                return (
                   <div
-                    className={`relative h-36 sm:h-40 bg-gradient-to-tr ${course.thumbnailBg} p-3.5 flex items-center justify-center overflow-hidden`}
+                    key={index}
+                    className="border border-slate-200 rounded-2xl overflow-hidden transition-all"
                   >
-                    <div className="absolute top-3 left-3 bg-[#dfa32b] text-[#092347] px-2.5 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-sm z-10">
-                      <Play size={10} className="fill-[#092347]" />
-                      <span>
-                        {course.rating} ({course.reviews})
-                      </span>
-                    </div>
-
-                    {/* Graphic Artwork */}
-                    {course.imageType === 'python' ? (
-                      <div className="flex items-center justify-between w-full px-5">
-                        <div className="w-20 h-14 bg-[#051325] border border-blue-400/40 rounded-md p-1.5 shadow-md flex flex-col justify-between">
-                          <div className="flex gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          </div>
-                          <div className="space-y-0.5 font-mono text-[6px] text-blue-300">
-                            <p className="text-emerald-400">def code():</p>
-                            <p className="pl-1 text-amber-300">return True</p>
-                          </div>
-                        </div>
-                        <div className="w-12 h-12 relative flex items-center justify-center">
-                          <div className="w-8 h-8 bg-blue-500 rounded-lg rotate-12 flex items-center justify-center shadow-lg">
-                            <div className="w-8 h-8 bg-amber-400 rounded-lg -rotate-12 opacity-90" />
-                          </div>
-                        </div>
-                      </div>
-                    ) : course.imageType === 'datascience' ? (
-                      <div className="flex items-end justify-center gap-2 h-20 w-full px-6">
-                        <div className="w-3.5 bg-blue-500 rounded-t h-[40%]" />
-                        <div className="w-3.5 bg-blue-400 rounded-t h-[65%]" />
-                        <div className="w-3.5 bg-cyan-400 rounded-t h-[50%]" />
-                        <div className="w-3.5 bg-[#dfa32b] rounded-t h-[90%]" />
-                        <div className="w-3.5 bg-[#f5cb68] rounded-t h-[75%]" />
-                      </div>
-                    ) : (
-                      <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#dfa32b]">
-                        <BookOpen size={28} />
+                    <button
+                      onClick={() => setFaqOpen(isOpen ? null : index)}
+                      className="w-full text-left p-5 sm:p-6 bg-slate-50/60 hover:bg-slate-50 flex items-center justify-between gap-4 font-extrabold text-sm sm:text-base text-[#07182e]"
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown
+                        className={`w-5 h-5 text-slate-500 shrink-0 transition-transform ${
+                          isOpen ? 'rotate-180 text-[#dfa32b]' : ''
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="p-5 sm:p-6 pt-0 bg-slate-50/60 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                        {faq.a}
                       </div>
                     )}
                   </div>
-
-                  {/* Card Body */}
-                  <div className="p-4 sm:p-5 space-y-2">
-                    <h3 className="font-black text-sm sm:text-base text-[#092347] group-hover:text-[#b87e1a] transition-colors leading-snug line-clamp-1">
-                      {course.title}
-                    </h3>
-                    <p className="text-[11px] sm:text-xs text-[#557086] font-medium line-clamp-1">
-                      {course.subtitle}
-                    </p>
-
-                    <div className="flex items-center gap-3 text-[11px] text-[#8294a5] font-semibold pt-1">
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} className="text-[#8294a5]" />
-                        {course.duration}
-                      </span>
-                      <span>•</span>
-                      <span>{course.level}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Row */}
-                <div className="p-4 sm:p-5 pt-0 flex items-center justify-between gap-2 border-t border-slate-100/80 mt-1">
-                  <span className="text-base sm:text-lg font-black text-[#092347]">
-                    {course.price}
-                  </span>
-
-                  <Link href={`/courses/${course.slug}`}>
-                    <button className="px-4 py-2 rounded-full text-xs font-black bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#092347] border-t border-[#ffe8a3]/60 shadow-[0_3px_12px_rgba(223,163,43,0.3)] hover:shadow-[0_4px_18px_rgba(223,163,43,0.45)] hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 transition-all tracking-wide">
-                      <Play size={10} className="fill-[#092347]" />
-                      <span>Enroll Now</span>
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Premium Banner: "Get Unlimited Access" */}
-        <section className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-r from-[#07182e] via-[#092347] to-[#12365e] p-5 sm:p-7 lg:p-9 text-white overflow-hidden shadow-xl border border-[#1b3d64]">
-          <div className="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-20">
-            <div className="w-64 h-64 border-[4px] border-[#dfa32b] rounded-full -top-12 -right-12 absolute" />
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div className="flex items-center gap-3.5 sm:gap-5">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#ffd56b]/20 to-transparent border border-[#ffd56b]/40 flex items-center justify-center shrink-0 shadow-inner">
-                <Crown size={26} className="text-[#ffd56b]" />
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-base sm:text-xl font-black text-white tracking-tight">
-                  Get Unlimited Access
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-300 font-medium">
-                  Subscribe and unlock all engineering courses, code repositories & certificates
-                </p>
-              </div>
+                )
+              })}
             </div>
 
-            <Link href="/pricing" className="shrink-0 pt-1 sm:pt-0">
-              <button className="w-full sm:w-auto px-6 sm:px-7 py-3 rounded-full text-xs sm:text-sm font-black bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#092347] border-t border-[#ffe8a3]/60 shadow-[0_4px_18px_rgba(223,163,43,0.35)] hover:shadow-[0_6px_24px_rgba(223,163,43,0.5)] hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 transition-all tracking-wide">
-                <span>Go Premium</span>
-                <ArrowRight size={15} strokeWidth={2.5} />
-              </button>
-            </Link>
           </div>
         </section>
-      </div>
 
+      </main>
+
+      {/* Global Footer */}
+      <Footer />
+
+      {/* Mobile Bottom Navigation Bar */}
       <BottomNav />
+
     </div>
   )
 }
