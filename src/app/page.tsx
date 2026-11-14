@@ -19,7 +19,7 @@ import {
   Sparkles,
   BookOpen,
 } from 'lucide-react'
-import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
 
 export default function HomePage() {
@@ -100,72 +100,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f6f9fd] text-[#092347] pb-24 md:pb-12 font-sans antialiased selection:bg-[#dfa32b]/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-6 space-y-5 sm:space-y-6 md:space-y-8">
-        
-        {/* Top App Header with Official SARVONAYA Logo */}
-        <header className="flex items-center justify-between py-2 border-b border-transparent md:border-slate-100 md:pb-4">
-          <div className="flex items-center gap-6">
-            <SaryonayaLogo size="md" />
+      {/* Master Navbar with Login/Logout & Official Logo */}
+      <Navbar />
 
-            <nav className="hidden lg:flex items-center gap-1.5 ml-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="px-3.5 py-1.5 rounded-full text-xs font-bold text-[#092347]/80 hover:text-[#092347] hover:bg-white transition-all tracking-wide"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Right Header Controls */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Desktop Search Bar */}
-            <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-white border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] shadow-sm transition-all">
-              <Search size={15} className="text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search Python, VLSI, AI..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-xs text-[#092347] placeholder-slate-400 outline-none w-32 xl:w-48 font-medium"
-              />
-            </div>
-
-            {/* Go Premium Golden Pill Button */}
-            <Link
-              href="/pricing"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0f3460] text-[#f5cb68] border border-[#dfa32b]/50 text-xs font-black shadow-[0_4px_16px_rgba(7,24,46,0.25)] hover:shadow-[0_6px_22px_rgba(223,163,43,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all tracking-wide"
-            >
-              <Crown size={14} className="text-[#f5cb68]" />
-              <span>Go Premium</span>
-            </Link>
-
-            {/* Notification Bell */}
-            <Link
-              href="/student/progress"
-              className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#092347] hover:bg-slate-50 transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell size={19} strokeWidth={2.2} />
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
-            </Link>
-
-            {/* Student Avatar */}
-            <Link href="/student/profile" className="relative group">
-              <div className="w-10 h-10 rounded-full ring-2 ring-[#dfa32b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform bg-white">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
-                  alt="Student Avatar"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-            </Link>
-          </div>
-        </header>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 space-y-6 sm:space-y-8">
         {/* Hero Banner Section */}
         <section className="relative rounded-[28px] sm:rounded-[32px] bg-gradient-to-r from-white via-white to-[#f0f6ff] border border-slate-100 shadow-[0_8px_30px_rgba(9,35,71,0.06)] overflow-hidden p-5 sm:p-8 lg:p-10">
           {/* Decorative Navy & Gold Waves Background */}

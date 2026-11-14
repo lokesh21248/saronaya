@@ -12,13 +12,11 @@ import {
   CheckCircle2,
   ChevronRight,
   Flame,
-  Bell,
   Play,
   ArrowRight,
   ShieldCheck,
-  Crown,
 } from 'lucide-react'
-import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
 
 export default function ProgressPage() {
@@ -59,74 +57,11 @@ export default function ProgressPage() {
     },
   ]
 
-  const navLinks = [
-    { label: 'Explore', href: '/courses' },
-    { label: 'Subscriptions', href: '/pricing' },
-    { label: 'My Learning', href: '/student/dashboard' },
-    { label: 'My Courses', href: '/student/courses' },
-    { label: 'Progress', href: '/student/progress' },
-    { label: 'Certificates', href: '/student/certificates' },
-  ]
-
   return (
-    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#e5a93b]/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-6 space-y-5 sm:space-y-6 md:space-y-8">
-        
-        {/* Header */}
-        <header className="flex items-center justify-between py-2 border-b border-transparent md:border-slate-100 md:pb-4">
-          <div className="flex items-center gap-6">
-            <SaryonayaLogo size="md" />
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#dfa32b]/30">
+      <Navbar />
 
-            <nav className="hidden lg:flex items-center gap-1.5 ml-4">
-              {navLinks.map((link) => {
-                const isActive = link.href === '/student/progress'
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-                      isActive
-                        ? 'bg-amber-50 text-[#c58a23] border border-[#e5a93b]/40'
-                        : 'text-[#102b46]/80 hover:text-[#102b46] hover:bg-white'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                )
-              })}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <Link
-              href="/pricing"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#0e2742] to-[#123963] text-amber-300 text-xs font-bold shadow-sm"
-            >
-              <Crown size={13} className="text-[#f5c465]" />
-              <span>Go Premium</span>
-            </Link>
-
-            <Link
-              href="/student/progress"
-              className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell size={19} strokeWidth={2.2} />
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
-            </Link>
-
-            <Link href="/student/profile" className="relative group">
-              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
-                  alt="Student Avatar"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-            </Link>
-          </div>
-        </header>
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 md:py-8 space-y-5 sm:space-y-6 md:space-y-8">
         {/* Learning Journey Overview Card */}
         <div className="bg-white rounded-2xl sm:rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -239,7 +174,7 @@ export default function ProgressPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <BottomNav />
     </div>

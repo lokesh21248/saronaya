@@ -9,10 +9,10 @@ import {
   ShieldCheck,
   Printer,
   ExternalLink,
-  Bell,
   Play,
   Share2,
 } from 'lucide-react'
+import { Navbar } from '@/components/layout/Navbar'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { SAMPLE_CERTIFICATES } from '@/lib/data/lms-data'
@@ -25,34 +25,12 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 font-sans antialiased selection:bg-[#e5a93b]/30">
-      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-5xl px-4 sm:px-6 pt-3 space-y-5">
-        {/* Header */}
-        <header className="flex items-center justify-between py-2 print:hidden">
-          <SaryonayaLogo size="md" />
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 font-sans antialiased selection:bg-[#dfa32b]/30">
+      <div className="print:hidden">
+        <Navbar />
+      </div>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href="/student/progress"
-              className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell size={20} strokeWidth={2.2} />
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
-            </Link>
-
-            <Link href="/student/profile" className="relative group">
-              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
-                  alt="Student Avatar"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-            </Link>
-          </div>
-        </header>
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 md:py-8 space-y-5">
         {/* Title banner */}
         <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] print:hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -190,7 +168,7 @@ export default function CertificatesPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <div className="print:hidden">
         <BottomNav />

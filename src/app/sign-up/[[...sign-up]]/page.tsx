@@ -27,14 +27,14 @@ export default function SignUpPage() {
 
         {/* Brand Banner */}
         <div className="text-center space-y-2 pt-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold">
-            <Sparkles size={14} />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 border border-[#dfa32b]/40 text-[#b37a18] text-xs font-bold shadow-xs">
+            <Sparkles size={14} className="text-[#dfa32b]" />
             <span>Create Student Account</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#102b46]">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#092347] tracking-tight">
             Start Your Learning Journey
           </h1>
-          <p className="text-xs sm:text-sm text-[#5a7184] font-medium max-w-sm mx-auto">
+          <p className="text-xs sm:text-sm text-[#475569] font-medium max-w-sm mx-auto">
             Get instant access to university branch-mapped courses, quizzes, and academic certifications.
           </p>
         </div>
@@ -48,20 +48,20 @@ export default function SignUpPage() {
             fallbackRedirectUrl="/onboarding"
             appearance={{
               variables: {
-                colorPrimary: '#e5a93b',
+                colorPrimary: '#dfa32b',
                 colorBackground: '#ffffff',
                 borderRadius: '1.25rem',
               },
               elements: {
                 rootBox: 'w-full max-w-md',
-                card: 'shadow-[0_8px_30px_rgba(16,43,70,0.06)] border border-slate-100 rounded-[28px] p-6 sm:p-8',
-                headerTitle: 'text-[#102b46] font-black text-xl',
-                headerSubtitle: 'text-[#5a7184] text-xs font-medium',
+                card: 'shadow-[0_12px_40px_rgba(9,35,71,0.08)] border border-slate-200/80 rounded-[28px] p-6 sm:p-8',
+                headerTitle: 'text-[#092347] font-black text-xl tracking-tight',
+                headerSubtitle: 'text-[#64748b] text-xs font-medium',
                 formButtonPrimary:
-                  'bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] font-black hover:brightness-105 shadow-sm text-xs py-3 rounded-full',
+                  'bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#dfa32b] text-[#07182e] font-black hover:brightness-105 shadow-[0_4px_14px_rgba(223,163,43,0.3)] text-xs py-3 rounded-full uppercase tracking-wider',
                 formFieldInput:
-                  'border-slate-200 focus:border-[#e5a93b] focus:ring-2 focus:ring-[#e5a93b]/20 rounded-xl text-xs sm:text-sm font-medium',
-                footerActionLink: 'text-[#c58a23] font-bold hover:underline',
+                  'border-slate-200 focus:border-[#dfa32b] focus:ring-2 focus:ring-[#dfa32b]/20 rounded-xl text-xs sm:text-sm font-medium',
+                footerActionLink: 'text-[#dfa32b] font-bold hover:underline',
                 dividerLine: 'bg-slate-100',
                 dividerText: 'text-slate-400 text-xs font-medium',
               },
@@ -71,18 +71,18 @@ export default function SignUpPage() {
 
         {/* Guest Explorer Option */}
         <div className="max-w-md mx-auto text-center space-y-3 pt-2">
-          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-[0_4px_20px_rgba(9,35,71,0.04)] flex items-center justify-between gap-3">
             <div className="text-left">
-              <span className="text-xs font-bold text-[#102b46] block">
+              <span className="text-xs font-bold text-[#092347] block">
                 Just exploring?
               </span>
-              <span className="text-[11px] text-[#5a7184]">
+              <span className="text-[11px] text-[#64748b]">
                 Browse all courses and curriculums before signing up.
               </span>
             </div>
 
             <Link href="/courses">
-              <button className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-[#102b46] hover:bg-slate-200 transition-colors flex items-center gap-1 shrink-0">
+              <button className="px-4 py-2 rounded-full text-xs font-black bg-gradient-to-r from-[#dfa32b] to-[#f5cb68] text-[#07182e] hover:brightness-105 shadow-sm flex items-center gap-1 shrink-0 transition-transform active:scale-95">
                 <span>Browse</span>
                 <ArrowRight size={13} />
               </button>
