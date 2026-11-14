@@ -460,3 +460,4 @@ export default function CourseBuilderPage() {
     </div>
   )
 }
+

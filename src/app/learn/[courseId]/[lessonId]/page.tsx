@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { MuxVideoPlayer } from '@/components/video/MuxVideoPlayer'
 import { COURSES_DATA, CourseData, LessonData } from '@/lib/data/lms-data'
 
 interface LearnPageProps {
@@ -154,33 +155,17 @@ export default function LearnPage({ params }: LearnPageProps) {
         {/* Left: Video Player & Tabs */}
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Video Player Box */}
-          <div className="relative bg-black aspect-video w-full max-h-[68vh] flex items-center justify-center group overflow-hidden">
-            <video
-              ref={videoRef}
-              src={activeLesson.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}
-              controls
-              className="w-full h-full object-contain"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
+          <div className="relative bg-black aspect-video w-full max-h-[68vh] flex items-center justify-center overflow-hidden">
+            <MuxVideoPlayer
+              playbackId={activeLesson.muxPlaybackId}
+              videoUrl={activeLesson.videoUrl}
+              title={activeLesson.title}
+              onEnded={() => {
+                if (!completedLessons.includes(activeLesson.id)) {
+                  setCompletedLessons((prev) => [...prev, activeLesson.id])
+                }
+              }}
             />
-
-            {/* Custom Overlay Speed Badge for easy access */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-navy-deep/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-line/20 text-xs font-medium">
-              <span className="text-muted mr-1">Speed:</span>
-              {[0.75, 1, 1.25, 1.5, 2].map((speed) => (
-                <button
-                  key={speed}
-                  onClick={() => handleSpeedChange(speed)}
-                  className={`px-1.5 py-0.5 rounded text-[11px] transition-colors ${
-                    playbackSpeed === speed
-                      ? 'bg-gold text-navy-deep font-bold'
-                      : 'text-muted hover:text-cream'
-                  }`}
-                >
-                  {speed}x
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Lesson Action Controls & Navigation */}

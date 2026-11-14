@@ -652,3 +652,4 @@ export const SAMPLE_CERTIFICATES = [
     grade: 'Grade A (88%)',
   },
 ]
+
