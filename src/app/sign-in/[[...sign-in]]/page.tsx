@@ -1,39 +1,97 @@
-import { SignIn } from '@clerk/nextjs'
+'use client'
+
+import React from 'react'
 import Link from 'next/link'
+import { SignIn } from '@clerk/nextjs'
+import { ArrowLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react'
+import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { BottomNav } from '@/components/layout/BottomNav'
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen bg-navy-deep flex flex-col items-center justify-center p-4">
-      <Link href="/" className="flex items-center gap-2.5 mb-8 group">
-        <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center text-navy-deep font-black text-lg shadow-lg group-hover:scale-105 transition-transform">
-          S
-        </div>
-        <div className="flex flex-col">
-          <span className="text-white font-bold text-2xl tracking-tight leading-tight">
-            SARYONAYA
-          </span>
-          <span className="text-[10px] text-gold tracking-widest uppercase font-semibold">
-            Online Learning Platform
-          </span>
-        </div>
-      </Link>
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-4 sm:px-6 pt-3 space-y-6">
+        
+        {/* Top Header */}
+        <header className="flex items-center justify-between py-2">
+          <SaryonayaLogo size="md" />
 
-      <SignIn
-        appearance={{
-          elements: {
-            rootBox: 'mx-auto w-full max-w-md',
-            card: 'bg-navy border border-line/20 shadow-2xl rounded-2xl',
-            headerTitle: 'text-white text-xl font-bold',
-            headerSubtitle: 'text-muted text-sm',
-            formButtonPrimary: 'bg-gold hover:bg-gold-light text-navy-deep font-bold transition-all',
-            formFieldInput: 'bg-navy-soft/80 border-line/20 text-cream focus:border-gold',
-            footerActionLink: 'text-gold hover:text-gold-light',
-            dividerLine: 'bg-line/20',
-            dividerText: 'text-muted text-xs',
-          },
-        }}
-      />
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#102b46] hover:bg-slate-50 shadow-sm transition-all"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Home</span>
+          </Link>
+        </header>
+
+        {/* Brand Banner */}
+        <div className="text-center space-y-2 pt-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold">
+            <Sparkles size={14} />
+            <span>Student & Faculty Portal</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#102b46]">
+            Welcome Back to SARYONAYA
+          </h1>
+          <p className="text-xs sm:text-sm text-[#5a7184] font-medium max-w-sm mx-auto">
+            Sign in to resume your engineering video lectures, quizzes, and academic certifications.
+          </p>
+        </div>
+
+        {/* Clerk Sign In Card Container */}
+        <div className="flex justify-center">
+          <SignIn
+            routing="path"
+            path="/sign-in"
+            signUpUrl="/sign-up"
+            fallbackRedirectUrl="/student/dashboard"
+            appearance={{
+              variables: {
+                colorPrimary: '#e5a93b',
+                colorBackground: '#ffffff',
+                borderRadius: '1.25rem',
+              },
+              elements: {
+                rootBox: 'w-full max-w-md',
+                card: 'shadow-[0_8px_30px_rgba(16,43,70,0.06)] border border-slate-100 rounded-[28px] p-6 sm:p-8',
+                headerTitle: 'text-[#102b46] font-black text-xl',
+                headerSubtitle: 'text-[#5a7184] text-xs font-medium',
+                formButtonPrimary:
+                  'bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] font-black hover:brightness-105 shadow-sm text-xs py-3 rounded-full',
+                formFieldInput:
+                  'border-slate-200 focus:border-[#e5a93b] focus:ring-2 focus:ring-[#e5a93b]/20 rounded-xl text-xs sm:text-sm font-medium',
+                footerActionLink: 'text-[#c58a23] font-bold hover:underline',
+                dividerLine: 'bg-slate-100',
+                dividerText: 'text-slate-400 text-xs font-medium',
+              },
+            }}
+          />
+        </div>
+
+        {/* Guest / Demo Explorer Quick Action */}
+        <div className="max-w-md mx-auto text-center space-y-3 pt-2">
+          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+            <div className="text-left">
+              <span className="text-xs font-bold text-[#102b46] block">
+                Testing or Previewing?
+              </span>
+              <span className="text-[11px] text-[#5a7184]">
+                Continue without signing in to explore all student features.
+              </span>
+            </div>
+
+            <Link href="/student/dashboard">
+              <button className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-[#102b46] hover:bg-slate-200 transition-colors flex items-center gap-1 shrink-0">
+                <span>Explore</span>
+                <ArrowRight size={13} />
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <BottomNav />
     </div>
   )
 }
-

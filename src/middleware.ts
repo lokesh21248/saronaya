@@ -1,13 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
+// Public routes accessible without forced redirect
 const isPublicRoute = createRouteMatcher([
   '/',
   '/courses(.*)',
   '/pricing(.*)',
+  '/student(.*)',
+  '/learn(.*)',
+  '/onboarding(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)',
   '/api/courses(.*)',
+  '/api/branches(.*)',
 ])
 
 export default clerkMiddleware(async (auth, request) => {
@@ -24,4 +29,3 @@ export const config = {
     '/(api|trpc)(.*)',
   ],
 }
-
