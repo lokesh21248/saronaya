@@ -26,12 +26,20 @@ export default function StudentDashboard() {
   const { user } = useUser()
   const [selectedBranch, setSelectedBranch] = useState('CSE')
   const [collegeName, setCollegeName] = useState('Engineering College')
+  const [demoStudentName, setDemoStudentName] = useState<string | null>(null)
 
   useEffect(() => {
     const savedBranch = localStorage.getItem('saryonaya_user_branch')
     const savedCollege = localStorage.getItem('saryonaya_user_college')
+    const demoSession = localStorage.getItem('saryonaya_demo_session')
     if (savedBranch) setSelectedBranch(savedBranch)
     if (savedCollege) setCollegeName(savedCollege)
+    if (demoSession) {
+      try {
+        const parsed = JSON.parse(demoSession)
+        if (parsed?.name) setDemoStudentName(parsed.name)
+      } catch (e) {}
+    }
   }, [])
 
   const currentBranchInfo =
@@ -42,7 +50,7 @@ export default function StudentDashboard() {
   )
 
   const stats = [
-    { label: 'Active Courses', value: '2', icon: BookOpen, color: 'text-[#e5a93b] bg-amber-50' },
+    { label: 'Active Courses', value: '2', icon: BookOpen, color: 'text-[#dfa32b] bg-amber-50' },
     { label: 'Completed Lessons', value: '14', icon: CheckCircle, color: 'text-emerald-600 bg-emerald-50' },
     { label: 'Hours Watched', value: '8.5h', icon: Clock, color: 'text-blue-600 bg-blue-50' },
     { label: 'Certificates', value: '1', icon: Award, color: 'text-purple-600 bg-purple-50' },
@@ -70,20 +78,20 @@ export default function StudentDashboard() {
         <div className="bg-white rounded-2xl sm:rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.06)] relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold mb-2">
-                <GraduationCap size={14} />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#dfa32b]/40 text-[#b37a18] text-xs font-bold mb-2">
+                <GraduationCap size={14} className="text-[#dfa32b]" />
                 <span>{currentBranchInfo.code} • {currentBranchInfo.name}</span>
               </div>
-              <h1 className="text-xl sm:text-3xl font-black text-[#102b46]">
-                Welcome back, {user?.firstName || 'Learner'}! 👋
+              <h1 className="text-xl sm:text-3xl font-black text-[#092347] tracking-tight">
+                Welcome back, {user?.firstName || demoStudentName || 'Learner'}! 👋
               </h1>
-              <p className="text-xs sm:text-sm text-[#5a7184] font-medium mt-1">
+              <p className="text-xs sm:text-sm text-[#557086] font-medium mt-1">
                 Enrolled at {collegeName}. You are on a 5-day learning streak!
               </p>
             </div>
 
             <Link href="/onboarding">
-              <button className="px-4 py-2 sm:py-2.5 rounded-full border border-slate-200 text-xs font-bold text-[#102b46] hover:bg-slate-50 transition-all">
+              <button className="px-4 py-2 sm:py-2.5 rounded-full border border-slate-200 text-xs font-bold text-[#092347] hover:bg-slate-50 transition-all cursor-pointer">
                 Change Branch
               </button>
             </Link>

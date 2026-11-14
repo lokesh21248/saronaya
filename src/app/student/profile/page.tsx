@@ -70,7 +70,12 @@ export default function StudentProfilePage() {
   }
 
   const handleSignOut = async () => {
-    await signOut({ redirectUrl: '/' })
+    try {
+      await signOut({ redirectUrl: '/' })
+    } catch (e) {}
+    try {
+      localStorage.removeItem('saryonaya_demo_session')
+    } catch (e) {}
     router.push('/')
   }
 

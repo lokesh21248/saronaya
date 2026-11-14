@@ -2,96 +2,37 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { SignIn } from '@clerk/nextjs'
-import { ArrowLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react'
-import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
-import { BottomNav } from '@/components/layout/BottomNav'
+import { ArrowLeft, Sparkles, GraduationCap } from 'lucide-react'
+import { AuthCard } from '@/components/auth/AuthCard'
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#e5a93b]/30">
-      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-4 sm:px-6 pt-3 space-y-6">
-        
-        {/* Top Header */}
-        <header className="flex items-center justify-between py-2">
-          <SaryonayaLogo size="md" />
+    <div className="min-h-screen bg-gradient-to-b from-[#f5f8fc] via-white to-[#f0f4f9] text-[#092347] flex flex-col justify-between p-4 sm:p-6 md:p-8 font-sans antialiased selection:bg-[#dfa32b]/30">
+      {/* Top Header */}
+      <header className="max-w-md w-full mx-auto flex items-center justify-between pb-3 sm:pb-5">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-bold text-[#557086] hover:text-[#092347] transition-colors py-1.5 px-3 rounded-full hover:bg-white"
+        >
+          <ArrowLeft size={14} />
+          <span>Back to Home</span>
+        </Link>
 
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#102b46] hover:bg-slate-50 shadow-sm transition-all"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to Home</span>
-          </Link>
-        </header>
-
-        {/* Brand Banner */}
-        <div className="text-center space-y-2 pt-2">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 border border-[#dfa32b]/40 text-[#b37a18] text-xs font-bold shadow-xs">
-            <Sparkles size={14} className="text-[#dfa32b]" />
-            <span>Student & Faculty Portal</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#092347] tracking-tight">
-            Welcome Back to SARYONAYA
-          </h1>
-          <p className="text-xs sm:text-sm text-[#475569] font-medium max-w-sm mx-auto">
-            Sign in to resume your engineering video lectures, quizzes, and academic certifications.
-          </p>
+        <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#b37a18]">
+          <GraduationCap size={15} />
+          <span>Student Portal</span>
         </div>
+      </header>
 
-        {/* Clerk Sign In Card Container */}
-        <div className="flex justify-center">
-          <SignIn
-            routing="path"
-            path="/sign-in"
-            signUpUrl="/sign-up"
-            fallbackRedirectUrl="/student/dashboard"
-            appearance={{
-              variables: {
-                colorPrimary: '#dfa32b',
-                colorBackground: '#ffffff',
-                borderRadius: '1.25rem',
-              },
-              elements: {
-                rootBox: 'w-full max-w-md',
-                card: 'shadow-[0_12px_40px_rgba(9,35,71,0.08)] border border-slate-200/80 rounded-[28px] p-6 sm:p-8',
-                headerTitle: 'text-[#092347] font-black text-xl tracking-tight',
-                headerSubtitle: 'text-[#64748b] text-xs font-medium',
-                formButtonPrimary:
-                  'bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#dfa32b] text-[#07182e] font-black hover:brightness-105 shadow-[0_4px_14px_rgba(223,163,43,0.3)] text-xs py-3 rounded-full uppercase tracking-wider',
-                formFieldInput:
-                  'border-slate-200 focus:border-[#dfa32b] focus:ring-2 focus:ring-[#dfa32b]/20 rounded-xl text-xs sm:text-sm font-medium',
-                footerActionLink: 'text-[#dfa32b] font-bold hover:underline',
-                dividerLine: 'bg-slate-100',
-                dividerText: 'text-slate-400 text-xs font-medium',
-              },
-            }}
-          />
-        </div>
+      {/* Main Center Auth Container */}
+      <main className="flex-1 flex items-center justify-center py-2 sm:py-6">
+        <AuthCard initialMode="sign-in" />
+      </main>
 
-        {/* Guest / Demo Explorer Quick Action */}
-        <div className="max-w-md mx-auto text-center space-y-3 pt-2">
-          <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-[0_4px_20px_rgba(9,35,71,0.04)] flex items-center justify-between gap-3">
-            <div className="text-left">
-              <span className="text-xs font-bold text-[#092347] block">
-                Testing or Previewing?
-              </span>
-              <span className="text-[11px] text-[#64748b]">
-                Continue without signing in to explore all student features.
-              </span>
-            </div>
-
-            <Link href="/student/dashboard">
-              <button className="px-4 py-2 rounded-full text-xs font-black bg-gradient-to-r from-[#dfa32b] to-[#f5cb68] text-[#07182e] hover:brightness-105 shadow-sm flex items-center gap-1 shrink-0 transition-transform active:scale-95">
-                <span>Explore</span>
-                <ArrowRight size={13} />
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <BottomNav />
+      {/* Subtle Footer */}
+      <footer className="max-w-md w-full mx-auto text-center pt-4 pb-2 text-[11px] text-[#557086]/80 font-medium">
+        © {new Date().getFullYear()} SARVONAYA Online Learning Platform. All rights reserved.
+      </footer>
     </div>
   )
 }
