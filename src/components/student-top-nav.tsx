@@ -77,19 +77,19 @@ export function StudentTopNav({ onMenuClick, isMenuOpen }: StudentTopNavProps) {
         {/* Right side items */}
         <div className="flex items-center gap-3">
           {/* Desktop Search Bar */}
-          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-[#f5f8fc] border border-slate-200/80 rounded-full focus-within:border-[#e5a93b] focus-within:bg-white transition-all">
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white transition-all">
             <Search size={15} className="text-slate-400" />
             <input
               type="text"
               placeholder="Search Python, VLSI, AI..."
-              className="bg-transparent text-xs text-[#102b46] placeholder-slate-400 outline-none w-36 lg:w-48 font-medium"
+              className="bg-transparent text-xs text-[#092347] placeholder-slate-400 outline-none w-36 lg:w-48 font-medium"
             />
           </div>
 
           {/* Notification Bell */}
           <Link
             href="/student/progress"
-            className="relative p-2 rounded-full text-[#102b46] hover:bg-slate-100 transition-colors"
+            className="relative p-2 rounded-full text-[#092347] hover:bg-slate-100 transition-colors"
             aria-label="Notifications"
           >
             <Bell size={19} strokeWidth={2.2} />
@@ -101,13 +101,13 @@ export function StudentTopNav({ onMenuClick, isMenuOpen }: StudentTopNavProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/sign-in"
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold text-[#102b46] hover:bg-slate-100 transition-colors"
+                className="px-4 py-1.5 rounded-full text-xs font-bold text-[#092347] hover:bg-slate-100 transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/sign-up"
-                className="px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] shadow-sm hover:brightness-105 transition-all"
+                className="px-5 py-2 rounded-full text-xs font-black bg-gradient-to-r from-[#dfa32b] via-[#f5cb68] to-[#d4941e] text-[#092347] border-t border-[#ffe8a3]/60 shadow-[0_4px_16px_rgba(223,163,43,0.32)] hover:shadow-[0_6px_22px_rgba(223,163,43,0.48)] hover:scale-[1.02] active:scale-[0.98] transition-all tracking-wide"
               >
                 Get Started
               </Link>
@@ -116,9 +116,9 @@ export function StudentTopNav({ onMenuClick, isMenuOpen }: StudentTopNavProps) {
             <div className="flex items-center gap-3">
               <Link
                 href="/pricing"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#0e2742] to-[#123963] text-amber-300 text-xs font-bold shadow-sm"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#0f3460] text-[#f5cb68] border border-[#dfa32b]/40 text-xs font-black shadow-sm hover:scale-[1.02] transition-all tracking-wide"
               >
-                <Crown size={13} className="text-[#f5c465]" />
+                <Crown size={13} className="text-[#f5cb68]" />
                 <span>Go Premium</span>
               </Link>
               <UserButton />

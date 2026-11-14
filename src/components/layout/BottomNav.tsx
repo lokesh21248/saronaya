@@ -30,14 +30,14 @@ export function BottomNav() {
             >
               <div
                 className={`transition-colors ${
-                  isActive ? 'text-[#102b46]' : 'text-slate-400 group-hover:text-slate-600'
+                  isActive ? 'text-[#092347]' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               >
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
               <span
                 className={`text-[10px] sm:text-[11px] mt-1 font-bold transition-colors ${
-                  isActive ? 'text-[#102b46]' : 'text-slate-400 group-hover:text-slate-600'
+                  isActive ? 'text-[#092347]' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               >
                 {tab.label}
@@ -45,7 +45,7 @@ export function BottomNav() {
 
               {/* Active Golden Underline Indicator */}
               {isActive && (
-                <span className="w-7 h-[3px] bg-gradient-to-r from-[#d89b2b] to-[#f5cb68] rounded-full mt-1 animate-in fade-in zoom-in-50 duration-200" />
+                <span className="w-7 h-[3px] bg-gradient-to-r from-[#dfa32b] to-[#f5cb68] rounded-full mt-1 animate-in fade-in zoom-in-50 duration-200" />
               )}
             </Link>
           )
