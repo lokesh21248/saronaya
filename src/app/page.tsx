@@ -392,61 +392,20 @@ export default function HomePage() {
 
               </div>
 
-              {/* RIGHT COLUMN: Professional Education Visual with 3D Floating Elements */}
-              <div className="lg:col-span-5 xl:col-span-6 relative flex items-center justify-center">
-                
-                {/* Visual Backdrop Frame */}
-                <div className="relative w-full max-w-lg lg:max-w-xl aspect-[4/3] sm:aspect-square flex items-center justify-center">
-                  
-                  {/* Subtle University Building Background */}
-                  <div className="absolute inset-4 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/80 bg-slate-100">
-                    <img
-                      src="/images/saryonaya-hero-banner.jpg"
-                      alt="SARYONAYA Student Experience"
-                      className="w-full h-full object-cover object-right"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#07182e]/40 via-transparent to-transparent" />
-                  </div>
-
-                  {/* Floating 3D White Glass Trust Card (Mockup Accent) */}
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
-                    className="absolute -bottom-4 right-2 sm:right-6 bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-[0_12px_36px_rgba(9,35,71,0.18)] border border-slate-200/90 z-20 space-y-2.5 min-w-[190px]"
-                  >
-                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[#07182e]">
-                      <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span>Expert Mentors</span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[#07182e]">
-                      <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span>Live Classes</span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[#07182e]">
-                      <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span>Certificates</span>
-                    </div>
-                  </motion.div>
-
-                  {/* Floating 3D Graduation Cap element */}
-                  <motion.div
-                    animate={{ y: [0, -10, 0], rotate: [0, 2, 0] }}
-                    transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut', delay: 0.5 }}
-                    className="absolute -top-4 right-6 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#07182e] to-[#0f3460] shadow-xl border border-white/20 flex items-center justify-center z-20"
-                  >
-                    <GraduationCap className="w-8 h-8 text-[#e5a93b]" />
-                  </motion.div>
-
-                </div>
-
+              {/* RIGHT COLUMN: The exact 3D Student & Floating Education Elements from Mockup */}
+              <div className="lg:col-span-5 xl:col-span-6 relative flex items-center justify-center lg:justify-end">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="relative w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
+                >
+                  <img
+                    src="/images/mockup/hero-student-3d.png"
+                    alt="SARYONAYA Student & 3D Interactive Elements"
+                    className="w-full h-auto object-contain drop-shadow-[0_18px_40px_rgba(9,35,71,0.18)] rounded-2xl sm:rounded-3xl"
+                  />
+                </motion.div>
               </div>
 
             </div>
@@ -535,7 +494,14 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* BOTTOM TRUST STATS BAR (Matching Mockup exactly) */}
         {/* ========================================================================= */}
-        <section className="py-6 sm:py-8 bg-white border-y border-slate-200/80 shadow-[0_2px_15px_rgba(9,35,71,0.03)] my-8">
+        <section className="relative py-6 sm:py-8 bg-white border-y border-slate-200/80 shadow-[0_2px_15px_rgba(9,35,71,0.03)] my-8 overflow-hidden">
+          {/* Bottom right gold and royal blue wave ribbon accent matching mockup */}
+          <div className="absolute -right-2 -bottom-2 pointer-events-none opacity-90 hidden md:block">
+            <svg width="260" height="85" viewBox="0 0 260 85" fill="none">
+              <path d="M0 85 C90 50 170 25 260 0 L260 85 Z" fill="#07182e" />
+              <path d="M15 85 C95 45 175 20 260 0" stroke="#dfa32b" strokeWidth="5" strokeLinecap="round" />
+            </svg>
+          </div>
           <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center justify-center text-center">
               

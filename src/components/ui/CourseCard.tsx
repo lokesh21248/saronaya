@@ -83,6 +83,30 @@ export function CourseCard({
       )
     }
 
+    const mockupThumb: Record<string, string> = {
+      python: '/images/mockup/thumb-python.png',
+      datascience: '/images/mockup/thumb-datascience.png',
+      design: '/images/mockup/thumb-uiux.png',
+      business: '/images/mockup/thumb-business.png',
+      ai: '/images/mockup/thumb-datascience.png',
+      web: '/images/mockup/thumb-uiux.png',
+      general: '/images/mockup/thumb-python.png',
+    }
+
+    const matchedThumb = mockupThumb[imageType]
+
+    if (matchedThumb) {
+      return (
+        <div className="w-full h-full bg-[#05152a] relative overflow-hidden flex items-center justify-center">
+          <img
+            src={matchedThumb}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      )
+    }
+
     if (imageType === 'python') {
       return (
         <div className="w-full h-full bg-gradient-to-br from-[#061527] via-[#0b284e] to-[#040e1a] relative flex items-center justify-center overflow-hidden">
