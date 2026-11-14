@@ -12,10 +12,13 @@ import {
   CheckCircle2,
   ChevronRight,
   Flame,
+  Bell,
+  Play,
+  ArrowRight,
+  ShieldCheck,
 } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { StudentTopNav } from '@/components/student-top-nav'
-import { COURSES_DATA } from '@/lib/data/lms-data'
+import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { BottomNav } from '@/components/layout/BottomNav'
 
 export default function ProgressPage() {
   const weeklyActivity = [
@@ -28,130 +31,167 @@ export default function ProgressPage() {
     { day: 'Sun', hours: 1.2, height: '45%' },
   ]
 
+  const recentMilestones = [
+    {
+      title: 'Python for Beginners',
+      detail: 'Completed Lesson 4: Functions & Scope',
+      time: '2 hours ago',
+      type: 'lesson',
+    },
+    {
+      title: 'Data Structures Quiz',
+      detail: 'Scored 92% (A+ Grade)',
+      time: 'Yesterday',
+      type: 'quiz',
+    },
+    {
+      title: '5-Day Study Streak',
+      detail: 'Kept daily consistency for 5 consecutive days',
+      time: 'Today',
+      type: 'streak',
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-navy-deep text-cream">
-      <StudentTopNav />
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-4 sm:px-6 pt-3 space-y-5">
         {/* Header */}
-        <div className="bg-navy border border-line/20 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold text-xs font-semibold mb-3">
-              <TrendingUp size={14} />
-              <span>Learning Analytics & Progress</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Learning Journey</h1>
-            <p className="text-muted text-sm mt-1 max-w-xl">
-              Monitor your study streak, weekly hours, lesson completions, and quiz performance.
-            </p>
-          </div>
+        <header className="flex items-center justify-between py-2">
+          <SaryonayaLogo size="md" />
 
-          <div className="flex items-center gap-3 bg-navy-soft px-4 py-3 rounded-xl border border-line/15">
-            <div className="p-2 rounded-lg bg-orange-500/20 text-orange-400">
-              <Flame size={24} />
-            </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/student/progress"
+              className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={20} strokeWidth={2.2} />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
+            </Link>
+
+            <Link href="/student/profile" className="relative group">
+              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
+                  alt="Student Avatar"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+            </Link>
+          </div>
+        </header>
+
+        {/* Learning Journey Overview Card */}
+        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs text-muted block">Current Streak</span>
-              <span className="text-xl font-black text-white">5 Days Active</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Overview Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Weekly Learning Chart */}
-          <div className="lg:col-span-2 bg-navy border border-line/20 rounded-2xl p-6 shadow-xl space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-white">Weekly Study Hours</h2>
-                <p className="text-xs text-muted">Total 12.5 hours this week</p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold mb-2">
+                <TrendingUp size={14} />
+                <span>Learning Analytics & Progress</span>
               </div>
-              <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-                +24% vs last week
-              </span>
-            </div>
-
-            {/* Bar Chart Visualization */}
-            <div className="h-48 flex items-end justify-between gap-2 pt-8 px-4 border-b border-line/10 pb-4">
-              {weeklyActivity.map((bar, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                  <span className="text-[10px] text-muted">{bar.hours}h</span>
-                  <div className="w-full max-w-[36px] bg-navy-deep rounded-t-lg overflow-hidden h-full flex items-end">
-                    <div
-                      className="w-full bg-gradient-to-t from-gold-dark to-gold rounded-t-lg transition-all duration-500 hover:brightness-110"
-                      style={{ height: bar.height }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-muted">{bar.day}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 pt-2 text-center">
-              <div className="p-3 bg-navy-soft/40 rounded-xl">
-                <span className="text-xs text-muted block">Avg Daily Time</span>
-                <span className="text-base font-bold text-white mt-1 block">1h 48m</span>
-              </div>
-              <div className="p-3 bg-navy-soft/40 rounded-xl">
-                <span className="text-xs text-muted block">Videos Watched</span>
-                <span className="text-base font-bold text-white mt-1 block">18 Lessons</span>
-              </div>
-              <div className="p-3 bg-navy-soft/40 rounded-xl">
-                <span className="text-xs text-muted block">Avg Quiz Score</span>
-                <span className="text-base font-bold text-gold mt-1 block">91%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Goals and Milestones */}
-          <div className="bg-navy border border-line/20 rounded-2xl p-6 shadow-xl space-y-6 flex flex-col justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-white mb-4">Milestone Goals</h2>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5 font-medium">
-                    <span className="text-white">Complete Python Core</span>
-                    <span className="text-gold font-bold">65%</span>
-                  </div>
-                  <div className="h-2 bg-navy-deep rounded-full overflow-hidden">
-                    <div className="h-full bg-gold rounded-full w-[65%]" />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5 font-medium">
-                    <span className="text-white">React Web Development</span>
-                    <span className="text-blue-400 font-bold">40%</span>
-                  </div>
-                  <div className="h-2 bg-navy-deep rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-400 rounded-full w-[40%]" />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5 font-medium">
-                    <span className="text-white">Assessments Passed</span>
-                    <span className="text-emerald-400 font-bold">100%</span>
-                  </div>
-                  <div className="h-2 bg-navy-deep rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-400 rounded-full w-full" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-navy-soft/50 rounded-xl border border-line/10 text-xs space-y-2">
-              <span className="text-gold font-semibold flex items-center gap-1.5">
-                <Award size={14} /> Next Certificate Unlock
-              </span>
-              <p className="text-muted leading-relaxed">
-                Finish 2 more lessons in Python for Beginners to unlock your verified Grade A certificate.
+              <h1 className="text-xl sm:text-2xl font-black text-[#102b46]">
+                Your Learning Journey
+              </h1>
+              <p className="text-xs sm:text-sm text-[#5a7184] font-medium mt-1">
+                Monitor your study streak, weekly hours, lesson completions, and quiz performance.
               </p>
             </div>
+
+            {/* Streak Counter Pill */}
+            <div className="flex items-center gap-3 bg-amber-50/70 border border-amber-200/80 px-4 py-2.5 rounded-2xl shrink-0">
+              <div className="p-2 rounded-xl bg-amber-400/20 text-[#c58a23]">
+                <Flame size={22} className="fill-[#e5a93b] text-[#c58a23]" />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#c58a23] block tracking-wider">
+                  Current Streak
+                </span>
+                <span className="text-lg font-black text-[#102b46]">5 Days Active</span>
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+
+        {/* Weekly Study Hours Card with Chart */}
+        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-[#102b46]">
+                Weekly Study Hours
+              </h2>
+              <p className="text-xs text-[#5a7184] font-medium">
+                Total 12.5 hours tracked this week
+              </p>
+            </div>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+              +24% vs last week
+            </span>
+          </div>
+
+          {/* Golden Bar Chart Visualization */}
+          <div className="h-52 flex items-end justify-between gap-2 pt-6 px-2 sm:px-4 border-b border-slate-100 pb-4">
+            {weeklyActivity.map((bar, idx) => (
+              <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                <span className="text-[11px] font-bold text-[#5a7184]">{bar.hours}h</span>
+                <div className="w-full max-w-[36px] bg-slate-100 rounded-t-xl overflow-hidden h-full flex items-end">
+                  <div
+                    className="w-full bg-gradient-to-t from-[#d99222] to-[#f5c465] rounded-t-xl transition-all duration-500 hover:brightness-105 shadow-sm"
+                    style={{ height: bar.height }}
+                  />
+                </div>
+                <span className="text-xs font-bold text-[#102b46]">{bar.day}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Metrics */}
+          <div className="grid grid-cols-3 gap-3 pt-1 text-center">
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="text-[11px] text-[#5a7184] font-semibold block">Avg Daily</span>
+              <span className="text-sm sm:text-base font-black text-[#102b46] mt-1 block">1h 48m</span>
+            </div>
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="text-[11px] text-[#5a7184] font-semibold block">Watched</span>
+              <span className="text-sm sm:text-base font-black text-[#102b46] mt-1 block">18 Lessons</span>
+            </div>
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="text-[11px] text-[#5a7184] font-semibold block">Quiz Score</span>
+              <span className="text-sm sm:text-base font-black text-[#c58a23] mt-1 block">88% (Pass)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Milestones Card */}
+        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] space-y-4">
+          <h2 className="text-base sm:text-lg font-black text-[#102b46]">
+            Recent Learning Milestones
+          </h2>
+
+          <div className="space-y-3">
+            {recentMilestones.map((m, idx) => (
+              <div
+                key={idx}
+                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-[#e5a93b]/30 flex items-center justify-center text-[#c58a23] shrink-0">
+                    {m.type === 'lesson' && <BookOpen size={18} />}
+                    {m.type === 'quiz' && <CheckCircle2 size={18} />}
+                    {m.type === 'streak' && <Flame size={18} className="fill-[#e5a93b]" />}
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-[#102b46]">{m.title}</h3>
+                    <p className="text-[11px] text-[#5a7184] font-medium">{m.detail}</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-semibold text-slate-400 shrink-0">{m.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <BottomNav />
     </div>
   )
 }
-

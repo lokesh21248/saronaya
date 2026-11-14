@@ -15,9 +15,13 @@ import {
   CreditCard,
   Check,
   Share2,
+  Bell,
+  Play,
+  ArrowRight,
+  Star,
 } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { StudentTopNav } from '@/components/student-top-nav'
+import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { BottomNav } from '@/components/layout/BottomNav'
 import { COURSES_DATA, CourseData } from '@/lib/data/lms-data'
 
 interface CourseDetailsPageProps {
@@ -55,305 +59,290 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-navy-deep text-cream">
-      <StudentTopNav />
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-28 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-5xl px-4 sm:px-6 pt-3 space-y-5">
+        {/* Header */}
+        <header className="flex items-center justify-between py-2">
+          <SaryonayaLogo size="md" />
 
-      {/* Hero Banner */}
-      <section className="bg-navy border-b border-line/20 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8 items-start">
-          {/* Left 2 Cols: Course Overview */}
-          <div className="lg:col-span-2 space-y-5">
-            {/* Branch Badges */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold text-gold bg-gold/15 border border-gold/30 px-3 py-1 rounded-full">
-                {course.category}
-              </span>
-              <span className="text-xs text-cream/70 bg-navy-soft px-3 py-1 rounded-full border border-line/10">
-                Level: {course.level}
-              </span>
-            </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/student/progress"
+              className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={20} strokeWidth={2.2} />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
+            </Link>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-              {course.title}
-            </h1>
-
-            <p className="text-base sm:text-lg text-cream/80 leading-relaxed">
-              {course.tagline}
-            </p>
-
-            {/* Academic Branch Eligibility Notice */}
-            <div className="p-4 rounded-xl bg-navy-soft/60 border border-line/15 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gold uppercase tracking-wider">
-                <GraduationCap size={16} /> Eligible Engineering Branches:
+            <Link href="/student/profile" className="relative group">
+              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
+                  alt="Student Avatar"
+                  className="w-full h-full object-cover rounded-full"
+                />
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {course.eligibleBranches.map((b) => (
-                  <span
-                    key={b}
-                    className="px-2.5 py-1 text-xs font-bold rounded-md bg-gold/15 text-gold border border-gold/30"
-                  >
-                    {b}
-                  </span>
-                ))}
-              </div>
-              <p className="text-[11px] text-muted">
-                Students from these branches can enroll and earn official academic qualification credit.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-6 text-xs sm:text-sm text-muted pt-2">
-              <span className="flex items-center gap-1.5 text-cream">
-                <Clock size={16} className="text-gold" /> {course.durationHours} Hours Video
-              </span>
-              <span className="flex items-center gap-1.5 text-cream">
-                <BookOpen size={16} className="text-gold" /> {course.lessonsCount} Video Lessons
-              </span>
-              <span className="flex items-center gap-1.5 text-cream">
-                <Award size={16} className="text-gold" /> Verified Certificate
-              </span>
-            </div>
+            </Link>
           </div>
+        </header>
 
-          {/* Right Col: Pricing & Enrollment Card */}
-          <div className="bg-navy border border-line/20 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-6 lg:sticky lg:top-24">
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-navy-soft">
-              <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-              <Link
-                href={`/learn/${course.id}/${course.sections[0]?.lessons[0]?.id}`}
-                className="absolute inset-0 bg-black/40 flex items-center justify-center group"
-              >
-                <div className="w-14 h-14 rounded-full bg-gold/90 text-navy-deep flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <PlayCircle size={32} />
-                </div>
-              </Link>
-            </div>
-
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-white">₹{course.price}</span>
-                <span className="text-sm text-muted line-through">₹{course.originalPrice}</span>
-                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                  66% OFF
+        {/* Course Hero & Preview Card */}
+        <div className="bg-white rounded-[28px] border border-slate-100 shadow-[0_8px_30px_rgba(16,43,70,0.06)] overflow-hidden">
+          <div className="grid lg:grid-cols-5 gap-6 p-6 sm:p-8">
+            {/* Left 3 cols: Info */}
+            <div className="lg:col-span-3 space-y-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-[#c58a23] bg-amber-50 border border-[#e5a93b]/40 px-3 py-1 rounded-full">
+                  {course.category}
+                </span>
+                <span className="text-xs font-bold text-[#5a7184] bg-slate-100 px-3 py-1 rounded-full">
+                  Level: {course.level}
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                  ★ {course.rating || '4.5'} ({course.reviews || '12k'} reviews)
                 </span>
               </div>
-              <p className="text-xs text-muted mt-1">One-time purchase • Lifetime course access</p>
+
+              <h1 className="text-2xl sm:text-3xl font-black text-[#102b46] leading-tight">
+                {course.title}
+              </h1>
+
+              <p className="text-xs sm:text-sm text-[#5a7184] font-medium leading-relaxed">
+                {course.description}
+              </p>
+
+              {/* Eligible Branches */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#102b46]">
+                  <GraduationCap size={15} className="text-[#c58a23]" />
+                  <span>Eligible Academic Branches:</span>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {course.eligibleBranches.map((b) => (
+                    <span
+                      key={b}
+                      className="px-2.5 py-0.5 text-xs font-black rounded-lg bg-amber-50 text-[#c58a23] border border-[#e5a93b]/30"
+                    >
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Meta metrics */}
+              <div className="flex items-center gap-4 text-xs font-semibold text-[#5a7184] pt-1">
+                <div className="flex items-center gap-1.5">
+                  <Clock size={15} className="text-[#c58a23]" />
+                  <span>{course.duration} on-demand video</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-1.5">
+                  <Award size={15} className="text-[#c58a23]" />
+                  <span>Verified Certificate</span>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <Button
-                variant="gold"
-                size="lg"
-                onClick={() => setCheckoutModal(true)}
-                className="w-full font-bold text-navy-deep shadow-xl flex items-center justify-center gap-2"
-              >
-                <CreditCard size={18} />
-                Enroll Now with Razorpay
-              </Button>
+            {/* Right 2 cols: Preview & Purchase Card */}
+            <div className="lg:col-span-2 flex flex-col justify-between bg-gradient-to-br from-[#0c243c] to-[#123456] rounded-[24px] p-6 text-white shadow-xl relative overflow-hidden">
+              <div className="space-y-4">
+                {/* Video Play Badge Container */}
+                <div className="relative h-36 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center group overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop&q=80"
+                    alt="Course Preview"
+                    className="w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-[#e5a93b] text-[#102b46] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Play size={20} className="fill-[#102b46] ml-1" />
+                    </div>
+                  </div>
+                  <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white">
+                    Preview Lesson 1
+                  </span>
+                </div>
 
-              <Link href={`/learn/${course.id}/${course.sections[0]?.lessons[0]?.id}`}>
-                <Button
-                  variant="outline"
-                  size="md"
-                  className="w-full border-line/30 text-xs flex items-center justify-center gap-2 mt-2"
+                <div className="space-y-1">
+                  <div className="text-2xl sm:text-3xl font-black text-white">
+                    ₹{course.price.toLocaleString('en-IN')}
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    One-time payment • Lifetime access to all modules
+                  </p>
+                </div>
+
+                <ul className="space-y-2 pt-2 text-xs text-slate-200">
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-[#f5c465]" />
+                    <span>All {course.sections.reduce((acc, s) => acc + s.lessons.length, 0)} video lessons</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-[#f5c465]" />
+                    <span>Downloadable syllabus & code notes</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check size={14} className="text-[#f5c465]" />
+                    <span>Official Verified Certificate</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  onClick={() => setCheckoutModal(true)}
+                  className="w-full py-3 rounded-full text-xs font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all"
                 >
-                  <PlayCircle size={16} /> Watch Free Preview Lesson
-                </Button>
-              </Link>
-            </div>
-
-            <div className="border-t border-line/10 pt-4 space-y-2 text-xs text-muted">
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-gold" /> 1080p Mux Adaptive Video Streaming
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-gold" /> Downloadable PDF Lecture Notes
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-gold" /> Branch-specific assessment quiz
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-gold" /> Verifiable Certificate of Completion
+                  <Play size={13} className="fill-[#102b46]" />
+                  <span>Enroll in Course</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Syllabus & Course Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-2">About This Course</h2>
-            <p className="text-sm text-cream/80 leading-relaxed">{course.description}</p>
+        {/* Curriculum Sections Accordion */}
+        <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-[#102b46]">
+                Course Curriculum & Syllabus
+              </h2>
+              <p className="text-xs text-[#5a7184] font-medium">
+                {course.sections.length} Sections • {course.sections.reduce((acc, s) => acc + s.lessons.length, 0)} Lessons
+              </p>
+            </div>
           </div>
 
-          {/* Curriculum Accordion */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">Course Curriculum</h2>
-              <span className="text-xs text-muted">
-                {course.sections.length} Sections • {course.lessonsCount} Lessons
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {course.sections.map((section) => {
-                const isOpen = expandedSections[section.id]
-                return (
-                  <div
-                    key={section.id}
-                    className="border border-line/20 rounded-xl bg-navy overflow-hidden"
+          <div className="space-y-3">
+            {course.sections.map((section, sIdx) => {
+              const isOpen = expandedSections[section.id]
+              return (
+                <div
+                  key={section.id}
+                  className="rounded-2xl border border-slate-100 overflow-hidden bg-slate-50/50"
+                >
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-100/60 transition-colors"
                   >
-                    <button
-                      onClick={() => toggleSection(section.id)}
-                      className="w-full p-4 flex items-center justify-between text-left hover:bg-navy-soft/40 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-gold uppercase">
-                          {section.title}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted">
-                        <span>{section.lessons.length} lessons</span>
-                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </div>
-                    </button>
+                    <div>
+                      <span className="text-[11px] font-bold text-[#c58a23] uppercase tracking-wider block">
+                        Section {sIdx + 1}
+                      </span>
+                      <h3 className="text-xs sm:text-sm font-bold text-[#102b46] mt-0.5">
+                        {section.title}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-[#5a7184]">
+                        {section.lessons.length} lessons
+                      </span>
+                      {isOpen ? (
+                        <ChevronUp size={18} className="text-[#102b46]" />
+                      ) : (
+                        <ChevronDown size={18} className="text-[#102b46]" />
+                      )}
+                    </div>
+                  </button>
 
-                    {isOpen && (
-                      <div className="divide-y divide-line/10 border-t border-line/10 bg-navy-deep/40">
-                        {section.lessons.map((lesson) => (
-                          <div
-                            key={lesson.id}
-                            className="p-3.5 px-5 flex items-center justify-between hover:bg-navy-soft/20 text-xs"
-                          >
-                            <div className="flex items-center gap-3">
-                              <PlayCircle size={16} className="text-muted" />
-                              <span className="text-cream font-medium">{lesson.title}</span>
-                              {lesson.isFreePreview && (
-                                <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/15 text-emerald-400 font-semibold border border-emerald-500/30">
-                                  Free Preview
-                                </span>
-                              )}
+                  {isOpen && (
+                    <div className="p-3 bg-white border-t border-slate-100 space-y-2">
+                      {section.lessons.map((lesson, lIdx) => (
+                        <div
+                          key={lesson.id}
+                          className="p-3 rounded-xl hover:bg-slate-50 flex items-center justify-between gap-3 text-xs transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-full bg-amber-50 text-[#c58a23] flex items-center justify-center font-bold text-[11px] shrink-0">
+                              {lIdx + 1}
                             </div>
-
-                            <div className="flex items-center gap-3">
-                              <span className="text-muted">{lesson.durationMinutes} mins</span>
-                              {lesson.isFreePreview && (
-                                <Link
-                                  href={`/learn/${course.id}/${lesson.id}`}
-                                  className="text-gold font-bold hover:underline"
-                                >
-                                  Watch
-                                </Link>
-                              )}
+                            <div>
+                              <span className="font-bold text-[#102b46] block">{lesson.title}</span>
+                              <span className="text-[10px] text-slate-400">{lesson.duration}</span>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
 
-          {/* Instructor Bio */}
-          <div className="border border-line/20 rounded-2xl p-6 bg-navy space-y-4">
-            <h3 className="text-xl font-bold text-white">Course Instructor</h3>
-            <div className="flex items-center gap-4">
-              <img
-                src={course.instructor.avatar}
-                alt={course.instructor.name}
-                className="w-16 h-16 rounded-full object-cover border-2 border-gold/40"
-              />
-              <div>
-                <h4 className="text-base font-bold text-white">{course.instructor.name}</h4>
-                <p className="text-xs text-gold font-medium">{course.instructor.title}</p>
-                <p className="text-xs text-muted mt-1">
-                  Over 12+ years of engineering curriculum design and cloud engineering leadership.
-                </p>
-              </div>
-            </div>
+                          {lesson.isPreview ? (
+                            <Link href={`/learn/${course.id}/${lesson.id}`}>
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-[#c58a23] border border-[#e5a93b]/40 hover:bg-amber-100 transition-colors">
+                                Preview Free
+                              </span>
+                            </Link>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-semibold">Locked</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
-      </main>
+      </div>
 
-      {/* Razorpay Checkout Simulation Modal */}
+      {/* Checkout Modal */}
       {checkoutModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-navy border border-line/30 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-6 relative">
-            <div className="flex items-center justify-between border-b border-line/10 pb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gold flex items-center justify-center text-navy-deep font-bold text-sm">
-                  S
-                </div>
-                <span className="font-bold text-white">Saryonaya • Razorpay Checkout</span>
-              </div>
-              <button
-                onClick={() => {
-                  setCheckoutModal(false)
-                  setPaymentSuccess(false)
-                }}
-                className="text-muted hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[28px] max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in zoom-in-95 duration-200">
             {paymentSuccess ? (
-              <div className="text-center py-6 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="text-center space-y-4 py-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCircle2 size={36} />
                 </div>
-                <h3 className="text-xl font-bold text-white">Enrollment Confirmed!</h3>
-                <p className="text-xs text-muted">
-                  Your payment of ₹{course.price} was successfully verified via Razorpay webhook.
+                <h3 className="text-xl font-black text-[#102b46]">Enrollment Successful!</h3>
+                <p className="text-xs text-[#5a7184]">
+                  You now have complete access to {course.title}.
                 </p>
-                <div className="pt-4">
-                  <Link href={`/learn/${course.id}/${course.sections[0]?.lessons[0]?.id}`}>
-                    <Button variant="gold" size="lg" className="w-full font-bold text-navy-deep">
-                      Start Course Now
-                    </Button>
-                  </Link>
-                </div>
+                <Link href={`/learn/${course.id}/${course.sections[0]?.lessons[0]?.id || 'les-1'}`}>
+                  <button className="w-full py-3 rounded-full text-xs font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-sm transition-all">
+                    Start Learning Now →
+                  </button>
+                </Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-navy-soft/60 border border-line/15">
-                  <span className="text-xs text-muted">Order Item</span>
-                  <p className="font-bold text-white text-sm mt-0.5">{course.title}</p>
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-line/10">
-                    <span className="text-xs text-muted">Amount Payable</span>
-                    <span className="text-xl font-bold text-gold">₹{course.price}</span>
+              <>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-base font-black text-[#102b46]">Checkout</h3>
+                  <button
+                    onClick={() => setCheckoutModal(false)}
+                    className="text-xs font-bold text-slate-400 hover:text-[#102b46]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                  <div className="text-xs font-bold text-[#102b46]">{course.title}</div>
+                  <div className="flex justify-between items-center text-sm font-black text-[#102b46]">
+                    <span>Total Amount</span>
+                    <span className="text-[#c58a23]">₹{course.price.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-xs text-muted">Payment Method</label>
-                  <div className="p-3 rounded-lg border border-gold/40 bg-gold/10 text-xs font-semibold text-gold flex items-center justify-between">
-                    <span>UPI / Debit Card / Net Banking (Razorpay)</span>
-                    <ShieldCheck size={16} />
-                  </div>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleSimulatePayment}
+                    disabled={paymentProcessing}
+                    className="w-full py-3 rounded-full text-xs font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  >
+                    <CreditCard size={15} />
+                    <span>{paymentProcessing ? 'Processing with Razorpay...' : 'Pay with Razorpay / UPI'}</span>
+                  </button>
+                  <p className="text-[10px] text-center text-slate-400">
+                    256-bit SSL encrypted • Instant course access
+                  </p>
                 </div>
-
-                <Button
-                  variant="gold"
-                  size="lg"
-                  disabled={paymentProcessing}
-                  onClick={handleSimulatePayment}
-                  className="w-full font-bold text-navy-deep"
-                >
-                  {paymentProcessing ? 'Processing Secure Payment...' : `Pay ₹${course.price}`}
-                </Button>
-
-                <p className="text-[11px] text-center text-muted">
-                  🔒 256-bit encrypted secure transaction with instant entitlement.
-                </p>
-              </div>
+              </>
             )}
           </div>
         </div>
       )}
+
+      <BottomNav />
     </div>
   )
 }

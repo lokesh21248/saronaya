@@ -12,7 +12,9 @@ export interface LessonData {
   title: string
   slug: string
   durationMinutes: number
+  duration?: string
   isFreePreview: boolean
+  isPreview?: boolean
   muxPlaybackId?: string
   videoUrl?: string
   pdfNotesUrl?: string
@@ -40,6 +42,7 @@ export interface CourseData {
   title: string
   slug: string
   tagline: string
+  subtitle?: string
   description: string
   category: string
   thumbnail: string
@@ -52,6 +55,9 @@ export interface CourseData {
   originalPrice: number
   level: 'Beginner' | 'Intermediate' | 'Advanced'
   durationHours: number
+  duration?: string
+  rating?: string
+  reviews?: string
   lessonsCount: number
   isPublished: boolean
   isFeatured: boolean

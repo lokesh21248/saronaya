@@ -2,9 +2,19 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Award, Download, CheckCircle2, ShieldCheck, Printer, ExternalLink } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { StudentTopNav } from '@/components/student-top-nav'
+import {
+  Award,
+  Download,
+  CheckCircle2,
+  ShieldCheck,
+  Printer,
+  ExternalLink,
+  Bell,
+  Play,
+  Share2,
+} from 'lucide-react'
+import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
+import { BottomNav } from '@/components/layout/BottomNav'
 import { SAMPLE_CERTIFICATES } from '@/lib/data/lms-data'
 
 export default function CertificatesPage() {
@@ -15,35 +25,67 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-navy-deep text-cream">
-      <StudentTopNav />
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-5xl px-4 sm:px-6 pt-3 space-y-5">
         {/* Header */}
-        <div className="bg-navy border border-line/20 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold text-xs font-semibold mb-3">
-              <ShieldCheck size={14} />
-              <span>Cryptographically Verified</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Academic Certificates</h1>
-            <p className="text-muted text-sm mt-1 max-w-xl">
-              Official certificates awarded upon completion of engineering courses and passing verified assessments.
-            </p>
-          </div>
+        <header className="flex items-center justify-between py-2 print:hidden">
+          <SaryonayaLogo size="md" />
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handlePrint} className="border-line/30 flex items-center gap-2">
-              <Printer size={16} /> Print / Save PDF
-            </Button>
+            <Link
+              href="/student/progress"
+              className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={20} strokeWidth={2.2} />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
+            </Link>
+
+            <Link href="/student/profile" className="relative group">
+              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
+                  alt="Student Avatar"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+            </Link>
+          </div>
+        </header>
+
+        {/* Title banner */}
+        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] print:hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold mb-2">
+                <ShieldCheck size={14} />
+                <span>Cryptographically Verified</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-[#102b46]">
+                Academic Certificates
+              </h1>
+              <p className="text-xs sm:text-sm text-[#5a7184] font-medium mt-1">
+                Official certificates awarded upon passing verified engineering assessments.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrint}
+                className="px-4 py-2 rounded-full text-xs font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-sm flex items-center gap-1.5 transition-all"
+              >
+                <Printer size={14} />
+                <span>Print / Save PDF</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Certificate Display and Selection */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        {/* Certificate Display Area */}
+        <div className="grid lg:grid-cols-3 gap-5 items-start">
           {/* Certificate Selector List */}
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          <div className="space-y-3 print:hidden">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#5a7184]">
               Earned Certificates ({SAMPLE_CERTIFICATES.length})
             </h2>
 
@@ -53,20 +95,24 @@ export default function CertificatesPage() {
                 <div
                   key={cert.id}
                   onClick={() => setActiveCert(cert)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-navy-soft border-gold shadow-lg ring-1 ring-gold/40'
-                      : 'bg-navy border-line/15 hover:border-gold/30'
+                      ? 'bg-amber-50/70 border-[#e5a93b] shadow-md ring-1 ring-[#e5a93b]/40'
+                      : 'bg-white border-slate-100 hover:border-slate-200 shadow-sm'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-gold/15 text-gold shrink-0 mt-0.5">
+                    <div className="p-2.5 rounded-xl bg-amber-100/70 text-[#c58a23] shrink-0">
                       <Award size={20} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-white">{cert.courseTitle}</h3>
-                      <p className="text-xs text-muted mt-1">Issued: {cert.issuedDate}</p>
-                      <span className="text-[11px] text-emerald-400 font-semibold block mt-1">
+                      <h3 className="font-bold text-xs sm:text-sm text-[#102b46]">
+                        {cert.courseTitle}
+                      </h3>
+                      <p className="text-[11px] text-[#5a7184] mt-0.5">
+                        Issued: {cert.issuedDate}
+                      </p>
+                      <span className="text-[11px] text-emerald-700 font-bold block mt-1">
                         {cert.grade}
                       </span>
                     </div>
@@ -76,91 +122,79 @@ export default function CertificatesPage() {
             })}
           </div>
 
-          {/* Certificate Canvas / Certificate Certificate Preview */}
+          {/* Certificate Canvas */}
           <div className="lg:col-span-2">
-            <div className="bg-white text-navy-deep p-8 sm:p-12 rounded-2xl shadow-2xl border-4 border-gold relative overflow-hidden print:p-0 print:border-none">
+            <div className="bg-white text-[#102b46] p-8 sm:p-12 rounded-[28px] shadow-[0_8px_30px_rgba(16,43,70,0.08)] border-4 border-[#e5a93b]/80 relative overflow-hidden print:p-0 print:border-none print:shadow-none">
               {/* Decorative Corner Ornaments */}
-              <div className="absolute top-2 left-2 w-12 h-12 border-t-2 border-l-2 border-gold pointer-events-none" />
-              <div className="absolute top-2 right-2 w-12 h-12 border-t-2 border-r-2 border-gold pointer-events-none" />
-              <div className="absolute bottom-2 left-2 w-12 h-12 border-b-2 border-l-2 border-gold pointer-events-none" />
-              <div className="absolute bottom-2 right-2 w-12 h-12 border-b-2 border-r-2 border-gold pointer-events-none" />
+              <div className="absolute top-3 left-3 w-10 h-10 border-t-2 border-l-2 border-[#e5a93b] pointer-events-none" />
+              <div className="absolute top-3 right-3 w-10 h-10 border-t-2 border-r-2 border-[#e5a93b] pointer-events-none" />
+              <div className="absolute bottom-3 left-3 w-10 h-10 border-b-2 border-l-2 border-[#e5a93b] pointer-events-none" />
+              <div className="absolute bottom-3 right-3 w-10 h-10 border-b-2 border-r-2 border-[#e5a93b] pointer-events-none" />
 
               <div className="text-center space-y-6 relative z-10">
-                {/* Certificate Brand */}
-                <div className="inline-flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-[#102b46] flex items-center justify-center text-gold font-black text-xl">
-                    S
-                  </div>
-                  <span className="text-2xl font-black tracking-widest text-[#102b46]">
-                    SARYONAYA
-                  </span>
+                {/* Official Logo */}
+                <div className="flex justify-center">
+                  <SaryonayaLogo size="lg" />
                 </div>
 
-                <div className="uppercase tracking-[0.25em] text-xs font-bold text-muted">
+                <div className="uppercase tracking-[0.25em] text-[11px] font-black text-[#c58a23]">
                   Certificate of Academic Excellence
                 </div>
 
-                <p className="text-sm text-muted">This is proudly presented to</p>
-
-                <div className="text-3xl sm:text-4xl font-black text-[#102b46] tracking-tight font-serif italic border-b-2 border-gold/40 pb-3 max-w-md mx-auto">
-                  {activeCert.studentName}
+                <div className="space-y-1">
+                  <p className="text-xs text-[#5a7184] uppercase tracking-wider">
+                    This certifies that
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-black text-[#102b46] font-serif italic py-1">
+                    {activeCert.studentName}
+                  </h2>
+                  <p className="text-xs text-[#5a7184] max-w-md mx-auto">
+                    has successfully completed the comprehensive curriculum and passed all technical assessments for
+                  </p>
                 </div>
 
-                <p className="text-sm text-muted max-w-lg mx-auto">
-                  for successfully mastering the curriculum and passing all technical evaluations for the course
-                </p>
-
-                <div className="text-xl sm:text-2xl font-bold text-[#102b46]">
-                  {activeCert.courseTitle}
+                <div className="py-2">
+                  <h3 className="text-xl sm:text-2xl font-black text-[#102b46] tracking-tight">
+                    {activeCert.courseTitle}
+                  </h3>
+                  <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold">
+                    <span>Performance Grade: {activeCert.grade}</span>
+                  </div>
                 </div>
 
-                <div className="inline-block bg-[#102b46]/5 px-4 py-1.5 rounded-full text-xs font-semibold text-[#102b46]">
-                  {activeCert.grade}
-                </div>
-
-                {/* Footer Signatures and Verification Seal */}
-                <div className="pt-8 grid grid-cols-3 items-end gap-4 border-t border-line/50 text-center">
-                  <div>
-                    <div className="font-serif italic text-sm text-[#102b46] font-semibold">
-                      Dr. Ramesh Sharma
+                {/* Signatures & Verification Row */}
+                <div className="pt-6 border-t border-slate-100 grid grid-cols-2 gap-6 items-end">
+                  <div className="text-left space-y-1">
+                    <div className="font-serif italic text-base text-[#102b46]">
+                      Dr. A. R. Sharma
                     </div>
-                    <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
-                      Lead Instructor
+                    <div className="h-0.5 w-32 bg-[#102b46]/20" />
+                    <p className="text-[10px] uppercase font-bold text-slate-400">
+                      Dean of Engineering & Academics
                     </p>
                   </div>
 
-                  {/* Golden Seal */}
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#b8862f] via-[#d9ad61] to-[#f2d89e] flex items-center justify-center shadow-lg border-2 border-white">
-                      <div className="w-13 h-13 rounded-full border border-navy/30 flex items-center justify-center text-center p-1">
-                        <Award size={24} className="text-[#102b46]" />
-                      </div>
+                  <div className="text-right space-y-1">
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      ID: {activeCert.id.toUpperCase()}
                     </div>
-                    <span className="text-[9px] text-muted mt-1 uppercase font-bold tracking-widest">
-                      Verified Seal
-                    </span>
-                  </div>
-
-                  <div>
-                    <div className="font-serif italic text-sm text-[#102b46] font-semibold">
-                      Saryonaya Council
+                    <div className="text-[10px] text-emerald-700 font-bold flex items-center justify-end gap-1">
+                      <ShieldCheck size={12} /> Cryptographically Verified
                     </div>
-                    <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
-                      Academic Director
+                    <p className="text-[10px] text-slate-400">
+                      Issued: {activeCert.issuedDate}
                     </p>
                   </div>
-                </div>
-
-                <div className="pt-4 text-[10px] text-muted flex items-center justify-between border-t border-line/30">
-                  <span>Certificate ID: {activeCert.certificateNumber}</span>
-                  <span>Issued on: {activeCert.issuedDate}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      <div className="print:hidden">
+        <BottomNav />
+      </div>
     </div>
   )
 }
-
