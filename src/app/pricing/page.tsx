@@ -21,20 +21,51 @@ export default function PricingPage() {
     }, 1500)
   }
 
-  return (
-    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 font-sans antialiased selection:bg-[#e5a93b]/30">
-      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-5xl px-4 sm:px-6 pt-3 space-y-6">
-        {/* Header */}
-        <header className="flex items-center justify-between py-2">
-          <SaryonayaLogo size="md" />
+  const navLinks = [
+    { label: 'Explore', href: '/courses' },
+    { label: 'Subscriptions', href: '/pricing' },
+    { label: 'My Learning', href: '/student/dashboard' },
+    { label: 'My Courses', href: '/student/courses' },
+    { label: 'Progress', href: '/student/progress' },
+    { label: 'Certificates', href: '/student/certificates' },
+  ]
 
-          <div className="flex items-center gap-3">
+  return (
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-6 space-y-6 md:space-y-8">
+        
+        {/* Header */}
+        <header className="flex items-center justify-between py-2 border-b border-transparent md:border-slate-100 md:pb-4">
+          <div className="flex items-center gap-6">
+            <SaryonayaLogo size="md" />
+
+            <nav className="hidden lg:flex items-center gap-1.5 ml-4">
+              {navLinks.map((link) => {
+                const isActive = link.href === '/pricing'
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-amber-50 text-[#c58a23] border border-[#e5a93b]/40'
+                        : 'text-[#102b46]/80 hover:text-[#102b46] hover:bg-white'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <Link
               href="/student/progress"
               className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
               aria-label="Notifications"
             >
-              <Bell size={20} strokeWidth={2.2} />
+              <Bell size={19} strokeWidth={2.2} />
               <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
             </Link>
 
@@ -51,38 +82,38 @@ export default function PricingPage() {
         </header>
 
         {/* Hero Banner */}
-        <div className="text-center max-w-2xl mx-auto space-y-3 pt-2">
+        <div className="text-center max-w-3xl mx-auto space-y-3 pt-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold">
             <Crown size={14} />
             <span>SARYONAYA Premium Membership</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black text-[#102b46] tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#102b46] tracking-tight leading-tight">
             Get Unlimited Access to <br />
             <span className="bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] bg-clip-text text-transparent">
               All Engineering Courses
             </span>
           </h1>
-          <p className="text-xs sm:text-sm text-[#5a7184] font-medium max-w-lg mx-auto">
+          <p className="text-xs sm:text-sm lg:text-base text-[#5a7184] font-medium max-w-xl mx-auto">
             Subscribe for continuous access to branch roadmaps, Mux video lectures, downloadable notes, quizzes, and verified certificates.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-5 items-stretch pt-2">
+        {/* Pricing Cards: 1 col on mobile, 3 cols on laptop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-2">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const isFeatured = plan.isPopular
             return (
               <div
                 key={plan.id}
-                className={`bg-white rounded-[28px] p-6 sm:p-7 flex flex-col justify-between relative shadow-[0_8px_30px_rgba(16,43,70,0.06)] border transition-all ${
+                className={`bg-white rounded-2xl sm:rounded-[32px] p-6 sm:p-8 flex flex-col justify-between relative shadow-[0_8px_30px_rgba(16,43,70,0.06)] border transition-all ${
                   isFeatured
-                    ? 'border-[#e5a93b] ring-2 ring-[#e5a93b]/50 scale-[1.02] z-10'
+                    ? 'border-[#e5a93b] ring-2 ring-[#e5a93b]/50 md:scale-105 z-10'
                     : 'border-slate-100 hover:border-slate-200'
                 }`}
               >
                 {plan.badge && (
                   <div
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${
                       isFeatured
                         ? 'bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46]'
                         : 'bg-[#102b46] text-white'
@@ -93,35 +124,35 @@ export default function PricingPage() {
                 )}
 
                 <div>
-                  <h3 className="text-lg font-black text-[#102b46]">{plan.name}</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-[#102b46]">{plan.name}</h3>
                   <p className="text-xs text-[#5a7184] font-medium mt-0.5">{plan.description}</p>
 
-                  <div className="mt-5 mb-5 flex items-baseline">
-                    <span className="text-3xl sm:text-4xl font-black text-[#102b46]">
+                  <div className="mt-6 mb-6 flex items-baseline">
+                    <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#102b46]">
                       ₹{plan.price.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-xs text-[#5a7184] font-bold ml-1.5">
+                    <span className="text-xs sm:text-sm text-[#5a7184] font-bold ml-1.5">
                       / {plan.interval}
                     </span>
                   </div>
 
-                  <ul className="space-y-2.5 border-t border-slate-100 pt-5 text-xs text-[#102b46] font-medium">
+                  <ul className="space-y-3 border-t border-slate-100 pt-6 text-xs sm:text-sm text-[#102b46] font-medium">
                     {plan.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check size={15} className="text-[#c58a23] shrink-0 mt-0.5" />
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <Check size={16} className="text-[#c58a23] shrink-0 mt-0.5" />
                         <span>{feat}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="pt-6">
+                <div className="pt-8">
                   <button
                     onClick={() => {
                       setSelectedPlan(plan)
                       setCheckoutModal(true)
                     }}
-                    className={`w-full py-3 rounded-full text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition-all ${
+                    className={`w-full py-3.5 rounded-full text-xs sm:text-sm font-black shadow-sm flex items-center justify-center gap-1.5 transition-all ${
                       isFeatured
                         ? 'bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105'
                         : 'bg-[#102b46] text-white hover:bg-[#163a5f]'

@@ -19,6 +19,7 @@ import {
   Play,
   ArrowRight,
   Star,
+  Crown,
 } from 'lucide-react'
 import { SaryonayaLogo } from '@/components/ui/SaryonayaLogo'
 import { BottomNav } from '@/components/layout/BottomNav'
@@ -58,20 +59,52 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
     }, 1500)
   }
 
-  return (
-    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-28 font-sans antialiased selection:bg-[#e5a93b]/30">
-      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-5xl px-4 sm:px-6 pt-3 space-y-5">
-        {/* Header */}
-        <header className="flex items-center justify-between py-2">
-          <SaryonayaLogo size="md" />
+  const navLinks = [
+    { label: 'Explore', href: '/courses' },
+    { label: 'Subscriptions', href: '/pricing' },
+    { label: 'My Learning', href: '/student/dashboard' },
+    { label: 'My Courses', href: '/student/courses' },
+    { label: 'Progress', href: '/student/progress' },
+    { label: 'Certificates', href: '/student/certificates' },
+  ]
 
-          <div className="flex items-center gap-3">
+  return (
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-6 space-y-5 sm:space-y-6 md:space-y-8">
+        
+        {/* Header */}
+        <header className="flex items-center justify-between py-2 border-b border-transparent md:border-slate-100 md:pb-4">
+          <div className="flex items-center gap-6">
+            <SaryonayaLogo size="md" />
+
+            <nav className="hidden lg:flex items-center gap-1.5 ml-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-bold text-[#102b46]/80 hover:text-[#102b46] hover:bg-white transition-all"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link
+              href="/pricing"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#0e2742] to-[#123963] text-amber-300 text-xs font-bold shadow-sm"
+            >
+              <Crown size={13} className="text-[#f5c465]" />
+              <span>Go Premium</span>
+            </Link>
+
             <Link
               href="/student/progress"
               className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
               aria-label="Notifications"
             >
-              <Bell size={20} strokeWidth={2.2} />
+              <Bell size={19} strokeWidth={2.2} />
               <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
             </Link>
 
@@ -87,11 +120,11 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
           </div>
         </header>
 
-        {/* Course Hero & Preview Card */}
-        <div className="bg-white rounded-[28px] border border-slate-100 shadow-[0_8px_30px_rgba(16,43,70,0.06)] overflow-hidden">
-          <div className="grid lg:grid-cols-5 gap-6 p-6 sm:p-8">
-            {/* Left 3 cols: Info */}
-            <div className="lg:col-span-3 space-y-4">
+        {/* Course Hero & Preview Card: Responsive Grid */}
+        <div className="bg-white rounded-2xl sm:rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgba(16,43,70,0.06)] overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 sm:p-8 lg:p-10">
+            {/* Left cols: Course Info (7 cols on laptop) */}
+            <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold text-[#c58a23] bg-amber-50 border border-[#e5a93b]/40 px-3 py-1 rounded-full">
                   {course.category}
@@ -104,16 +137,16 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-[#102b46] leading-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#102b46] leading-tight">
                 {course.title}
               </h1>
 
-              <p className="text-xs sm:text-sm text-[#5a7184] font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm lg:text-base text-[#5a7184] font-medium leading-relaxed">
                 {course.description}
               </p>
 
-              {/* Eligible Branches */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+              {/* Eligible Academic Branches */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#102b46]">
                   <GraduationCap size={15} className="text-[#c58a23]" />
                   <span>Eligible Academic Branches:</span>
@@ -134,7 +167,7 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
               <div className="flex items-center gap-4 text-xs font-semibold text-[#5a7184] pt-1">
                 <div className="flex items-center gap-1.5">
                   <Clock size={15} className="text-[#c58a23]" />
-                  <span>{course.duration} on-demand video</span>
+                  <span>{course.duration || `${course.durationHours}h`} on-demand video</span>
                 </div>
                 <span>•</span>
                 <div className="flex items-center gap-1.5">
@@ -144,11 +177,11 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
               </div>
             </div>
 
-            {/* Right 2 cols: Preview & Purchase Card */}
-            <div className="lg:col-span-2 flex flex-col justify-between bg-gradient-to-br from-[#0c243c] to-[#123456] rounded-[24px] p-6 text-white shadow-xl relative overflow-hidden">
+            {/* Right cols: Preview & Purchase Card (5 cols on laptop) */}
+            <div className="lg:col-span-5 flex flex-col justify-between bg-gradient-to-br from-[#0c243c] to-[#123456] rounded-2xl sm:rounded-[28px] p-6 text-white shadow-xl relative overflow-hidden">
               <div className="space-y-4">
                 {/* Video Play Badge Container */}
-                <div className="relative h-36 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center group overflow-hidden">
+                <div className="relative h-44 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center group overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop&q=80"
                     alt="Course Preview"
@@ -159,7 +192,7 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
                       <Play size={20} className="fill-[#102b46] ml-1" />
                     </div>
                   </div>
-                  <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white">
+                  <span className="absolute bottom-2 left-2 px-2.5 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white">
                     Preview Lesson 1
                   </span>
                 </div>
@@ -192,7 +225,7 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
               <div className="pt-6">
                 <button
                   onClick={() => setCheckoutModal(true)}
-                  className="w-full py-3 rounded-full text-xs font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all"
                 >
                   <Play size={13} className="fill-[#102b46]" />
                   <span>Enroll in Course</span>
@@ -203,13 +236,13 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
         </div>
 
         {/* Curriculum Sections Accordion */}
-        <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] space-y-4">
+        <div className="bg-white rounded-2xl sm:rounded-[32px] p-6 sm:p-8 lg:p-10 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-[#102b46]">
+              <h2 className="text-lg sm:text-2xl font-black text-[#102b46]">
                 Course Curriculum & Syllabus
               </h2>
-              <p className="text-xs text-[#5a7184] font-medium">
+              <p className="text-xs sm:text-sm text-[#5a7184] font-medium">
                 {course.sections.length} Sections • {course.sections.reduce((acc, s) => acc + s.lessons.length, 0)} Lessons
               </p>
             </div>
@@ -225,7 +258,7 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
                 >
                   <button
                     onClick={() => toggleSection(section.id)}
-                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-100/60 transition-colors"
+                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-100/60 transition-colors"
                   >
                     <div>
                       <span className="text-[11px] font-bold text-[#c58a23] uppercase tracking-wider block">
@@ -248,7 +281,7 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
                   </button>
 
                   {isOpen && (
-                    <div className="p-3 bg-white border-t border-slate-100 space-y-2">
+                    <div className="p-3 sm:p-4 bg-white border-t border-slate-100 space-y-2">
                       {section.lessons.map((lesson, lIdx) => (
                         <div
                           key={lesson.id}
@@ -260,11 +293,13 @@ export default function CourseDetailsPage({ params }: CourseDetailsPageProps) {
                             </div>
                             <div>
                               <span className="font-bold text-[#102b46] block">{lesson.title}</span>
-                              <span className="text-[10px] text-slate-400">{lesson.duration}</span>
+                              <span className="text-[10px] text-slate-400">
+                                {lesson.duration || `${lesson.durationMinutes} mins`}
+                              </span>
                             </div>
                           </div>
 
-                          {lesson.isPreview ? (
+                          {lesson.isFreePreview || lesson.isPreview ? (
                             <Link href={`/learn/${course.id}/${lesson.id}`}>
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-[#c58a23] border border-[#e5a93b]/40 hover:bg-amber-100 transition-colors">
                                 Preview Free

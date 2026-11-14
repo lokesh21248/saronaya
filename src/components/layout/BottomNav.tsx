@@ -16,7 +16,7 @@ export function BottomNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] py-2 px-6">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_25px_rgba(16,43,70,0.08)] py-2 px-4 sm:px-6 md:hidden">
       <div className="max-w-md mx-auto flex items-center justify-between">
         {tabs.map((tab) => {
           const Icon = tab.icon
@@ -33,19 +33,19 @@ export function BottomNav() {
                   isActive ? 'text-[#102b46]' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               >
-                <Icon size={24} strokeWidth={isActive ? 2.4 : 1.8} />
+                <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
               <span
-                className={`text-[11px] mt-1 font-semibold transition-colors ${
+                className={`text-[10px] sm:text-[11px] mt-1 font-bold transition-colors ${
                   isActive ? 'text-[#102b46]' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               >
                 {tab.label}
               </span>
 
-              {/* Active Golden Underline Pill */}
+              {/* Active Golden Underline Indicator */}
               {isActive && (
-                <span className="w-8 h-[3px] bg-gradient-to-r from-[#d89b2b] to-[#f5cb68] rounded-full mt-1 animate-in fade-in zoom-in-50 duration-200" />
+                <span className="w-7 h-[3px] bg-gradient-to-r from-[#d89b2b] to-[#f5cb68] rounded-full mt-1 animate-in fade-in zoom-in-50 duration-200" />
               )}
             </Link>
           )
@@ -54,4 +54,3 @@ export function BottomNav() {
     </nav>
   )
 }
-

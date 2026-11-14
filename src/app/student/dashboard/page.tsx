@@ -48,26 +48,66 @@ export default function StudentDashboard() {
     { label: 'Certificates', value: '1', icon: Award, color: 'text-purple-600 bg-purple-50' },
   ]
 
+  const navLinks = [
+    { label: 'Explore', href: '/courses' },
+    { label: 'Subscriptions', href: '/pricing' },
+    { label: 'My Learning', href: '/student/dashboard' },
+    { label: 'My Courses', href: '/student/courses' },
+    { label: 'Progress', href: '/student/progress' },
+    { label: 'Certificates', href: '/student/certificates' },
+  ]
+
   const continueCourse = COURSES_DATA[0] // Python for Beginners
 
   return (
-    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 font-sans antialiased">
-      <div className="max-w-md mx-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-4 sm:px-6 pt-3 space-y-5">
+    <div className="min-h-screen bg-[#f5f8fc] text-[#0d2238] pb-24 md:pb-12 font-sans antialiased selection:bg-[#e5a93b]/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-6 space-y-5 sm:space-y-6 md:space-y-8">
+        
         {/* Top Header */}
-        <header className="flex items-center justify-between py-2">
-          <SaryonayaLogo size="md" />
+        <header className="flex items-center justify-between py-2 border-b border-transparent md:border-slate-100 md:pb-4">
+          <div className="flex items-center gap-6">
+            <SaryonayaLogo size="md" />
 
-          <div className="flex items-center gap-3">
+            <nav className="hidden lg:flex items-center gap-1.5 ml-4">
+              {navLinks.map((link) => {
+                const isActive = link.href === '/student/dashboard'
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-amber-50 text-[#c58a23] border border-[#e5a93b]/40'
+                        : 'text-[#102b46]/80 hover:text-[#102b46] hover:bg-white'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link
+              href="/pricing"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#0e2742] to-[#123963] text-amber-300 text-xs font-bold shadow-sm"
+            >
+              <Crown size={13} className="text-[#f5c465]" />
+              <span>Go Premium</span>
+            </Link>
+
             <Link
               href="/student/progress"
               className="relative p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-[#102b46] hover:bg-slate-50 transition-colors"
+              aria-label="Notifications"
             >
-              <Bell size={20} strokeWidth={2.2} />
+              <Bell size={19} strokeWidth={2.2} />
               <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
             </Link>
 
-            <Link href="/student/profile">
-              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm">
+            <Link href="/student/profile" className="relative group">
+              <div className="w-10 h-10 rounded-full ring-2 ring-[#e5a93b] p-0.5 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
                 <img
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
                   alt="Student Avatar"
@@ -79,14 +119,14 @@ export default function StudentDashboard() {
         </header>
 
         {/* Academic Profile Welcome Card */}
-        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.06)] relative overflow-hidden">
+        <div className="bg-white rounded-2xl sm:rounded-[28px] p-6 sm:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.06)] relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#e5a93b]/40 text-[#c58a23] text-xs font-bold mb-2">
                 <GraduationCap size={14} />
                 <span>{currentBranchInfo.code} • {currentBranchInfo.name}</span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-[#102b46]">
+              <h1 className="text-xl sm:text-3xl font-black text-[#102b46]">
                 Welcome back, {user?.firstName || 'Learner'}! 👋
               </h1>
               <p className="text-xs sm:text-sm text-[#5a7184] font-medium mt-1">
@@ -95,7 +135,7 @@ export default function StudentDashboard() {
             </div>
 
             <Link href="/onboarding">
-              <button className="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-[#102b46] hover:bg-slate-50 transition-all">
+              <button className="px-4 py-2 sm:py-2.5 rounded-full border border-slate-200 text-xs font-bold text-[#102b46] hover:bg-slate-50 transition-all">
                 Change Branch
               </button>
             </Link>
@@ -103,172 +143,134 @@ export default function StudentDashboard() {
         </div>
 
         {/* 4 Quick Stat Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {stats.map((s, idx) => {
             const Icon = s.icon
             return (
               <div
                 key={idx}
-                className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_4px_20px_rgba(16,43,70,0.04)] flex flex-col justify-between"
+                className="bg-white rounded-2xl sm:rounded-[24px] p-4 sm:p-5 border border-slate-100 shadow-[0_4px_20px_rgba(16,43,70,0.04)] flex items-center gap-3 sm:gap-4"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#8294a5] uppercase tracking-wider">
+                <div className={`p-3 rounded-2xl ${s.color} shrink-0`}>
+                  <Icon size={22} strokeWidth={2.4} />
+                </div>
+                <div>
+                  <span className="text-[11px] sm:text-xs text-[#5a7184] font-semibold block">
                     {s.label}
                   </span>
-                  <div className={`p-1.5 rounded-lg ${s.color}`}>
-                    <Icon size={16} />
-                  </div>
-                </div>
-                <div className="text-2xl font-black text-[#102b46] mt-2">
-                  {s.value}
+                  <span className="text-lg sm:text-2xl font-black text-[#102b46] mt-0.5 block">
+                    {s.value}
+                  </span>
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* Continue Learning Featured Card */}
-        <div className="bg-white rounded-[24px] p-5 sm:p-6 border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.06)] space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-black text-[#102b46] flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              Continue Learning
-            </h2>
-            <Link
-              href="/student/courses"
-              className="text-xs font-bold text-[#d89b2b] hover:text-[#b88226] flex items-center gap-0.5"
-            >
-              My Courses <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#f8fafc] border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#102b46] to-[#0a1e32] flex items-center justify-center text-[#e5a93b] shadow-md shrink-0">
-                <PlayCircle size={30} />
+        {/* Continue Learning Card */}
+        <section className="bg-gradient-to-r from-[#0c243c] via-[#0f2d4a] to-[#163a5f] rounded-2xl sm:rounded-[28px] p-5 sm:p-7 text-white shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-400/20 text-[#f5c465] text-xs font-bold">
+                <PlayCircle size={13} />
+                <span>Resume Learning</span>
               </div>
-              <div>
-                <span className="text-[10px] font-bold text-[#e5a93b] uppercase tracking-wider">
-                  Lesson 2 of 6 • 18 min
-                </span>
-                <h3 className="text-sm sm:text-base font-extrabold text-[#102b46] line-clamp-1">
-                  Variables, Data Types and Operators
-                </h3>
-                <p className="text-xs text-[#5a7184] font-medium">
-                  {continueCourse.title}
-                </p>
-                {/* Progress bar */}
-                <div className="mt-2 flex items-center gap-2 w-48 sm:w-60">
-                  <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#d89b2b] to-[#f5cb68] rounded-full w-[65%]" />
-                  </div>
-                  <span className="text-[10px] font-bold text-[#d89b2b]">65%</span>
-                </div>
+              <h3 className="text-lg sm:text-xl font-black text-white">
+                {continueCourse.title}
+              </h3>
+              <p className="text-xs text-slate-300">
+                Lesson 4: Functions, Lambdas & Scope • 65% Completed
+              </p>
+              <div className="w-full sm:w-64 h-2 bg-white/20 rounded-full overflow-hidden mt-2">
+                <div className="h-full bg-gradient-to-r from-[#d99222] to-[#f5c465] rounded-full w-[65%]" />
               </div>
             </div>
 
-            <Link href={`/learn/${continueCourse.id}/${continueCourse.sections[0].lessons[1].id}`}>
-              <button className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-gradient-to-r from-[#e5a93b] via-[#f5cb68] to-[#dba032] text-[#0a1e32] font-bold text-xs shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-1.5">
-                <Play size={12} fill="#0a1e32" />
-                <span>Resume Lesson</span>
+            <Link href={`/learn/${continueCourse.id}/${continueCourse.sections[0].lessons[0].id}`} className="shrink-0">
+              <button className="w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all">
+                <Play size={13} className="fill-[#102b46]" />
+                <span>Continue Video</span>
               </button>
             </Link>
           </div>
-        </div>
+        </section>
 
         {/* Branch-Specific Recommended Courses */}
-        <div className="space-y-3.5 pt-2">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-black text-[#102b46]">
-                Eligible Courses for {currentBranchInfo.code}
+              <h2 className="text-lg sm:text-2xl font-black text-[#102b46] tracking-tight">
+                Recommended for {currentBranchInfo.code}
               </h2>
               <p className="text-xs text-[#5a7184] font-medium">
-                Mapped to your academic syllabus
+                Mapped directly to your university academic curriculum
               </p>
             </div>
             <Link
               href="/courses"
-              className="text-xs font-bold text-[#d89b2b] hover:underline"
+              className="text-xs sm:text-sm font-bold text-[#c58a23] hover:text-[#a8741a] flex items-center gap-1"
             >
-              View All
+              <span>View All</span>
+              <ArrowRight size={14} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {branchCourses.slice(0, 2).map((course) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            {branchCourses.map((c) => (
               <div
-                key={course.id}
-                className="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(16,43,70,0.06)] hover:shadow-[0_8px_30px_rgba(16,43,70,0.12)] transition-all overflow-hidden flex flex-col justify-between group"
+                key={c.id}
+                className="bg-white rounded-2xl sm:rounded-[24px] border border-slate-100 shadow-[0_4px_24px_rgba(16,43,70,0.05)] overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all group"
               >
-                <div className="relative h-36 bg-gradient-to-tr from-[#0b1e33] to-[#122e4d] p-3.5 flex items-center justify-center overflow-hidden">
-                  <div className="absolute top-3 left-3 bg-[#e5a93b] text-[#0a1e32] px-2.5 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-sm">
-                    <Play size={10} fill="#0a1e32" />
-                    <span>4.6 (8k)</span>
+                <div>
+                  <div className="relative h-40 bg-gradient-to-br from-[#0b1e33] to-[#122e4d] p-4 flex items-center justify-center overflow-hidden">
+                    <div className="absolute top-3 left-3 bg-[#e5a93b] text-[#102b46] px-2.5 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-sm z-10">
+                      <Play size={10} className="fill-[#102b46]" />
+                      <span>{c.rating || '4.5'}</span>
+                    </div>
+
+                    <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/20 z-10">
+                      {c.category}
+                    </div>
+
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#e5a93b]">
+                      <BookOpen size={28} />
+                    </div>
                   </div>
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-300"
-                  />
+
+                  <div className="p-4 sm:p-5 space-y-2">
+                    <h3 className="text-sm sm:text-base font-black text-[#102b46] group-hover:text-[#c58a23] transition-colors leading-snug line-clamp-1">
+                      {c.title}
+                    </h3>
+                    <p className="text-[11px] sm:text-xs text-[#5a7184] font-medium line-clamp-1">
+                      {c.tagline || c.description}
+                    </p>
+
+                    <div className="flex items-center gap-3 pt-1 text-[11px] text-[#5a7184] font-semibold">
+                      <div className="flex items-center gap-1">
+                        <Clock size={12} className="text-slate-400" />
+                        <span>{c.duration || `${c.durationHours}h`}</span>
+                      </div>
+                      <span>•</span>
+                      <span>{c.level}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="p-4 space-y-2">
-                  <h3 className="font-extrabold text-[15px] text-[#102b46] group-hover:text-[#d89b2b] transition-colors leading-snug line-clamp-1">
-                    {course.title}
-                  </h3>
-                  <p className="text-[11px] text-[#5a7184] font-medium line-clamp-1">
-                    {course.tagline}
-                  </p>
-
-                  <div className="flex items-center gap-3 text-[11px] text-[#8294a5] font-semibold pt-1">
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} />
-                      {course.durationHours} hrs
-                    </span>
-                    <span>•</span>
-                    <span>{course.level}</span>
+                <div className="p-4 sm:p-5 pt-0 flex items-center justify-between gap-3 border-t border-slate-100/80 mt-1">
+                  <div className="text-base sm:text-lg font-black text-[#102b46]">
+                    ₹{c.price.toLocaleString('en-IN')}
                   </div>
-
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-base font-black text-[#102b46]">
-                      ₹{course.price}
-                    </span>
-
-                    <Link href={`/courses/${course.slug}`}>
-                      <button className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#e5a93b] via-[#f5cb68] to-[#dba032] text-[#0a1e32] text-[11px] font-bold shadow-sm hover:shadow-md transition-all flex items-center gap-1.5">
-                        <Play size={10} fill="#0a1e32" />
-                        <span>Enroll Now</span>
-                      </button>
-                    </Link>
-                  </div>
+                  <Link href={`/courses/${c.slug}`}>
+                    <button className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-black bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] text-[#102b46] hover:brightness-105 shadow-sm flex items-center gap-1.5 transition-all">
+                      <Play size={10} className="fill-[#102b46]" />
+                      <span>Enroll Now</span>
+                    </button>
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Get Unlimited Access Banner */}
-        <section className="relative rounded-[22px] bg-gradient-to-r from-[#0a1e32] via-[#0d2642] to-[#123153] p-5 overflow-hidden shadow-lg text-white">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e5a93b]/30 to-[#f5d076]/10 border border-[#e5a93b]/50 flex items-center justify-center shrink-0 text-[#f5cb68]">
-                <Crown size={26} strokeWidth={2.4} fill="#e5a93b" fillOpacity={0.2} />
-              </div>
-              <div>
-                <h3 className="text-base font-black text-white">Get Unlimited Access</h3>
-                <p className="text-xs text-slate-300 font-medium">Subscribe and unlock all courses</p>
-              </div>
-            </div>
-
-            <Link href="/pricing">
-              <button className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#e5a93b] via-[#f5cb68] to-[#dba032] text-[#0a1e32] font-extrabold text-xs shadow-md hover:scale-105 transition-all flex items-center gap-1.5">
-                <span>Go Premium</span>
-                <ArrowRight size={14} strokeWidth={2.5} />
-              </button>
-            </Link>
-          </div>
-        </section>
       </div>
 
       <BottomNav />
