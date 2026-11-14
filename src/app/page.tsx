@@ -231,9 +231,27 @@ export default function HomePage() {
       <main className="flex-1">
         
         {/* ========================================================================= */}
-        {/* HERO SECTION — Fully responsive: Mobile first + 4K Desktop */}
+        {/* MOBILE HERO BANNER (< md) — Exactly matching saryonaya-mobile-design.jpg  */}
         {/* ========================================================================= */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-8 sm:pb-14">
+        <section className="md:hidden px-3 pt-3 pb-1 bg-gradient-to-b from-[#eef3f9] to-[#f4f7fb]">
+          <div className="relative rounded-2xl overflow-hidden shadow-[0_6px_20px_rgba(9,38,83,0.14)] border border-slate-200/90 active:scale-[0.99] transition-transform">
+            <Link href="/courses" className="block relative group" aria-label="Explore Courses">
+              <img
+                src="/images/mockup/hero-mobile-banner-2x.png"
+                alt="Learn Anytime, Anywhere - Explore Courses"
+                className="w-full h-auto object-cover"
+                width={944}
+                height={484}
+              />
+              <span className="sr-only">Learn Anytime, Anywhere - Upgrade your skills with expert-led online courses. Explore Courses</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* DESKTOP HERO SECTION (>= md) — 4K Premium UI                              */}
+        {/* ========================================================================= */}
+        <section className="hidden md:block relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-8 sm:pb-14">
           
           {/* Sweeping 3D Royal Navy & Molten Gold Ribbon Waves */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -336,15 +354,6 @@ export default function HomePage() {
                   </Link>
                 </motion.div>
 
-                {/* Mobile Hero Image (Positioned between CTA buttons and Trust indicators on mobile) */}
-                <div className="lg:hidden my-3 relative flex items-center justify-center">
-                  <img
-                    src="/images/mockup/hero-student-3d.png"
-                    alt="SARYONAYA Student Learning"
-                    className="w-full max-w-sm h-auto object-contain drop-shadow-[0_12px_30px_rgba(9,38,83,0.18)]"
-                  />
-                </div>
-
                 {/* Trust Indicators (Learner Avatars + Rating) */}
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -419,35 +428,37 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 3. PROMOTIONAL COURSE BANNERS (Carousel / Banners as requested) */}
+        {/* 3. PROMOTIONAL COURSE BANNERS (Carousel / Banners - Desktop view)         */}
         {/* ========================================================================= */}
-        <PromotionalBanners />
+        <div className="hidden md:block">
+          <PromotionalBanners />
+        </div>
 
         {/* ========================================================================= */}
-        {/* 4. SEARCH & FILTER BAR */}
+        {/* 4. SEARCH & FILTER BAR                                                    */}
         {/* ========================================================================= */}
-        <section className="relative -mt-2 sm:-mt-4 z-20">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3 max-w-3xl mx-auto">
+        <section className="relative px-3 sm:px-6 lg:px-8 pt-2 sm:pt-0 sm:-mt-4 z-20">
+          <div className="max-w-[1280px] mx-auto">
+            <div className="flex items-center gap-2 sm:gap-3 max-w-3xl mx-auto">
               
               {/* Large Rounded White Search Bar */}
-              <div className="flex-1 flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-3.5 bg-white rounded-full border border-slate-200/90 shadow-[0_4px_20px_rgba(9,38,83,0.06)] focus-within:border-[#E9AC32] focus-within:shadow-[0_6px_25px_rgba(9,38,83,0.1)] transition-all">
-                <Search className="w-5 h-5 text-slate-400 shrink-0" />
+              <div className="flex-1 flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-6 py-2.5 sm:py-3.5 bg-white rounded-full border border-slate-200/90 shadow-[0_3px_14px_rgba(9,38,83,0.06)] focus-within:border-[#E9AC32] focus-within:shadow-[0_6px_25px_rgba(9,38,83,0.1)] transition-all">
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 shrink-0" />
                 <input
                   type="text"
                   placeholder="Search for courses..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent text-sm sm:text-base text-[#102B50] placeholder-slate-400 outline-none w-full font-medium"
+                  className="bg-transparent text-xs sm:text-base text-[#102B50] placeholder-slate-400 outline-none w-full font-medium"
                 />
               </div>
 
               {/* 3D Filter Button */}
               <button
                 onClick={() => setFilterActive(!filterActive)}
-                className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#061B3A] via-[#092653] to-[#1456A0] text-white font-extrabold text-sm border-t border-white/20 border-b-[2px] border-b-[#040f21] shadow-[0_3px_12px_rgba(9,38,83,0.28)] hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer shrink-0"
+                className="px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-[#061B3A] via-[#092653] to-[#1456A0] text-white font-extrabold text-xs sm:text-sm border-t border-white/20 border-b-[2px] border-b-[#040f21] shadow-[0_3px_12px_rgba(9,38,83,0.28)] hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0"
               >
-                <SlidersHorizontal className="w-4 h-4 text-[#F8D77A]" />
+                <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F8D77A]" />
                 <span>Filter</span>
               </button>
 
@@ -456,11 +467,11 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business) */}
+        {/* 5. 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business)    */}
         {/* ========================================================================= */}
-        <section className="pt-8 sm:pt-12 pb-6 sm:pb-8">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+        <section className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-10 pb-2 sm:pb-6">
+          <div className="max-w-[1280px] mx-auto">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6">
               {categories.map((cat) => (
                 <CategoryCard key={cat.id} category={cat} />
               ))}
@@ -469,16 +480,16 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* POPULAR COURSES SECTION (Matching Mockup) */}
+        {/* POPULAR COURSES SECTION (Matching Mockup)                                  */}
         {/* ========================================================================= */}
-        <section className="py-8 sm:py-12">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="px-3 sm:px-6 lg:px-8 py-4 sm:py-10">
+          <div className="max-w-[1280px] mx-auto">
             
             {/* Header row: Yellow bar | Popular Courses  and  View All Courses -> */}
-            <div className="flex items-center justify-between gap-4 mb-5 sm:mb-8">
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                <span className="w-1.5 sm:w-2 h-6 sm:h-8 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
+            <div className="flex items-center justify-between gap-4 mb-3 sm:mb-8">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="w-1.5 sm:w-2 h-5 sm:h-8 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
+                <h2 className="text-base sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
                   Popular Courses
                 </h2>
               </div>
@@ -493,13 +504,31 @@ export default function HomePage() {
             </div>
 
             {/* 4 Popular Course Cards - 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
               {popularCourses.map((c) => (
                 <CourseCard key={c.id} course={c} />
               ))}
             </div>
 
           </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* MOBILE UNLIMITED ACCESS BANNER (< md)                                     */}
+        {/* ========================================================================= */}
+        <section className="md:hidden px-3 pt-1 pb-4">
+          <Link
+            href="/subscriptions"
+            className="block relative rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(9,38,83,0.12)] active:scale-[0.99] transition-transform"
+          >
+            <img
+              src="/images/mockup/banner-mobile-premium-2x.png"
+              alt="Get Unlimited Access - Subscribe and unlock all courses"
+              className="w-full h-auto object-cover"
+              width={864}
+              height={170}
+            />
+          </Link>
         </section>
 
         {/* ========================================================================= */}

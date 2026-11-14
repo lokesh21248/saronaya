@@ -169,96 +169,140 @@ export function Navbar() {
         </div>
 
         {/* Center / Right: Search Bar & Actions */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           
-          {/* Search Bar (matching the mockup) */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white focus-within:shadow-md shadow-xs transition-all w-48 xl:w-64"
-          >
-            <Search size={14} className="text-slate-400 shrink-0" />
-            <input
-              type="text"
-              placeholder="Search courses, AI, VLSI..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent text-xs text-[#07182e] placeholder-slate-400 outline-none w-full font-medium"
-            />
-          </form>
+          {/* ========================================================= */}
+          {/* MOBILE ONLY (< md): Clean Bell + Circular Student Avatar */}
+          {/* Matches saryonaya-mobile-design.jpg pixel-for-pixel       */}
+          {/* ========================================================= */}
+          <div className="flex md:hidden items-center gap-2">
+            <Link
+              href="/notifications"
+              className="relative p-2 rounded-full bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 active:scale-95 transition-all"
+              aria-label="Notifications"
+            >
+              <Bell size={18} />
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                2
+              </span>
+            </Link>
 
-          {/* Go Premium Luxury Button */}
-          <Link href="/subscriptions" className="hidden sm:inline-block">
-            <PremiumButton size="sm">Go Premium</PremiumButton>
-          </Link>
-
-          {/* Notification Bell with Badge */}
-          <Link
-            href="/notifications"
-            className="relative p-2 sm:p-2.5 rounded-full bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 hover:text-[#b87e1a] transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell size={16} />
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-sm">
-              2
-            </span>
-          </Link>
-
-          {/* Authentication Actions: Login / Register OR User Profile / Logout */}
-          {isSignedIn ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 hover:border-[#dfa32b] transition-all"
-              >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#dfa32b] to-[#07182e] text-white flex items-center justify-center font-bold text-xs">
-                  {user?.firstName?.[0] || 'U'}
+            {isSignedIn ? (
+              <Link href="/profile" className="relative group shrink-0" aria-label="Profile">
+                <div className="w-8 h-8 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-slate-100 shadow-sm flex items-center justify-center font-black text-xs text-[#07182e]">
+                  {user?.imageUrl ? (
+                    <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user?.firstName?.[0] || 'U'}</span>
+                  )}
                 </div>
-                <span className="text-xs font-extrabold text-[#07182e] hidden sm:inline">
-                  {user?.firstName || 'Student'}
-                </span>
               </Link>
-              <button
-                onClick={handleSignOut}
-                className="p-2 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                title="Sign Out"
-              >
-                <LogOut size={16} />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              {/* Login Button (White pill with subtle shadow) */}
-              <Link href="/login">
-                <button className="px-4 py-2 rounded-full text-xs font-black text-[#07182e] bg-white border border-slate-300/90 shadow-sm hover:border-[#07182e] hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-1.5">
-                  <User size={13} className="text-[#07182e]" />
-                  <span>Login</span>
-                </button>
+            ) : (
+              <Link href="/login" className="relative group shrink-0" aria-label="Sign In">
+                <div className="w-8 h-8 rounded-full ring-2 ring-[#e5a93b] overflow-hidden bg-white shadow-sm flex items-center justify-center">
+                  <img
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                    alt="Student Account"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </Link>
+            )}
+          </div>
 
-              {/* Register Button (Golden 3D pill button matching mockup) */}
-              <Link href="/register">
-                <button className="px-4 sm:px-5 py-2 rounded-full text-xs font-black text-[#07182e] bg-gradient-to-r from-[#dfa32b] via-[#f7d685] to-[#d99222] border-t border-white/60 border-b-[2px] border-b-[#a66d0e] shadow-[0_3px_12px_rgba(223,163,43,0.35)] hover:shadow-[0_5px_18px_rgba(223,163,43,0.5)] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
-                  <UserPlus size={13} className="text-[#07182e]" />
-                  <span>Register</span>
-                </button>
-              </Link>
-            </div>
-          )}
+          {/* ========================================================= */}
+          {/* DESKTOP / TABLET (>= md): Full Actions & Auth Controls     */}
+          {/* ========================================================= */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-3">
+            {/* Search Bar (matching the mockup) */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f9fd] border border-slate-200/90 rounded-full focus-within:border-[#dfa32b] focus-within:bg-white focus-within:shadow-md shadow-xs transition-all w-48 xl:w-64"
+            >
+              <Search size={14} className="text-slate-400 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search courses, AI, VLSI..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent text-xs text-[#07182e] placeholder-slate-400 outline-none w-full font-medium"
+              />
+            </form>
 
-          {/* Mobile Drawer Menu Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden p-2 rounded-xl bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 transition-colors ml-1"
-            aria-label="Toggle Navigation Menu"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            {/* Go Premium Luxury Button */}
+            <Link href="/subscriptions" className="hidden sm:inline-block">
+              <PremiumButton size="sm">Go Premium</PremiumButton>
+            </Link>
+
+            {/* Notification Bell with Badge */}
+            <Link
+              href="/notifications"
+              className="relative p-2 sm:p-2.5 rounded-full bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 hover:text-[#b87e1a] transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={16} />
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+                2
+              </span>
+            </Link>
+
+            {/* Authentication Actions: Login / Register OR User Profile / Logout */}
+            {isSignedIn ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 hover:border-[#dfa32b] transition-all"
+                >
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#dfa32b] to-[#07182e] text-white flex items-center justify-center font-bold text-xs">
+                    {user?.firstName?.[0] || 'U'}
+                  </div>
+                  <span className="text-xs font-extrabold text-[#07182e] hidden sm:inline">
+                    {user?.firstName || 'Student'}
+                  </span>
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="p-2 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {/* Login Button (White pill with subtle shadow) */}
+                <Link href="/login">
+                  <button className="px-4 py-2 rounded-full text-xs font-black text-[#07182e] bg-white border border-slate-300/90 shadow-sm hover:border-[#07182e] hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-1.5">
+                    <User size={13} className="text-[#07182e]" />
+                    <span>Login</span>
+                  </button>
+                </Link>
+
+                {/* Register Button (Golden 3D pill button matching mockup) */}
+                <Link href="/register">
+                  <button className="px-4 sm:px-5 py-2 rounded-full text-xs font-black text-[#07182e] bg-gradient-to-r from-[#dfa32b] via-[#f7d685] to-[#d99222] border-t border-white/60 border-b-[2px] border-b-[#a66d0e] shadow-[0_3px_12px_rgba(223,163,43,0.35)] hover:shadow-[0_5px_18px_rgba(223,163,43,0.5)] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <UserPlus size={13} className="text-[#07182e]" />
+                    <span>Register</span>
+                  </button>
+                </Link>
+              </div>
+            )}
+
+            {/* Tablet Menu Toggle (Between md and xl only) */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="xl:hidden p-2 rounded-xl bg-slate-50 border border-slate-200 text-[#07182e] hover:bg-slate-100 transition-colors ml-1"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Tablet Drawer Menu (Hidden on mobile < md where bottom nav is active) */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-4 duration-200 shadow-xl">
+        <div className="hidden md:block xl:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-4 duration-200 shadow-xl">
           {/* Mobile Search */}
           <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
             <Search size={15} className="text-slate-400" />
