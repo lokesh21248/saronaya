@@ -130,7 +130,7 @@ export default function CoursesExplorePage() {
     <div className="min-h-screen bg-[#f4f7fb] text-[#07182e] flex flex-col font-sans antialiased selection:bg-[#dfa32b]/30">
       <Navbar />
 
-      <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8 sm:py-12">
+      <main className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         
         {/* Page Header */}
         <div className="space-y-2 mb-8">
@@ -382,7 +382,7 @@ export default function CoursesExplorePage() {
               <div
                 className={
                   viewMode === 'grid'
-                    ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6'
+                    ? 'grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6'
                     : 'space-y-4'
                 }
               >

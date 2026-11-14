@@ -26,10 +26,10 @@ export function Premium3DButton({
   ...props
 }: MotionProps) {
   const sizeClasses = {
-    sm: 'px-3.5 py-1.5 text-xs font-black gap-1.5 rounded-full',
-    md: 'px-5 py-2.5 text-xs sm:text-sm font-black gap-2 rounded-full',
-    lg: 'px-7 py-3.5 text-sm sm:text-base font-black gap-2.5 rounded-full',
-    xl: 'px-9 py-4 text-base sm:text-lg font-black gap-3 rounded-full',
+    sm: 'h-9 px-3.5 text-xs font-black gap-1.5 rounded-full',
+    md: 'h-11 sm:h-12 px-5 text-xs sm:text-sm font-black gap-2 rounded-full',
+    lg: 'h-12 sm:h-13 px-7 text-sm sm:text-base font-black gap-2.5 rounded-full',
+    xl: 'h-14 px-9 text-base sm:text-lg font-black gap-3 rounded-full',
   }[size]
 
   return (
@@ -62,3 +62,4 @@ export function Premium3DButton({
     </motion.button>
   )
 }
+

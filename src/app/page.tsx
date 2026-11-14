@@ -35,6 +35,7 @@ import {
   EnrollButton,
   SubscribeButton,
 } from '@/components/ui/Buttons'
+import { PromotionalBanners } from '@/components/home/PromotionalBanners'
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -230,16 +231,14 @@ export default function HomePage() {
       <main className="flex-1">
         
         {/* ========================================================================= */}
-        {/* HERO SECTION — Matching the 4K Mockup exactly */}
+        {/* HERO SECTION — Fully responsive: Mobile first + 4K Desktop */}
         {/* ========================================================================= */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-12 sm:pb-16">
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#eef3f9] via-white to-[#f4f7fb] pt-6 sm:pt-10 pb-8 sm:pb-14">
           
-          {/* Sweeping 3D Royal Navy & Molten Gold Ribbon Waves (Mockup Accent) */}
+          {/* Sweeping 3D Royal Navy & Molten Gold Ribbon Waves */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-            {/* Top right golden ribbon */}
-            <div className="absolute -top-24 right-0 w-[55vw] h-[55vw] max-w-[850px] max-h-[850px] bg-gradient-to-bl from-amber-400/20 via-blue-900/10 to-transparent rounded-full blur-3xl" />
+            <div className="absolute -top-24 right-0 w-[55vw] h-[55vw] max-w-[850px] max-h-[850px] bg-gradient-to-bl from-[#E9AC32]/20 via-[#092653]/10 to-transparent rounded-full blur-3xl" />
             
-            {/* 3D Wave SVG background curves */}
             <svg
               className="absolute right-0 top-0 w-full lg:w-[65%] h-full object-cover opacity-90 hidden sm:block"
               viewBox="0 0 900 600"
@@ -248,22 +247,20 @@ export default function HomePage() {
             >
               <defs>
                 <linearGradient id="heroNavyGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#07182e" stopOpacity="0.05" />
-                  <stop offset="50%" stopColor="#0e3a6c" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#1e5ba3" stopOpacity="0.25" />
+                  <stop offset="0%" stopColor="#061B3A" stopOpacity="0.05" />
+                  <stop offset="50%" stopColor="#092653" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#1456A0" stopOpacity="0.25" />
                 </linearGradient>
                 <linearGradient id="heroGoldRibbon" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#dfa32b" />
-                  <stop offset="50%" stopColor="#fced9f" />
-                  <stop offset="100%" stopColor="#b37a18" />
+                  <stop offset="0%" stopColor="#E9AC32" />
+                  <stop offset="50%" stopColor="#F8D77A" />
+                  <stop offset="100%" stopColor="#d4941e" />
                 </linearGradient>
               </defs>
-              {/* Backing wave curve */}
               <path
                 d="M300 0 C450 150 550 200 900 120 L900 600 L200 600 C350 400 200 250 300 0 Z"
                 fill="url(#heroNavyGrad)"
               />
-              {/* Gold Ribbon Trim */}
               <path
                 d="M200 600 C380 380 480 280 900 200"
                 stroke="url(#heroGoldRibbon)"
@@ -273,7 +270,7 @@ export default function HomePage() {
               />
               <path
                 d="M160 600 C350 400 450 300 900 220"
-                stroke="#092347"
+                stroke="#092653"
                 strokeWidth="8"
                 strokeLinecap="round"
                 opacity="0.85"
@@ -281,11 +278,11 @@ export default function HomePage() {
             </svg>
           </div>
 
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
               
-              {/* LEFT COLUMN: Headlines, CTAs & Social Proof */}
-              <div className="lg:col-span-7 xl:col-span-6 space-y-6 sm:space-y-8">
+              {/* HEADLINES, CTAS & SOCIAL PROOF */}
+              <div className="lg:col-span-7 space-y-5 sm:space-y-6">
                 
                 {/* Hero Title */}
                 <div className="space-y-2">
@@ -293,10 +290,10 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black text-[#07182e] tracking-tight leading-[1.08]"
+                    className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#102B50] tracking-tight leading-[1.12]"
                   >
                     Learn Anytime,{' '}
-                    <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#d99222] via-[#e5a93b] to-[#f5c465] bg-clip-text text-transparent drop-shadow-xs">
+                    <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#d4941e] via-[#E9AC32] to-[#F8D77A] bg-clip-text text-transparent drop-shadow-xs">
                       Anywhere
                     </span>
                   </motion.h1>
@@ -306,7 +303,7 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
-                    className="text-base sm:text-lg md:text-xl text-slate-600 font-medium max-w-xl leading-relaxed pt-2"
+                    className="text-sm sm:text-base lg:text-lg text-slate-600 font-medium max-w-xl leading-relaxed pt-1"
                   >
                     Upgrade your skills with expert-led online courses and take your career to the next level.
                   </motion.p>
@@ -323,7 +320,7 @@ export default function HomePage() {
                     <PrimaryButton
                       size="lg"
                       icon={<Play className="w-4 h-4 text-white fill-white shrink-0 mr-1" />}
-                      rightIcon={<ArrowRight className="w-4 h-4 text-[#e5a93b] shrink-0" />}
+                      rightIcon={<ArrowRight className="w-4 h-4 text-[#F8D77A] shrink-0" />}
                     >
                       Explore Courses
                     </PrimaryButton>
@@ -332,12 +329,21 @@ export default function HomePage() {
                   <Link href="/courses/python-for-beginners">
                     <SecondaryButton
                       size="lg"
-                      icon={<Play className="w-4 h-4 text-[#07182e] fill-[#07182e] shrink-0 mr-1" />}
+                      icon={<Play className="w-4 h-4 text-[#092653] fill-[#092653] shrink-0 mr-1" />}
                     >
                       Watch Demo
                     </SecondaryButton>
                   </Link>
                 </motion.div>
+
+                {/* Mobile Hero Image (Positioned between CTA buttons and Trust indicators on mobile) */}
+                <div className="lg:hidden my-3 relative flex items-center justify-center">
+                  <img
+                    src="/images/mockup/hero-student-3d.png"
+                    alt="SARYONAYA Student Learning"
+                    className="w-full max-w-sm h-auto object-contain drop-shadow-[0_12px_30px_rgba(9,38,83,0.18)]"
+                  />
+                </div>
 
                 {/* Trust Indicators (Learner Avatars + Rating) */}
                 <motion.div
@@ -369,7 +375,7 @@ export default function HomePage() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gradient-to-tr from-[#07182e] to-[#0e3a6c] text-[#fced9f] text-xs font-black flex items-center justify-center shadow-sm">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gradient-to-tr from-[#061B3A] to-[#092653] text-[#F8D77A] text-xs font-black flex items-center justify-center shadow-sm">
                       +10K
                     </div>
                   </div>
@@ -382,7 +388,7 @@ export default function HomePage() {
                           <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
                         ))}
                       </div>
-                      <span className="font-extrabold text-sm text-[#07182e]">4.8/5</span>
+                      <span className="font-extrabold text-sm text-[#102B50]">4.8/5</span>
                     </div>
                     <span className="text-xs font-medium text-slate-500">
                       Trusted by 10,000+ Learners
@@ -392,18 +398,18 @@ export default function HomePage() {
 
               </div>
 
-              {/* RIGHT COLUMN: The exact 3D Student & Floating Education Elements from Mockup */}
-              <div className="lg:col-span-5 xl:col-span-6 relative flex items-center justify-center lg:justify-end">
+              {/* DESKTOP RIGHT COLUMN: 3D Student & Floating Education Elements */}
+              <div className="hidden lg:flex lg:col-span-5 relative items-center justify-end">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="relative w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
+                  className="relative w-full max-w-lg"
                 >
                   <img
                     src="/images/mockup/hero-student-3d.png"
                     alt="SARYONAYA Student & 3D Interactive Elements"
-                    className="w-full h-auto object-contain drop-shadow-[0_18px_40px_rgba(9,35,71,0.18)] rounded-2xl sm:rounded-3xl"
+                    className="w-full h-auto object-contain drop-shadow-[0_18px_40px_rgba(9,38,83,0.18)]"
                   />
                 </motion.div>
               </div>
@@ -413,30 +419,35 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SEARCH & FILTER BAR (Matching Mockup) */}
+        {/* 3. PROMOTIONAL COURSE BANNERS (Carousel / Banners as requested) */}
         {/* ========================================================================= */}
-        <section className="relative -mt-6 z-20">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-            <div className="flex items-center gap-3 max-w-4xl mx-auto">
+        <PromotionalBanners />
+
+        {/* ========================================================================= */}
+        {/* 4. SEARCH & FILTER BAR */}
+        {/* ========================================================================= */}
+        <section className="relative -mt-2 sm:-mt-4 z-20">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 max-w-3xl mx-auto">
               
               {/* Large Rounded White Search Bar */}
-              <div className="flex-1 flex items-center gap-3 px-5 sm:px-6 py-3.5 sm:py-4 bg-white rounded-full border border-slate-200/90 shadow-[0_6px_24px_rgba(9,35,71,0.07)] focus-within:border-[#dfa32b] focus-within:shadow-[0_8px_30px_rgba(9,35,71,0.12)] transition-all">
+              <div className="flex-1 flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-3.5 bg-white rounded-full border border-slate-200/90 shadow-[0_4px_20px_rgba(9,38,83,0.06)] focus-within:border-[#E9AC32] focus-within:shadow-[0_6px_25px_rgba(9,38,83,0.1)] transition-all">
                 <Search className="w-5 h-5 text-slate-400 shrink-0" />
                 <input
                   type="text"
                   placeholder="Search for courses..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent text-sm sm:text-base text-[#07182e] placeholder-slate-400 outline-none w-full font-medium"
+                  className="bg-transparent text-sm sm:text-base text-[#102B50] placeholder-slate-400 outline-none w-full font-medium"
                 />
               </div>
 
               {/* 3D Filter Button */}
               <button
                 onClick={() => setFilterActive(!filterActive)}
-                className="px-5 sm:px-7 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#07182e] via-[#092347] to-[#123963] text-white font-extrabold text-sm sm:text-base border-t border-white/20 border-b-[2px] border-b-[#030b14] shadow-[0_4px_14px_rgba(7,24,46,0.3)] hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer shrink-0"
+                className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#061B3A] via-[#092653] to-[#1456A0] text-white font-extrabold text-sm border-t border-white/20 border-b-[2px] border-b-[#040f21] shadow-[0_3px_12px_rgba(9,38,83,0.28)] hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer shrink-0"
               >
-                <SlidersHorizontal className="w-4 h-4 text-[#e5a93b]" />
+                <SlidersHorizontal className="w-4 h-4 text-[#F8D77A]" />
                 <span>Filter</span>
               </button>
 
@@ -445,11 +456,11 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business) */}
+        {/* 5. 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business) */}
         {/* ========================================================================= */}
-        <section className="pt-8 sm:pt-14 pb-8 sm:pb-10">
-          <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+        <section className="pt-8 sm:pt-12 pb-6 sm:pb-8">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {categories.map((cat) => (
                 <CategoryCard key={cat.id} category={cat} />
               ))}
@@ -461,13 +472,13 @@ export default function HomePage() {
         {/* POPULAR COURSES SECTION (Matching Mockup) */}
         {/* ========================================================================= */}
         <section className="py-8 sm:py-12">
-          <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
             
             {/* Header row: Yellow bar | Popular Courses  and  View All Courses -> */}
             <div className="flex items-center justify-between gap-4 mb-5 sm:mb-8">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <span className="w-1.5 sm:w-2 h-6 sm:h-8 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
                   Popular Courses
                 </h2>
               </div>
@@ -482,7 +493,7 @@ export default function HomePage() {
             </div>
 
             {/* 4 Popular Course Cards - 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {popularCourses.map((c) => (
                 <CourseCard key={c.id} course={c} />
               ))}
@@ -494,7 +505,7 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* BOTTOM TRUST STATS BAR (Matching Mockup exactly) */}
         {/* ========================================================================= */}
-        <section className="relative py-6 sm:py-8 bg-white border-y border-slate-200/80 shadow-[0_2px_15px_rgba(9,35,71,0.03)] my-8 overflow-hidden">
+        <section className="relative py-6 sm:py-8 bg-white border-y border-slate-200/80 shadow-[0_2px_15px_rgba(9,35,71,0.03)] my-6 sm:my-8 overflow-hidden">
           {/* Bottom right gold and royal blue wave ribbon accent matching mockup */}
           <div className="absolute -right-2 -bottom-2 pointer-events-none opacity-90 hidden md:block">
             <svg width="260" height="85" viewBox="0 0 260 85" fill="none">
@@ -502,31 +513,31 @@ export default function HomePage() {
               <path d="M15 85 C95 45 175 20 260 0" stroke="#dfa32b" strokeWidth="5" strokeLinecap="round" />
             </svg>
           </div>
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center justify-center text-center">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 items-center justify-center text-center">
               
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3">
                 <span className="text-xl sm:text-2xl">🏆</span>
                 <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
                   Trusted by 10,000+ Students
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3">
                 <span className="text-xl sm:text-2xl">📹</span>
                 <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
                   500+ Premium Courses
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3">
                 <span className="text-xl sm:text-2xl">🎓</span>
                 <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
                   Get Certified
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3">
                 <span className="text-xl sm:text-2xl">🎧</span>
                 <span className="font-extrabold text-xs sm:text-sm text-[#07182e]">
                   24/7 Support
@@ -540,12 +551,12 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* FEATURED / TRENDING ENGINEERING COURSES */}
         {/* ========================================================================= */}
-        <section className="py-12 sm:py-16">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+        <section className="py-8 sm:py-14">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
-              <div className="flex items-center gap-3">
-                <span className="w-1.5 sm:w-2 h-7 sm:h-8 rounded-full bg-gradient-to-b from-[#092347] to-[#1e40af]" />
+            <div className="flex items-center justify-between gap-4 mb-5 sm:mb-8">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <span className="w-1.5 sm:w-2 h-6 sm:h-8 rounded-full bg-gradient-to-b from-[#092347] to-[#1e40af]" />
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
                   Featured Engineering Programs
                 </h2>
@@ -556,12 +567,12 @@ export default function HomePage() {
                 className="text-xs sm:text-sm font-extrabold text-[#092347] hover:text-[#b87e1a] flex items-center gap-1 transition-colors group"
               >
                 <span>Browse All</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
             {/* Featured Engineering Programs - 2 columns on mobile */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {featuredCourses.map((c) => (
                 <CourseCard key={c.id} course={c} />
               ))}
@@ -573,8 +584,8 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* WHY CHOOSE SARYONAYA — 3D Cards */}
         {/* ========================================================================= */}
-        <section className="py-14 sm:py-20 bg-white border-y border-slate-200/80">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+        <section className="py-10 sm:py-16 bg-white border-y border-slate-200/80">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
             
             <div className="text-center max-w-2xl mx-auto space-y-3 mb-12 sm:mb-16">
               <span className="text-xs font-black text-[#b87e1a] uppercase tracking-wider px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300/40">
@@ -638,7 +649,7 @@ export default function HomePage() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#dfa32b]/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-4xl mx-auto text-center space-y-6">
               
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-[#dfa32b]/60 text-xs font-black text-[#fced9f]">
@@ -680,8 +691,8 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* STUDENT TESTIMONIALS */}
         {/* ========================================================================= */}
-        <section className="py-14 sm:py-20">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+        <section className="py-12 sm:py-16">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
             
             <div className="text-center max-w-2xl mx-auto space-y-3 mb-12 sm:mb-16">
               <span className="text-xs font-black text-[#b87e1a] uppercase tracking-wider px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300/40">

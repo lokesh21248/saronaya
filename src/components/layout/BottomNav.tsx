@@ -17,8 +17,8 @@ export function BottomNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(9,35,71,0.08)] py-1.5 px-2 md:hidden">
-      <div className="max-w-md mx-auto flex items-center justify-around">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(9,38,83,0.08)] pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] px-3 md:hidden">
+      <div className="max-w-md mx-auto flex items-center justify-between">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive =
@@ -32,25 +32,25 @@ export function BottomNav() {
               className="flex flex-col items-center justify-center flex-1 py-1 transition-all group relative"
             >
               <div
-                className={`transition-colors p-1 rounded-xl ${
+                className={`transition-colors p-1.5 rounded-xl ${
                   isActive
-                    ? 'text-[#07182e] bg-amber-50/80 shadow-xs'
+                    ? 'text-[#092653] bg-amber-50 shadow-xs'
                     : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
               <span
-                className={`text-[10px] mt-0.5 font-bold transition-colors ${
-                  isActive ? 'text-[#07182e]' : 'text-slate-400 group-hover:text-slate-600'
+                className={`text-[11px] mt-0.5 font-bold transition-colors ${
+                  isActive ? 'text-[#092653]' : 'text-slate-500 group-hover:text-slate-700'
                 }`}
               >
                 {tab.label}
               </span>
 
-              {/* Active Golden Underline Indicator */}
+              {/* Active Golden Indicator Dot */}
               {isActive && (
-                <span className="w-5 h-[2.5px] bg-gradient-to-r from-[#dfa32b] to-[#f5cb68] rounded-full mt-0.5" />
+                <span className="w-1.5 h-1.5 bg-[#E9AC32] rounded-full mt-0.5" />
               )}
             </Link>
           )

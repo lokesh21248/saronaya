@@ -30,10 +30,10 @@ export function Secondary3DButton({
   ...props
 }: MotionProps) {
   const sizeClasses = {
-    sm: 'px-4 py-2 text-xs font-bold gap-1.5 rounded-full',
-    md: 'px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold gap-2 rounded-full',
-    lg: 'px-8 py-3.5 text-sm sm:text-base font-extrabold gap-2.5 rounded-full',
-    xl: 'px-10 py-4 text-base sm:text-lg font-black gap-3 rounded-full',
+    sm: 'h-9 px-4 text-xs font-bold gap-1.5 rounded-full',
+    md: 'h-11 sm:h-12 px-6 text-sm sm:text-base font-bold gap-2 rounded-full',
+    lg: 'h-12 sm:h-13 px-8 text-sm sm:text-base font-extrabold gap-2.5 rounded-full',
+    xl: 'h-14 px-10 text-base sm:text-lg font-black gap-3 rounded-full',
   }[size]
 
   return (
@@ -67,3 +67,4 @@ export function Secondary3DButton({
     </motion.button>
   )
 }
+
