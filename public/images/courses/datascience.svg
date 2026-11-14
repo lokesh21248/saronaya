@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_ds" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#061B3A"/>
+      <stop offset="50%" stop-color="#092653"/>
+      <stop offset="100%" stop-color="#1456A0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg_ds)"/>
+  <g transform="translate(320, 120)">
+    <rect x="-10" y="-10" width="180" height="140" rx="24" fill="#061B3A" stroke="#E9AC32" stroke-width="2" opacity="0.6"/>
+    <rect x="20" y="60" width="24" height="60" rx="6" fill="#38bdf8"/>
+    <rect x="60" y="30" width="24" height="90" rx="6" fill="#1456A0"/>
+    <rect x="100" y="10" width="24" height="110" rx="6" fill="#E9AC32"/>
+  </g>
+  <text x="400" y="340" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle" letter-spacing="2">DATA SCIENCE &amp; ANALYTICS</text>
+  <text x="400" y="375" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#F8D77A" text-anchor="middle" letter-spacing="3">PANDAS • NUMPY • POWER BI • SQL</text>
+</svg>

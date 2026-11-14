@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg-mkt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#061B3A"/>
+      <stop offset="50%" stop-color="#092653"/>
+      <stop offset="100%" stop-color="#1456A0"/>
+    </linearGradient>
+    <linearGradient id="mkt-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F8D77A"/>
+      <stop offset="100%" stop-color="#E9AC32"/>
+    </linearGradient>
+    <filter id="glow-mkt">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg-mkt)"/>
+  <circle cx="680" cy="130" r="150" fill="#1456A0" opacity="0.3" filter="url(#glow-mkt)"/>
+  <circle cx="150" cy="340" r="130" fill="#E9AC32" opacity="0.2" filter="url(#glow-mkt)"/>
+  
+  {/* Bullhorn & Growth Rocket Marketing Graphic */}
+  <g transform="translate(340, 95)" filter="url(#glow-mkt)">
+    <circle cx="60" cy="60" r="65" fill="#061B3A" stroke="#E9AC32" stroke-width="2" opacity="0.85"/>
+    {/* Bullhorn / Megaphone icon */}
+    <path d="M 45 45 L 75 32 L 75 88 L 45 75 Z" fill="url(#mkt-accent)"/>
+    <rect x="32" y="50" width="13" height="20" rx="3" fill="#ffffff"/>
+    <path d="M 45 75 L 48 95 L 56 95 L 54 75 Z" fill="#F8D77A"/>
+    {/* Soundwaves */}
+    <path d="M 85 45 A 20 20 0 0 1 85 75" fill="none" stroke="#F8D77A" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 95 35 A 35 35 0 0 1 95 85" fill="none" stroke="#E9AC32" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <text x="400" y="325" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle" letter-spacing="2">DIGITAL MARKETING &amp; SEO</text>
+  <text x="400" y="360" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#F8D77A" text-anchor="middle" letter-spacing="3">PERFORMANCE MARKETING • BRAND STRATEGY</text>
+</svg>

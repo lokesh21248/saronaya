@@ -1,30 +1,36 @@
 @import 'tailwindcss';
 
 :root {
-  --navy: #092347;
-  --navy-deep: #07182e;
-  --navy-soft: #12345e;
-  --navy-card: #0b2545;
-  --gold: #dfa32b;
-  --gold-light: #f5cb68;
+  /* SARYONAYA Brand Colour Tokens */
+  --primary-navy: #092653;
+  --royal-blue: #1456A0;
+  --deep-blue: #061B3A;
+  --gold: #E9AC32;
+  --light-gold: #F8D77A;
   --gold-dark: #b87e1a;
-  --gold-gradient: linear-gradient(135deg, #dfa32b 0%, #f5cb68 50%, #d4941e 100%);
+  --bg-canvas: #F4F7FC;
+  --bg-card: #FFFFFF;
+  --text-main: #102B50;
+  --text-muted: #557086;
+  --line-border: #e2e8f0;
+
+  /* Legacy variable mappings for compatibility */
+  --navy: #092653;
+  --navy-deep: #061B3A;
+  --navy-soft: #1456A0;
+  --navy-card: #092653;
   --cream: #ffffff;
-  --bg-main: #f6f9fd;
-  --ink: #092347;
+  --bg-main: #F4F7FC;
+  --ink: #102B50;
   --ink-secondary: #557086;
   --muted: #8294a5;
   --line: #e2e8f0;
   --white: #ffffff;
-  --green: #10b981;
-  --red: #ef4444;
-  --amber: #f59e0b;
-  --shadow-card: 0 4px 24px -2px rgba(9, 35, 71, 0.06);
-  --shadow-hover: 0 10px 32px -4px rgba(9, 35, 71, 0.12);
-  --shadow-gold: 0 6px 24px -2px rgba(223, 163, 43, 0.38);
-  --radius: 20px;
-  --radius-sm: 12px;
-  --radius-lg: 28px;
+
+  --shadow-3d-btn: 0 4px 14px rgba(9, 38, 83, 0.32), 0 1px 2px rgba(233, 172, 50, 0.15);
+  --shadow-3d-gold: 0 4px 18px rgba(233, 172, 50, 0.38), 0 2px 4px rgba(6, 27, 58, 0.3);
+  --shadow-card-elevated: 0 4px 20px -2px rgba(9, 38, 83, 0.06);
+  --shadow-card-hover: 0 14px 34px -4px rgba(9, 38, 83, 0.14), 0 2px 8px rgba(233, 172, 50, 0.12);
 }
 
 * {
@@ -39,8 +45,8 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', Helvetica, Arial, sans-serif;
-  color: var(--ink);
-  background-color: var(--bg-main);
+  color: var(--text-main);
+  background-color: var(--bg-canvas);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.01em;
@@ -65,28 +71,48 @@ body {
 }
 
 ::selection {
-  background-color: rgba(223, 163, 43, 0.3);
-  color: #092347;
+  background-color: rgba(233, 172, 50, 0.35);
+  color: #061B3A;
 }
 
 .gradient-text-gold {
-  background: linear-gradient(135deg, #dfa32b 0%, #f5cb68 50%, #d4941e 100%);
+  background: linear-gradient(135deg, #E9AC32 0%, #F8D77A 50%, #d4941e 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-text-navy {
-  background: linear-gradient(135deg, #07182e 0%, #092347 60%, #123963 100%);
+  background: linear-gradient(135deg, #061B3A 0%, #092653 60%, #1456A0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gold-glow {
-  box-shadow: 0 4px 20px rgba(223, 163, 43, 0.35);
+  box-shadow: 0 4px 20px rgba(233, 172, 50, 0.35);
 }
 
 .gold-glow-hover:hover {
-  box-shadow: 0 8px 28px rgba(223, 163, 43, 0.5);
+  box-shadow: 0 8px 28px rgba(233, 172, 50, 0.5);
+}
+
+/* 3D Button Custom Utility Styles */
+.btn-3d-press {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.btn-3d-press:hover {
+  transform: translateY(-3px);
+}
+
+.btn-3d-press:active {
+  transform: translateY(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-3d-press:hover,
+  .btn-3d-press:active {
+    transform: none !important;
+  }
 }
 
 /* Suppress Next.js dev indicator badge from covering the bottom navigation */
@@ -98,5 +124,4 @@ div[data-nextjs-portal] {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
-  opacity: 0 !important;
 }

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_react" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#061B3A"/>
+      <stop offset="60%" stop-color="#072247"/>
+      <stop offset="100%" stop-color="#1456A0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg_react)"/>
+  <circle cx="400" cy="180" r="16" fill="#38bdf8"/>
+  <ellipse cx="400" cy="180" rx="75" ry="28" fill="none" stroke="#38bdf8" stroke-width="4" transform="rotate(30 400 180)"/>
+  <ellipse cx="400" cy="180" rx="75" ry="28" fill="none" stroke="#38bdf8" stroke-width="4" transform="rotate(90 400 180)"/>
+  <ellipse cx="400" cy="180" rx="75" ry="28" fill="none" stroke="#38bdf8" stroke-width="4" transform="rotate(150 400 180)"/>
+  <text x="400" y="340" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle" letter-spacing="2">REACT.JS ARCHITECTURE &amp; REDUX</text>
+  <text x="400" y="375" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#F8D77A" text-anchor="middle" letter-spacing="3">SERVER COMPONENTS • HOOKS • PERFORMANCE</text>
+</svg>

@@ -447,9 +447,9 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business) */}
         {/* ========================================================================= */}
-        <section className="pt-10 sm:pt-14 pb-10">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <section className="pt-8 sm:pt-14 pb-8 sm:pb-10">
+          <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
               {categories.map((cat) => (
                 <CategoryCard key={cat.id} category={cat} />
               ))}
@@ -460,14 +460,14 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* POPULAR COURSES SECTION (Matching Mockup) */}
         {/* ========================================================================= */}
-        <section className="py-10 sm:py-12">
-          <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+        <section className="py-8 sm:py-12">
+          <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12">
             
             {/* Header row: Yellow bar | Popular Courses  and  View All Courses -> */}
-            <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
-              <div className="flex items-center gap-3">
-                <span className="w-1.5 sm:w-2 h-7 sm:h-8 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
+            <div className="flex items-center justify-between gap-4 mb-5 sm:mb-8">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <span className="w-1.5 sm:w-2 h-6 sm:h-8 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-[#07182e] tracking-tight">
                   Popular Courses
                 </h2>
               </div>
@@ -477,12 +477,12 @@ export default function HomePage() {
                 className="text-xs sm:text-sm font-extrabold text-[#092347] hover:text-[#b87e1a] flex items-center gap-1 transition-colors group"
               >
                 <span>View All Courses</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
-            {/* 4 Popular Course Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {/* 4 Popular Course Cards - 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
               {popularCourses.map((c) => (
                 <CourseCard key={c.id} course={c} />
               ))}
@@ -560,7 +560,8 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {/* Featured Engineering Programs - 2 columns on mobile */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
               {featuredCourses.map((c) => (
                 <CourseCard key={c.id} course={c} />
               ))}

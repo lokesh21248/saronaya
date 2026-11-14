@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_java" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#061B3A"/>
+      <stop offset="50%" stop-color="#0a2a5a"/>
+      <stop offset="100%" stop-color="#1456A0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg_java)"/>
+  <circle cx="400" cy="180" r="140" fill="#E9AC32" opacity="0.15"/>
+  <g transform="translate(340, 110)">
+    <rect x="-10" y="-10" width="140" height="140" rx="28" fill="#061B3A" stroke="#E9AC32" stroke-width="2" opacity="0.7"/>
+    <path d="M50 30 C30 50 60 70 40 90 M60 20 C45 45 75 65 55 90 M30 75 C45 75 55 90 70 90 C85 90 85 80 85 75 L15 75 C15 95 40 105 70 105 C95 105 105 95 105 75 C115 75 125 70 120 55 C115 45 105 50 100 55" stroke="#E9AC32" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </g>
+  <text x="400" y="340" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle" letter-spacing="2">JAVA ENTERPRISE ARCHITECTURE</text>
+  <text x="400" y="375" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#F8D77A" text-anchor="middle" letter-spacing="3">SPRING BOOT • MICROSERVICES • DSA</text>
+</svg>

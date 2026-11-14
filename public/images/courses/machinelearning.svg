@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_ml" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#061B3A"/>
+      <stop offset="50%" stop-color="#092653"/>
+      <stop offset="100%" stop-color="#1456A0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg_ml)"/>
+  <g transform="translate(340, 110)">
+    <rect x="-10" y="-10" width="140" height="140" rx="24" fill="#061B3A" stroke="#10b981" stroke-width="2" opacity="0.6"/>
+    <line x1="15" y1="105" x2="115" y2="25" stroke="#E9AC32" stroke-width="4"/>
+    <circle cx="35" cy="45" r="8" fill="#38bdf8"/>
+    <circle cx="55" cy="30" r="8" fill="#38bdf8"/>
+    <circle cx="45" cy="65" r="8" fill="#38bdf8"/>
+    <circle cx="85" cy="85" r="8" fill="#10b981"/>
+    <circle cx="95" cy="65" r="8" fill="#10b981"/>
+    <circle cx="75" cy="105" r="8" fill="#10b981"/>
+  </g>
+  <text x="400" y="340" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle" letter-spacing="2">APPLIED MACHINE LEARNING</text>
+  <text x="400" y="375" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#F8D77A" text-anchor="middle" letter-spacing="3">SCIKIT-LEARN • REGRESSION • CLUSTERING</text>
+</svg>
