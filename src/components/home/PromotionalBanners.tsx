@@ -15,6 +15,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { PrimaryButton, Gold3DButton } from '@/components/ui/Buttons'
+import { supabase } from '@/lib/supabase/client'
 
 interface BannerItem {
   id: string
@@ -29,48 +30,143 @@ interface BannerItem {
   badge: string
 }
 
-export function PromotionalBanners() {
-  const banners: BannerItem[] = [
-    {
-      id: 'banner-skills',
-      tag: 'FEATURED PROGRAM',
-      title: 'Upgrade Your Skills Today',
-      subtitle: 'Explore industry-ready courses taught by expert instructors with real-world engineering projects.',
-      ctaText: 'Explore Courses',
-      ctaHref: '/courses',
-      gradient: 'from-[#061B3A] via-[#092653] to-[#1456A0]',
-      accentColor: '#E9AC32',
-      badge: '500+ Industry Modules',
-      icon: <GraduationCap className="w-10 h-10 text-[#F8D77A]" />,
-    },
-    {
-      id: 'banner-premium',
-      tag: 'ALL-ACCESS PASS',
-      title: 'Unlock Unlimited Learning',
-      subtitle: 'Get full access to all 500+ premium courses, live mentor doubt clearing, and verified certificates.',
-      ctaText: 'Go Premium',
-      ctaHref: '/subscriptions',
-      gradient: 'from-[#092653] via-[#0c2f66] to-[#1a5fb4]',
-      accentColor: '#F8D77A',
-      badge: '👑 Save 45% This Month',
-      icon: <Crown className="w-10 h-10 text-[#E9AC32]" />,
-    },
-    {
-      id: 'banner-career',
-      tag: 'CAREER ACCELERATION',
-      title: 'Learn Today. Build Your Future.',
-      subtitle: 'Develop in-demand tech skills that prepare you for top hiring partners and multinational corporations.',
-      ctaText: 'Start Learning',
-      ctaHref: '/courses?sort=bestseller',
-      gradient: 'from-[#041328] via-[#092653] to-[#0e3b6e]',
-      accentColor: '#E9AC32',
-      badge: 'Recognized Credentials',
-      icon: <Zap className="w-10 h-10 text-[#F8D77A]" />,
-    },
+function getBannerIcon(title: string, badge?: string) {
+  const text = `${title} ${badge || ''}`.toLowerCase()
+  if (text.includes('pass') || text.includes('unlimited') || text.includes('premium')) {
+    return <Crown className="w-10 h-10 text-[#E9AC32]" />
+  }
+  if (text.includes('gate') || text.includes('placement') || text.includes('career') || text.includes('exam')) {
+    return <Zap className="w-10 h-10 text-[#F8D77A]" />
+  }
+  if (text.includes('course') || text.includes('masterclass') || text.includes('foundations')) {
+    return <GraduationCap className="w-10 h-10 text-[#F8D77A]" />
+  }
+  return <Sparkles className="w-10 h-10 text-[#E9AC32]" />
+}
+
+function mapApiBannerToItem(b: any, index: number): BannerItem {
+  const gradients = [
+    'from-[#092653] via-[#0c2f66] to-[#1a5fb4]',
+    'from-[#061B3A] via-[#092653] to-[#1456A0]',
+    'from-[#041328] via-[#092653] to-[#0e3b6e]',
   ]
 
+  return {
+    id: b.id || `dyn-banner-${index}`,
+    tag: b.badge_text || 'ALL-ACCESS PASS',
+    title: b.title,
+    subtitle: b.description || 'Get full access to all premium engineering courses and verified certificates.',
+    ctaText: b.cta_text || 'Explore Passes',
+    ctaHref: b.cta_url || '/subscriptions',
+    gradient: gradients[index % gradients.length],
+    accentColor: '#F8D77A',
+    badge: b.callout_text ? (b.callout_text.includes('👑') ? b.callout_text : `👑 ${b.callout_text}`) : 'Save 45% This Month',
+    icon: getBannerIcon(b.title, b.badge_text),
+  }
+}
+
+const DEFAULT_BANNERS: BannerItem[] = [
+  {
+    id: 'banner-premium',
+    tag: 'ALL-ACCESS PASS',
+    title: 'Unlock Unlimited Learning',
+    subtitle: 'Get full access to all 500+ premium courses, live mentor doubt clearing, and verified certificates.',
+    ctaText: 'Go Premium',
+    ctaHref: '/subscriptions',
+    gradient: 'from-[#092653] via-[#0c2f66] to-[#1a5fb4]',
+    accentColor: '#F8D77A',
+    badge: '👑 Save 45% This Month',
+    icon: <Crown className="w-10 h-10 text-[#E9AC32]" />,
+  },
+  {
+    id: 'banner-skills',
+    tag: 'FEATURED PROGRAM',
+    title: 'Upgrade Your Skills Today',
+    subtitle: 'Explore industry-ready courses taught by expert instructors with real-world engineering projects.',
+    ctaText: 'Explore Courses',
+    ctaHref: '/courses',
+    gradient: 'from-[#061B3A] via-[#092653] to-[#1456A0]',
+    accentColor: '#E9AC32',
+    badge: '500+ Industry Modules',
+    icon: <GraduationCap className="w-10 h-10 text-[#F8D77A]" />,
+  },
+  {
+    id: 'banner-career',
+    tag: 'CAREER ACCELERATION',
+    title: 'Learn Today. Build Your Future.',
+    subtitle: 'Develop in-demand tech skills that prepare you for top hiring partners and multinational corporations.',
+    ctaText: 'Start Learning',
+    ctaHref: '/courses?sort=bestseller',
+    gradient: 'from-[#041328] via-[#092653] to-[#0e3b6e]',
+    accentColor: '#E9AC32',
+    badge: 'Recognized Credentials',
+    icon: <Zap className="w-10 h-10 text-[#F8D77A]" />,
+  },
+]
+
+export function PromotionalBanners() {
+  const [banners, setBanners] = useState<BannerItem[]>(DEFAULT_BANNERS)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+
+  // Fetch live banners from Admin Portal API or Supabase
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLiveBanners() {
+      // 1. Try local customer API route (/api/banners)
+      try {
+        const localRes = await fetch('/api/banners', { cache: 'no-store' })
+        if (localRes.ok) {
+          const json = await localRes.json()
+          if (!cancelled && json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setBanners(json.data.map(mapApiBannerToItem))
+            return
+          }
+        }
+      } catch (err) {
+        // Continue to next source
+      }
+
+      // 2. Try direct Admin Portal API (https://admin-saronya.vercel.app/api/banners)
+      try {
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://admin-saronya.vercel.app'
+        const adminRes = await fetch(`${adminUrl}/api/banners`, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+        })
+        if (adminRes.ok) {
+          const json = await adminRes.json()
+          if (!cancelled && json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setBanners(json.data.map(mapApiBannerToItem))
+            return
+          }
+        }
+      } catch (err) {
+        // Continue to Supabase direct
+      }
+
+      // 3. Try direct client-side Supabase query
+      try {
+        const { data, error } = await supabase
+          .from('promotional_banners')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
+
+        if (!cancelled && !error && data && data.length > 0) {
+          setBanners(data.map(mapApiBannerToItem))
+        }
+      } catch (err) {
+        console.warn('Supabase direct banner fetch fallback:', err)
+      }
+    }
+
+    loadLiveBanners()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Auto-slide every 6 seconds on desktop if not paused
   useEffect(() => {
