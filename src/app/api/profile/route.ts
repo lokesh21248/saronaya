@@ -15,8 +15,8 @@ export async function GET() {
     const { data: profile, error } = await supabaseAdmin
       .from('profiles')
       .select('*')
-      .eq('clerk_user_id', userId)
-      .single()
+      .or(`clerk_id.eq.${userId},clerk_user_id.eq.${userId}`)
+      .maybeSingle()
 
     if (error && error.code !== 'PGRST116') {
       console.warn('Error fetching profile:', error)
@@ -26,9 +26,9 @@ export async function GET() {
     if (profile) {
       const { data: qual } = await supabaseAdmin
         .from('academic_qualifications')
-        .select('*')
-        .eq('profile_id', profile.id)
-        .single()
+        .select('*, branch:academic_branches(*)')
+        .or(`student_id.eq.${profile.id},profile_id.eq.${profile.id}`)
+        .maybeSingle()
       qualification = qual
     }
 
@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
     const email = user?.primaryEmailAddress?.emailAddress || body.email || 'student@saryonaya.com'
     const name = fullName || user?.fullName || 'Student'
 
-    // Upsert profile
+    // Upsert profile supporting both clerk_id and clerk_user_id
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
       .select('id')
-      .eq('clerk_user_id', clerkId)
-      .single()
+      .or(`clerk_id.eq.${clerkId},clerk_user_id.eq.${clerkId}`)
+      .maybeSingle()
 
     let profileId = existingProfile?.id
 
@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
         .update({
           full_name: name,
           phone: phone || null,
+          clerk_id: clerkId,
+          clerk_user_id: clerkId,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profileId)
@@ -85,11 +87,11 @@ export async function POST(request: NextRequest) {
       const { data: newProfile } = await supabaseAdmin
         .from('profiles')
         .insert({
+          clerk_id: clerkId,
           clerk_user_id: clerkId,
           full_name: name,
           email: email,
           phone: phone || null,
-          role: 'student',
           status: 'active',
         })
         .select('id')
@@ -98,44 +100,40 @@ export async function POST(request: NextRequest) {
       profileId = newProfile?.id
     }
 
-    // Find branch by code
+    // Find branch by code or branch_code
     if (profileId && branchCode) {
       const { data: branch } = await supabaseAdmin
         .from('academic_branches')
         .select('id')
-        .eq('branch_code', branchCode)
-        .single()
+        .or(`code.eq.${branchCode},branch_code.eq.${branchCode}`)
+        .maybeSingle()
 
       const branchId = branch?.id || null
 
       const { data: existingQual } = await supabaseAdmin
         .from('academic_qualifications')
         .select('id')
-        .eq('profile_id', profileId)
-        .single()
+        .or(`student_id.eq.${profileId},profile_id.eq.${profileId}`)
+        .maybeSingle()
+
+      const qualPayload: any = {
+        student_id: profileId,
+        profile_id: profileId,
+        branch_id: branchId,
+        college_name: collegeName || null,
+        degree: degree || educationLevel || null,
+        passed_out_year: passedOutYear ? Number(passedOutYear) : null,
+      }
 
       if (existingQual) {
         await supabaseAdmin
           .from('academic_qualifications')
-          .update({
-            college_name: collegeName || null,
-            branch_id: branchId,
-            degree: degree || educationLevel || null,
-            field_of_study: branchCode,
-            passed_out_year: passedOutYear ? Number(passedOutYear) : null,
-            updated_at: new Date().toISOString(),
-          })
+          .update(qualPayload)
           .eq('id', existingQual.id)
       } else {
-        await supabaseAdmin.from('academic_qualifications').insert({
-          profile_id: profileId,
-          college_name: collegeName || null,
-          branch_id: branchId,
-          degree: degree || educationLevel || null,
-          field_of_study: branchCode,
-          passed_out_year: passedOutYear ? Number(passedOutYear) : null,
-          is_current: true,
-        })
+        await supabaseAdmin
+          .from('academic_qualifications')
+          .insert(qualPayload)
       }
     }
 
