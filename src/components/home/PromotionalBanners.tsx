@@ -114,21 +114,7 @@ export function PromotionalBanners() {
     let cancelled = false
 
     async function loadLiveBanners() {
-      // 1. Try local customer API route (/api/banners)
-      try {
-        const localRes = await fetch('/api/banners', { cache: 'no-store' })
-        if (localRes.ok) {
-          const json = await localRes.json()
-          if (!cancelled && json.success && Array.isArray(json.data) && json.data.length > 0) {
-            setBanners(json.data.map(mapApiBannerToItem))
-            return
-          }
-        }
-      } catch (err) {
-        // Continue to next source
-      }
-
-      // 2. Try direct Admin Portal API (https://admin-saronya.vercel.app/api/banners)
+      // 1. Try direct Admin Portal API (https://admin-saronya.vercel.app/api/banners)
       try {
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://admin-saronya.vercel.app'
         const adminRes = await fetch(`${adminUrl}/api/banners`, {
@@ -137,6 +123,20 @@ export function PromotionalBanners() {
         })
         if (adminRes.ok) {
           const json = await adminRes.json()
+          if (!cancelled && json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setBanners(json.data.map(mapApiBannerToItem))
+            return
+          }
+        }
+      } catch (err) {
+        // Continue to local API
+      }
+
+      // 2. Try local customer API route (/api/banners)
+      try {
+        const localRes = await fetch('/api/banners', { cache: 'no-store' })
+        if (localRes.ok) {
+          const json = await localRes.json()
           if (!cancelled && json.success && Array.isArray(json.data) && json.data.length > 0) {
             setBanners(json.data.map(mapApiBannerToItem))
             return
