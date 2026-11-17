@@ -65,47 +65,8 @@ function mapApiBannerToItem(b: any, index: number): BannerItem {
   }
 }
 
-const DEFAULT_BANNERS: BannerItem[] = [
-  {
-    id: 'banner-premium',
-    tag: 'ALL-ACCESS PASS',
-    title: 'Unlock Unlimited Learning',
-    subtitle: 'Get full access to all 500+ premium courses, live mentor doubt clearing, and verified certificates.',
-    ctaText: 'Go Premium',
-    ctaHref: '/subscriptions',
-    gradient: 'from-[#092653] via-[#0c2f66] to-[#1a5fb4]',
-    accentColor: '#F8D77A',
-    badge: '👑 Save 45% This Month',
-    icon: <Crown className="w-10 h-10 text-[#E9AC32]" />,
-  },
-  {
-    id: 'banner-skills',
-    tag: 'FEATURED PROGRAM',
-    title: 'Upgrade Your Skills Today',
-    subtitle: 'Explore industry-ready courses taught by expert instructors with real-world engineering projects.',
-    ctaText: 'Explore Courses',
-    ctaHref: '/courses',
-    gradient: 'from-[#061B3A] via-[#092653] to-[#1456A0]',
-    accentColor: '#E9AC32',
-    badge: '500+ Industry Modules',
-    icon: <GraduationCap className="w-10 h-10 text-[#F8D77A]" />,
-  },
-  {
-    id: 'banner-career',
-    tag: 'CAREER ACCELERATION',
-    title: 'Learn Today. Build Your Future.',
-    subtitle: 'Develop in-demand tech skills that prepare you for top hiring partners and multinational corporations.',
-    ctaText: 'Start Learning',
-    ctaHref: '/courses?sort=bestseller',
-    gradient: 'from-[#041328] via-[#092653] to-[#0e3b6e]',
-    accentColor: '#E9AC32',
-    badge: 'Recognized Credentials',
-    icon: <Zap className="w-10 h-10 text-[#F8D77A]" />,
-  },
-]
-
 export function PromotionalBanners() {
-  const [banners, setBanners] = useState<BannerItem[]>(DEFAULT_BANNERS)
+  const [banners, setBanners] = useState<BannerItem[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
 
@@ -170,12 +131,14 @@ export function PromotionalBanners() {
 
   // Auto-slide every 6 seconds on desktop if not paused
   useEffect(() => {
-    if (isPaused) return
+    if (isPaused || banners.length === 0) return
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % banners.length)
     }, 6000)
     return () => clearInterval(timer)
   }, [isPaused, banners.length])
+
+  if (banners.length === 0) return null
 
   return (
     <section className="py-6 sm:py-8 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 w-full">

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
@@ -74,133 +74,45 @@ export default function HomePage() {
     },
   ]
 
-  // 4 Popular Courses matching the mockup
-  const popularCourses: CourseCardData[] = [
-    {
-      id: 'course-py-01',
-      slug: 'python-for-beginners',
-      title: 'Python for Beginners',
-      instructor: {
-        name: 'Dr. Priya Sharma',
-      },
-      rating: 4.8,
-      reviews: '12.5K',
-      duration: '40h',
-      lessonsCount: 120,
-      price: 1999,
-      originalPrice: 3999,
-      badge: 'Bestseller',
-      imageType: 'python',
-    },
-    {
-      id: 'course-ds-02',
-      slug: 'applied-machine-learning',
-      title: 'Data Science with Python',
-      instructor: {
-        name: 'Prof. Arun Kumar',
-      },
-      rating: 4.8,
-      reviews: '8.9K',
-      duration: '35h',
-      lessonsCount: 90,
-      price: 1799,
-      originalPrice: 3499,
-      badge: 'New',
-      imageType: 'datascience',
-    },
-    {
-      id: 'course-uiux-03',
-      slug: 'full-stack-web-development',
-      title: 'UI/UX Design Mastery',
-      instructor: {
-        name: 'Sneha Reddy',
-      },
-      rating: 4.8,
-      reviews: '7.2K',
-      duration: '28h',
-      lessonsCount: 75,
-      price: 1499,
-      originalPrice: 2999,
-      badge: 'Popular',
-      imageType: 'design',
-    },
-    {
-      id: 'course-biz-04',
-      slug: 'deep-learning-ai',
-      title: 'Business Analytics',
-      instructor: {
-        name: 'Vikram Reddy',
-      },
-      rating: 4.8,
-      reviews: '6.1K',
-      duration: '32h',
-      lessonsCount: 80,
-      price: 1699,
-      originalPrice: 3499,
-      badge: 'Top Rated',
-      imageType: 'business',
-    },
-  ]
+  const [coursesList, setCoursesList] = useState<CourseCardData[]>([])
 
-  // Featured Engineering Courses
-  const featuredCourses: CourseCardData[] = [
-    {
-      id: 'course-embedded-05',
-      slug: 'embedded-systems-iot',
-      title: 'Embedded Systems & IoT with ARM',
-      instructor: { name: 'Karthik Raman' },
-      rating: 4.9,
-      reviews: '4.8K',
-      duration: '38h',
-      lessonsCount: 85,
-      price: 2199,
-      originalPrice: 4299,
-      badge: 'Bestseller',
-      imageType: 'general',
-    },
-    {
-      id: 'course-cad-06',
-      slug: 'solidworks-cad-design',
-      title: 'Mechanical CAD Modeling (SolidWorks)',
-      instructor: { name: 'Rajesh Nair' },
-      rating: 4.8,
-      reviews: '3.9K',
-      duration: '30h',
-      lessonsCount: 70,
-      price: 1899,
-      originalPrice: 3799,
-      badge: 'Top Rated',
-      imageType: 'general',
-    },
-    {
-      id: 'course-civil-07',
-      slug: 'structural-analysis-autocad',
-      title: 'Civil & Structural Design (AutoCAD)',
-      instructor: { name: 'Ananya Deshmukh' },
-      rating: 4.7,
-      reviews: '3.2K',
-      duration: '26h',
-      lessonsCount: 65,
-      price: 1599,
-      originalPrice: 3199,
-      badge: 'Popular',
-      imageType: 'general',
-    },
-    {
-      id: 'course-cloud-08',
-      slug: 'cloud-devops-kubernetes',
-      title: 'Cloud Architecture & DevOps CI/CD',
-      instructor: { name: 'Sanjay Mehra' },
-      rating: 4.9,
-      reviews: '5.5K',
-      duration: '42h',
-      lessonsCount: 110,
-      price: 2499,
-      originalPrice: 4999,
-      badge: 'New',
-      imageType: 'general',
-    },
-  ]
+  useEffect(() => {
+    async function loadCourses() {
+      try {
+        const res = await fetch('/api/courses')
+        if (res.ok) {
+          const json = await res.json()
+          const data = json.data || []
+          if (Array.isArray(data)) {
+            const mapped: CourseCardData[] = data.map((c: any) => ({
+              id: c.id,
+              slug: c.slug,
+              title: c.title,
+              instructor: {
+                name: c.instructor?.name || c.primary_instructor?.full_name || 'Sarvonaya Faculty',
+              },
+              rating: Number(c.average_rating) || 0,
+              reviews: c.reviews_count ? `${c.reviews_count}` : '0',
+              duration: c.duration_hours ? `${c.duration_hours}h` : '10h',
+              lessonsCount: c.lessons_count || 0,
+              price: Number(c.price) || 0,
+              originalPrice: c.discount_price ? Number(c.discount_price) : undefined,
+              badge: c.difficulty_level || 'All Levels',
+              imageType: 'python',
+              thumbnail: c.thumbnail_url || c.thumbnail,
+            }))
+            setCoursesList(mapped)
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load courses from server:', err)
+      }
+    }
+    loadCourses()
+  }, [])
+
+  const popularCourses = coursesList.slice(0, 4)
+  const featuredCourses = coursesList.slice(4, 8).length > 0 ? coursesList.slice(4, 8) : coursesList.slice(0, 4)
 
   // FAQs
   const faqs = [
@@ -504,11 +416,17 @@ export default function HomePage() {
             </div>
 
             {/* 4 Popular Course Cards - 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-              {popularCourses.map((c) => (
-                <CourseCard key={c.id} course={c} />
-              ))}
-            </div>
+            {popularCourses.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+                {popularCourses.map((c) => (
+                  <CourseCard key={c.id} course={c} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-slate-50/60 rounded-2xl border border-slate-100">
+                <p className="text-sm font-semibold text-slate-500">Curriculum courses are loading. Explore branches for specific modules.</p>
+              </div>
+            )}
 
           </div>
         </section>
@@ -601,11 +519,17 @@ export default function HomePage() {
             </div>
 
             {/* Featured Engineering Programs - 2 columns on mobile */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {featuredCourses.map((c) => (
-                <CourseCard key={c.id} course={c} />
-              ))}
-            </div>
+            {featuredCourses.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                {featuredCourses.map((c) => (
+                  <CourseCard key={c.id} course={c} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-slate-50/60 rounded-2xl border border-slate-100">
+                <p className="text-sm font-semibold text-slate-500">Explore our academic branches for curated degree specializations.</p>
+              </div>
+            )}
 
           </div>
         </section>

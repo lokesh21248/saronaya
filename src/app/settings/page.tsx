@@ -41,37 +41,49 @@ export default function SettingsPage() {
   const [promoOffers, setPromoOffers] = useState(false)
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('saryonaya_user_profile')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed.fullName) setName(parsed.fullName)
-        if (parsed.email) setEmail(parsed.email)
-        if (parsed.phone) setPhone(parsed.phone)
-        if (parsed.college) setCollege(parsed.college)
-        if (parsed.education) setEducation(parsed.education)
-        if (parsed.course) setCourse(parsed.course)
-        if (parsed.passedOutYear) setPassYear(parsed.passedOutYear)
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/profile')
+        if (res.ok) {
+          const json = await res.json()
+          const data = json.data || json
+          if (data.full_name || data.fullName) setName(data.full_name || data.fullName)
+          if (data.email) setEmail(data.email)
+          if (data.phone) setPhone(data.phone)
+          if (data.qualification?.college_name) setCollege(data.qualification.college_name)
+          if (data.qualification?.education_level) setEducation(data.qualification.education_level)
+          if (data.qualification?.degree) setCourse(data.qualification.degree)
+          if (data.qualification?.passed_out_year) setPassYear(data.qualification.passed_out_year)
+        }
+      } catch (e) {
+        console.warn('Could not load profile from server:', e)
       }
-    } catch (e) {}
+    }
+    loadProfile()
   }, [])
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       const updated = {
         fullName: name,
         email,
         phone,
-        college,
-        education,
-        course,
+        collegeName: college,
+        educationLevel: education,
+        degree: course,
         passedOutYear: passYear,
       }
-      localStorage.setItem('saryonaya_user_profile', JSON.stringify(updated))
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      })
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
-    } catch (e) {}
+    } catch (e) {
+      console.error('Failed to save settings:', e)
+    }
   }
 
   return (

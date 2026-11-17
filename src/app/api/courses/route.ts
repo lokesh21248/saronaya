@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { COURSES_DATA } from '@/lib/data/lms-data'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,14 +7,14 @@ export async function GET(request: NextRequest) {
     const branch = searchParams.get('branch')
     const category = searchParams.get('category')
 
-    // Try fetching from Supabase
-    let query = supabaseAdmin.from('courses').select('*, categories(*)')
+    // Fetch from Supabase
+    let query = supabaseAdmin.from('courses').select('*, categories(*), primary_instructor:profiles(*)')
     if (branch) {
       // If branch specified, check course_branch_mappings
       const { data: mappings } = await supabaseAdmin
         .from('course_branch_mappings')
-        .select('course_id, academic_branches!inner(branch_code)')
-        .eq('academic_branches.branch_code', branch)
+        .select('course_id, academic_branches!inner(code, branch_code)')
+        .or(`academic_branches.code.eq.${branch},academic_branches.branch_code.eq.${branch}`)
 
       if (mappings && mappings.length > 0) {
         const courseIds = mappings.map((m: any) => m.course_id)
@@ -25,22 +24,11 @@ export async function GET(request: NextRequest) {
 
     const { data: dbCourses, error } = await query
 
-    // If Supabase has courses, return them
-    if (dbCourses && dbCourses.length > 0) {
-      return NextResponse.json({
-        data: dbCourses,
-        total: dbCourses.length,
-      })
+    if (error) {
+      console.warn('API /courses Supabase query notice:', error.message)
     }
 
-    // Fallback to rich seed data
-    let courses = COURSES_DATA
-    if (branch && branch !== 'ALL') {
-      courses = courses.filter((c) => c.eligibleBranches.includes(branch))
-    }
-    if (category) {
-      courses = courses.filter((c) => c.category.toLowerCase() === category.toLowerCase())
-    }
+    const courses = dbCourses || []
 
     return NextResponse.json({
       data: courses,
@@ -48,14 +36,14 @@ export async function GET(request: NextRequest) {
     })
   } catch (err) {
     console.error('API /courses error:', err)
-    return NextResponse.json({ error: 'Failed to fetch courses' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch courses', data: [], total: 0 }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, slug, description, price, category_id, branch_codes } = body
+    const { title, slug, description, price, category_id } = body
 
     if (!title || !slug) {
       return NextResponse.json({ error: 'Title and slug are required' }, { status: 400 })
@@ -75,12 +63,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.warn('Supabase course insert fallback:', error)
+      console.warn('Supabase course insert warning:', error)
+      return NextResponse.json({ error: 'Failed to create course' }, { status: 500 })
     }
 
     return NextResponse.json({
       success: true,
-      data: course || body,
+      data: course,
       message: 'Course created successfully',
     })
   } catch (err) {
@@ -88,4 +77,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create course' }, { status: 500 })
   }
 }
-

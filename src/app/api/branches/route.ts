@@ -14,32 +14,16 @@ export async function GET() {
       console.warn('Supabase branches fetch warning:', error)
     }
 
-    if (data && data.length > 0) {
-      const normalized = data.map((b: any) => ({
-        ...b,
-        branch_code: b.branch_code || b.code,
-        code: b.code || b.branch_code,
-        branch_name: b.branch_name || b.name,
-        name: b.name || b.branch_name,
-      }))
-      return NextResponse.json({
-        data: normalized as AcademicBranch[],
-        total: normalized.length,
-      })
-    }
-
-    // Default fallback branches
-    const fallbackBranches: any[] = [
-      { id: 'b1', code: 'CSE', branch_code: 'CSE', name: 'Computer Science and Engineering', branch_name: 'Computer Science and Engineering', is_active: true },
-      { id: 'b2', code: 'ECE', branch_code: 'ECE', name: 'Electronics & Communication Engineering', branch_name: 'Electronics & Communication Engineering', is_active: true },
-      { id: 'b3', code: 'EEE', branch_code: 'EEE', name: 'Electrical & Electronics Engineering', branch_name: 'Electrical & Electronics Engineering', is_active: true },
-      { id: 'b4', code: 'IT', branch_code: 'IT', name: 'Information Technology', branch_name: 'Information Technology', is_active: true },
-      { id: 'b5', code: 'AIML', branch_code: 'AIML', name: 'Artificial Intelligence & Machine Learning', branch_name: 'Artificial Intelligence & Machine Learning', is_active: true },
-    ]
-
+    const normalized = (data || []).map((b: any) => ({
+      ...b,
+      branch_code: b.branch_code || b.code,
+      code: b.code || b.branch_code,
+      branch_name: b.branch_name || b.name,
+      name: b.name || b.branch_name,
+    }))
     return NextResponse.json({
-      data: fallbackBranches,
-      total: fallbackBranches.length,
+      data: normalized as AcademicBranch[],
+      total: normalized.length,
     })
   } catch (error) {
     console.error('Unexpected error:', error)

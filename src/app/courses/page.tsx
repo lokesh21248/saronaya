@@ -20,10 +20,11 @@ import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { CourseCard, CourseCardData } from '@/components/ui/CourseCard'
-import { COURSES_DATA } from '@/lib/data/lms-data'
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Buttons'
 
 export default function CoursesExplorePage() {
+  const [coursesList, setCoursesList] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBranch, setSelectedBranch] = useState('ALL')
   const [selectedLevel, setSelectedLevel] = useState('ALL')
@@ -33,46 +34,59 @@ export default function CoursesExplorePage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
-  // Map COURSES_DATA into CourseCardData format
-  const mappedCourses: CourseCardData[] = useMemo(() => {
-    return COURSES_DATA.map((c, index) => {
-      let imageType: CourseCardData['imageType'] = 'general'
-      let badge: CourseCardData['badge'] = 'Bestseller'
+  React.useEffect(() => {
+    async function loadCourses() {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/courses')
+        if (res.ok) {
+          const json = await res.json()
+          setCoursesList(json.data || [])
+        }
+      } catch (err) {
+        console.warn('Could not load courses:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadCourses()
+  }, [])
 
-      if (c.slug.includes('python') || c.category.includes('Programming')) {
+  // Map database courses into CourseCardData format
+  const mappedCourses: CourseCardData[] = useMemo(() => {
+    return coursesList.map((c) => {
+      let imageType: CourseCardData['imageType'] = 'general'
+      if (c.slug?.includes('python') || c.category?.name?.includes('Programming')) {
         imageType = 'python'
-        badge = index % 2 === 0 ? 'Bestseller' : 'Popular'
-      } else if (c.category.includes('AI') || c.category.includes('Data')) {
+      } else if (c.category?.name?.includes('AI') || c.category?.name?.includes('Data')) {
         imageType = 'datascience'
-        badge = 'New'
-      } else if (c.category.includes('Design') || c.category.includes('Web')) {
+      } else if (c.category?.name?.includes('Design') || c.category?.name?.includes('Web')) {
         imageType = 'design'
-        badge = 'Popular'
-      } else if (c.category.includes('Business')) {
+      } else if (c.category?.name?.includes('Business')) {
         imageType = 'business'
-        badge = 'Top Rated'
       }
 
       return {
         id: c.id,
         slug: c.slug,
         title: c.title,
-        subtitle: c.tagline,
+        subtitle: c.short_description || c.description,
         instructor: {
-          name: c.instructor.name,
-          title: c.instructor.title,
+          name: c.primary_instructor?.full_name || c.instructor?.name || 'Sarvonaya Faculty',
+          title: c.primary_instructor?.bio || 'Senior Academic Faculty',
         },
-        rating: Number(c.rating || 4.8),
-        reviews: c.reviews || '8.5K',
-        duration: c.duration || `${c.durationHours}h`,
-        lessonsCount: c.lessonsCount || 45,
-        price: c.price,
-        originalPrice: c.originalPrice,
-        badge,
+        rating: Number(c.average_rating || 0),
+        reviews: c.reviews_count ? `${c.reviews_count}` : '0',
+        duration: c.duration_hours ? `${c.duration_hours}h` : '10h',
+        lessonsCount: c.lessons_count || 0,
+        price: Number(c.price) || 0,
+        originalPrice: c.discount_price ? Number(c.discount_price) : undefined,
+        badge: c.difficulty_level || 'All Levels',
         imageType,
+        thumbnail: c.thumbnail_url,
       }
     })
-  }, [])
+  }, [coursesList])
 
   // Filter & sort logic
   const filteredCourses = useMemo(() => {
@@ -85,19 +99,14 @@ export default function CoursesExplorePage() {
           c.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())
 
         // Branch filter
-        const original = COURSES_DATA.find((item) => item.id === c.id)
         const matchesBranch =
           selectedBranch === 'ALL' ||
-          original?.eligibleBranches.includes(selectedBranch) ||
-          original?.category.toLowerCase().includes(selectedBranch.toLowerCase())
-
-        // Level
-        const matchesLevel =
-          selectedLevel === 'ALL' || original?.level.toLowerCase() === selectedLevel.toLowerCase()
+          c.title.toLowerCase().includes(selectedBranch.toLowerCase()) ||
+          c.slug.toLowerCase().includes(selectedBranch.toLowerCase())
 
         // Price range
         let matchesPrice = true
-        const numPrice = typeof c.price === 'number' ? c.price : Number(c.price.replace(/[^\d]/g, ''))
+        const numPrice = typeof c.price === 'number' ? c.price : Number(String(c.price).replace(/[^\d]/g, ''))
         if (selectedPriceRange === 'under-1500') matchesPrice = numPrice < 1500
         if (selectedPriceRange === '1500-2000') matchesPrice = numPrice >= 1500 && numPrice <= 2000
         if (selectedPriceRange === 'above-2000') matchesPrice = numPrice > 2000
@@ -105,7 +114,7 @@ export default function CoursesExplorePage() {
         // Rating
         const matchesRating = minRating === 0 || Number(c.rating) >= minRating
 
-        return matchesSearch && matchesBranch && matchesLevel && matchesPrice && matchesRating
+        return matchesSearch && matchesBranch && matchesPrice && matchesRating
       })
       .sort((a, b) => {
         if (sortBy === 'rating') return Number(b.rating) - Number(a.rating)
@@ -113,7 +122,7 @@ export default function CoursesExplorePage() {
         if (sortBy === 'price-desc') return Number(b.price) - Number(a.price)
         return 0 // popular
       })
-  }, [mappedCourses, searchQuery, selectedBranch, selectedLevel, selectedPriceRange, minRating, sortBy])
+  }, [mappedCourses, searchQuery, selectedBranch, selectedPriceRange, minRating, sortBy])
 
   const branches = [
     { code: 'ALL', name: 'All Specializations' },

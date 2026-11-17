@@ -31,11 +31,6 @@ export default function OnboardingPage() {
     setLoading(true)
 
     try {
-      // Store in localStorage for instant client-side responsiveness
-      localStorage.setItem('saryonaya_user_branch', formData.branchCode)
-      localStorage.setItem('saryonaya_user_college', formData.collegeName)
-      localStorage.setItem('saryonaya_user_profile', JSON.stringify(formData))
-
       // Send to backend API to persist in Supabase
       await fetch('/api/profile', {
         method: 'POST',

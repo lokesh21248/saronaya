@@ -88,20 +88,6 @@ export default function StudentProfilePage() {
       } catch (e) {
         console.warn('Could not fetch remote profile:', e)
       }
-
-      // Check local registration cache
-      try {
-        const savedProfileStr = localStorage.getItem('saryonaya_user_profile')
-        if (savedProfileStr) {
-          const parsed = JSON.parse(savedProfileStr)
-          setProfile((prev) => ({ ...prev, ...parsed }))
-        } else {
-          const savedBranch = localStorage.getItem('saryonaya_user_branch')
-          const savedCollege = localStorage.getItem('saryonaya_user_college')
-          if (savedBranch) setProfile((prev) => ({ ...prev, branchCode: savedBranch }))
-          if (savedCollege) setProfile((prev) => ({ ...prev, collegeName: savedCollege }))
-        }
-      } catch (e) {}
     }
 
     if (isSignedIn) {
@@ -123,13 +109,6 @@ export default function StudentProfilePage() {
     } catch (e) {
       console.warn('Failed to sync profile to database:', e)
     }
-
-    // Save to local cache
-    try {
-      localStorage.setItem('saryonaya_user_branch', profile.branchCode)
-      localStorage.setItem('saryonaya_user_college', profile.collegeName)
-      localStorage.setItem('saryonaya_user_profile', JSON.stringify(profile))
-    } catch (e) {}
 
     setSaving(false)
     setSaved(true)

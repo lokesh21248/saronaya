@@ -92,12 +92,6 @@ export default function SignUpPage() {
     } catch (e) {
       console.warn('Profile sync notice:', e)
     }
-
-    try {
-      localStorage.setItem('saryonaya_user_profile', JSON.stringify(profilePayload))
-      localStorage.setItem('saryonaya_user_branch', branchCode)
-      localStorage.setItem('saryonaya_user_college', college.trim())
-    } catch (e) {}
   }
 
   // Real Production Registration with Clerk
