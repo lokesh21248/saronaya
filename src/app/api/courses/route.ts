@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
 
     // Fetch from Supabase
-    let query = supabaseAdmin.from('courses').select('*, categories(*), primary_instructor:profiles(*)')
+    let query = supabaseAdmin.from('courses').select('*, categories(*), primary_instructor:primary_instructor_id(*)')
     if (branch) {
       // If branch specified, check course_branch_mappings
       const { data: mappings } = await supabaseAdmin
