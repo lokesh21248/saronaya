@@ -59,16 +59,29 @@ export async function POST(request: NextRequest) {
       passedOutYear,
     } = body
 
-    const clerkId = userId || body.clerkUserId || 'guest-user'
-    const email = user?.primaryEmailAddress?.emailAddress || body.email || 'student@saryonaya.com'
-    const name = fullName || user?.fullName || 'Student'
+    const clerkId = userId || body.clerkUserId || user?.id || null
+    const email = user?.primaryEmailAddress?.emailAddress || body.email?.trim().toLowerCase() || 'student@saryonaya.com'
+    const name = fullName?.trim() || user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Student'
 
-    // Upsert profile supporting both clerk_id and clerk_user_id
-    const { data: existingProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('id')
-      .or(`clerk_id.eq.${clerkId},clerk_user_id.eq.${clerkId}`)
-      .maybeSingle()
+    // Look up existing profile by clerk_id OR email
+    let existingProfile = null
+    if (clerkId) {
+      const { data } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .or(`clerk_id.eq.${clerkId},clerk_user_id.eq.${clerkId}`)
+        .maybeSingle()
+      existingProfile = data
+    }
+
+    if (!existingProfile && email) {
+      const { data } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+      existingProfile = data
+    }
 
     let profileId = existingProfile?.id
 
@@ -78,25 +91,31 @@ export async function POST(request: NextRequest) {
         .update({
           full_name: name,
           phone: phone || null,
-          clerk_id: clerkId,
-          clerk_user_id: clerkId,
+          ...(clerkId && { clerk_id: clerkId, clerk_user_id: clerkId }),
           updated_at: new Date().toISOString(),
         })
         .eq('id', profileId)
     } else {
-      const { data: newProfile } = await supabaseAdmin
+      const insertData: Record<string, any> = {
+        full_name: name,
+        email: email,
+        phone: phone || null,
+        status: 'active',
+      }
+      if (clerkId) {
+        insertData.clerk_id = clerkId
+        insertData.clerk_user_id = clerkId
+      }
+
+      const { data: newProfile, error: insertError } = await supabaseAdmin
         .from('profiles')
-        .insert({
-          clerk_id: clerkId,
-          clerk_user_id: clerkId,
-          full_name: name,
-          email: email,
-          phone: phone || null,
-          status: 'active',
-        })
+        .insert(insertData)
         .select('id')
         .single()
 
+      if (insertError) {
+        console.error('Failed to insert new student profile:', insertError)
+      }
       profileId = newProfile?.id
     }
 

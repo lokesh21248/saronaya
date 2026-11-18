@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
       const { data: existingProfile } = await supabaseAdmin
         .from('profiles')
         .select('id')
-        .eq('clerk_user_id', clerkUserId)
-        .single()
+        .or(`clerk_user_id.eq.${clerkUserId},clerk_id.eq.${clerkUserId},email.eq.${email}`)
+        .maybeSingle()
 
       if (existingProfile) {
         await supabaseAdmin
@@ -38,17 +38,19 @@ export async function POST(request: NextRequest) {
             email,
             phone,
             avatar_url: avatarUrl,
+            clerk_id: clerkUserId,
+            clerk_user_id: clerkUserId,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existingProfile.id)
       } else {
         await supabaseAdmin.from('profiles').insert({
+          clerk_id: clerkUserId,
           clerk_user_id: clerkUserId,
           full_name: fullName,
           email,
           phone,
           avatar_url: avatarUrl,
-          role: 'student',
           status: 'active',
         })
       }

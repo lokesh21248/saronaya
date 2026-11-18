@@ -70,9 +70,11 @@ export default function SignUpPage() {
   }
 
   // Save the student's real profile to database and local cache
-  const saveStudentProfile = async () => {
+  const saveStudentProfile = async (userIdOverride?: string) => {
     const branchCode = getBranchCode(course)
+    const effectiveClerkId = userIdOverride || clerk?.user?.id || clerk?.client?.signUp?.createdUserId || null
     const profilePayload = {
+      clerkUserId: effectiveClerkId,
       fullName: fullName.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim() ? `+91 ${phone.trim()}` : null,
@@ -139,7 +141,7 @@ export default function SignUpPage() {
       // 2. Check if verification is needed
       if (signUpAttempt.status === 'complete' && signUpAttempt.createdSessionId) {
         await clerk.setActive({ session: signUpAttempt.createdSessionId })
-        await saveStudentProfile()
+        await saveStudentProfile((signUpAttempt as any).createdUserId)
         setSuccess(true)
         router.push('/student/dashboard')
         return
@@ -194,7 +196,7 @@ export default function SignUpPage() {
 
       if (completeSignUp.status === 'complete' && completeSignUp.createdSessionId) {
         await clerk.setActive({ session: completeSignUp.createdSessionId })
-        await saveStudentProfile()
+        await saveStudentProfile((completeSignUp as any).createdUserId)
         setSuccess(true)
         router.push('/student/dashboard')
         return
