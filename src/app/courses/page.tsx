@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
   Search,
   SlidersHorizontal,
@@ -22,11 +23,20 @@ import { BottomNav } from '@/components/layout/BottomNav'
 import { CourseCard, CourseCardData } from '@/components/ui/CourseCard'
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Buttons'
 
-export default function CoursesExplorePage() {
+function CoursesExploreContent() {
+  const searchParams = useSearchParams()
+  const initialCategory = searchParams.get('category') || 'ALL'
+  const initialSearch = searchParams.get('search') || searchParams.get('q') || ''
+  const initialBranch = searchParams.get('branch') || 'ALL'
+
   const [coursesList, setCoursesList] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [branches, setBranches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedBranch, setSelectedBranch] = useState('ALL')
+
+  const [searchQuery, setSearchQuery] = useState(initialSearch)
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
+  const [selectedBranch, setSelectedBranch] = useState(initialBranch)
   const [selectedLevel, setSelectedLevel] = useState('ALL')
   const [selectedPriceRange, setSelectedPriceRange] = useState('ALL')
   const [minRating, setMinRating] = useState<number>(0)
@@ -34,7 +44,14 @@ export default function CoursesExplorePage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
-  React.useEffect(() => {
+  // Sync category param from URL if it changes
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    if (cat) setSelectedCategory(cat)
+  }, [searchParams])
+
+  // Load Courses
+  useEffect(() => {
     async function loadCourses() {
       try {
         setLoading(true)
@@ -52,17 +69,47 @@ export default function CoursesExplorePage() {
     loadCourses()
   }, [])
 
+  // Load Categories & Branches dynamically from API
+  useEffect(() => {
+    async function loadFilters() {
+      try {
+        const [catRes, branchRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/branches'),
+        ])
+
+        if (catRes.ok) {
+          const catJson = await catRes.json()
+          if (catJson.data && Array.isArray(catJson.data)) {
+            setCategories(catJson.data)
+          }
+        }
+
+        if (branchRes.ok) {
+          const branchJson = await branchRes.json()
+          if (branchJson.data && Array.isArray(branchJson.data)) {
+            setBranches(branchJson.data)
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load filter metadata:', err)
+      }
+    }
+    loadFilters()
+  }, [])
+
   // Map database courses into CourseCardData format
   const mappedCourses: CourseCardData[] = useMemo(() => {
     return coursesList.map((c) => {
       let imageType: CourseCardData['imageType'] = 'general'
-      if (c.slug?.includes('python') || c.category?.name?.includes('Programming')) {
+      const catName = c.category?.name || c.categories?.name || ''
+      if (c.slug?.includes('python') || catName.includes('Programming')) {
         imageType = 'python'
-      } else if (c.category?.name?.includes('AI') || c.category?.name?.includes('Data')) {
+      } else if (catName.includes('AI') || catName.includes('Data')) {
         imageType = 'datascience'
-      } else if (c.category?.name?.includes('Design') || c.category?.name?.includes('Web')) {
+      } else if (catName.includes('Design') || catName.includes('Web')) {
         imageType = 'design'
-      } else if (c.category?.name?.includes('Business')) {
+      } else if (catName.includes('Business')) {
         imageType = 'business'
       }
 
@@ -83,7 +130,7 @@ export default function CoursesExplorePage() {
         originalPrice: c.discount_price ? Number(c.discount_price) : undefined,
         badge: c.difficulty_level || 'All Levels',
         imageType,
-        thumbnail: c.thumbnail_url,
+        thumbnail: c.thumbnail_url || c.thumbnail,
       }
     })
   }, [coursesList])
@@ -96,13 +143,37 @@ export default function CoursesExplorePage() {
         const matchesSearch =
           !searchQuery.trim() ||
           c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())
+          c.instructor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.subtitle?.toLowerCase().includes(searchQuery.toLowerCase())
+
+        // Category filter
+        let matchesCategory = true
+        if (selectedCategory && selectedCategory !== 'ALL') {
+          const target = selectedCategory.toLowerCase()
+          const rawCourse = coursesList.find((raw) => raw.id === c.id)
+          const catName = (rawCourse?.category?.name || rawCourse?.categories?.name || '').toLowerCase()
+          const catSlug = (rawCourse?.category?.slug || rawCourse?.categories?.slug || '').toLowerCase()
+          matchesCategory =
+            catName === target ||
+            catSlug === target ||
+            catName.includes(target) ||
+            c.title.toLowerCase().includes(target)
+        }
 
         // Branch filter
-        const matchesBranch =
-          selectedBranch === 'ALL' ||
-          c.title.toLowerCase().includes(selectedBranch.toLowerCase()) ||
-          c.slug.toLowerCase().includes(selectedBranch.toLowerCase())
+        let matchesBranch = true
+        if (selectedBranch && selectedBranch !== 'ALL') {
+          const target = selectedBranch.toLowerCase()
+          matchesBranch =
+            c.title.toLowerCase().includes(target) ||
+            c.slug.toLowerCase().includes(target)
+        }
+
+        // Difficulty level
+        let matchesLevel = true
+        if (selectedLevel !== 'ALL') {
+          matchesLevel = (c.badge || '').toLowerCase() === selectedLevel.toLowerCase()
+        }
 
         // Price range
         let matchesPrice = true
@@ -114,7 +185,7 @@ export default function CoursesExplorePage() {
         // Rating
         const matchesRating = minRating === 0 || Number(c.rating) >= minRating
 
-        return matchesSearch && matchesBranch && matchesPrice && matchesRating
+        return matchesSearch && matchesCategory && matchesBranch && matchesLevel && matchesPrice && matchesRating
       })
       .sort((a, b) => {
         if (sortBy === 'rating') return Number(b.rating) - Number(a.rating)
@@ -122,31 +193,42 @@ export default function CoursesExplorePage() {
         if (sortBy === 'price-desc') return Number(b.price) - Number(a.price)
         return 0 // popular
       })
-  }, [mappedCourses, searchQuery, selectedBranch, selectedPriceRange, minRating, sortBy])
+  }, [mappedCourses, coursesList, searchQuery, selectedCategory, selectedBranch, selectedLevel, selectedPriceRange, minRating, sortBy])
 
-  const branches = [
-    { code: 'ALL', name: 'All Specializations' },
+  // Fallback branches list if API hasn't loaded yet
+  const displayBranches = branches.length > 0 ? branches : [
     { code: 'CSE', name: 'Computer Science (CSE)' },
-    { code: 'AI_ML', name: 'AI & Data Science' },
+    { code: 'AIML', name: 'AI & Machine Learning' },
     { code: 'ECE', name: 'Electronics & Comm (ECE)' },
     { code: 'EEE', name: 'Electrical Engineering' },
     { code: 'MECH', name: 'Mechanical Engineering' },
     { code: 'CIVIL', name: 'Civil Engineering' },
-    { code: 'Web', name: 'Full-Stack Web Dev' },
   ]
+
+  const activeFiltersCount =
+    (selectedCategory !== 'ALL' ? 1 : 0) +
+    (selectedBranch !== 'ALL' ? 1 : 0) +
+    (selectedLevel !== 'ALL' ? 1 : 0) +
+    (selectedPriceRange !== 'ALL' ? 1 : 0) +
+    (minRating !== 0 ? 1 : 0)
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-[#07182e] flex flex-col font-sans antialiased selection:bg-[#dfa32b]/30">
       <Navbar />
 
       <main className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        
         {/* Page Header */}
         <div className="space-y-2 mb-8">
           <div className="flex items-center gap-2 text-xs font-bold text-[#b87e1a]">
-            <span>Explore</span>
+            <Link href="/" className="hover:underline">Home</Link>
             <span>/</span>
             <span className="text-slate-500">Course Marketplace</span>
+            {selectedCategory !== 'ALL' && (
+              <>
+                <span>/</span>
+                <span className="bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-black">{selectedCategory}</span>
+              </>
+            )}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#07182e] tracking-tight">
             Engineering Course Marketplace
@@ -158,7 +240,6 @@ export default function CoursesExplorePage() {
 
         {/* Top Control Bar: Search, View Mode, Sort */}
         <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm mb-8 flex flex-col lg:flex-row items-center justify-between gap-4">
-          
           {/* Search Bar */}
           <div className="relative w-full lg:max-w-md">
             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -179,7 +260,7 @@ export default function CoursesExplorePage() {
               className="lg:hidden px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-extrabold text-[#07182e] flex items-center gap-2"
             >
               <Filter className="w-4 h-4 text-[#e5a93b]" />
-              <span>Filters</span>
+              <span>Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}</span>
             </button>
 
             {/* Sort Selector */}
@@ -219,12 +300,10 @@ export default function CoursesExplorePage() {
               </button>
             </div>
           </div>
-
         </div>
 
         {/* Main 2-Column Marketplace Grid: Sidebar Filters + Courses */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
           {/* LEFT: Filters Sidebar (Desktop) */}
           <aside
             className={`lg:col-span-3 bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-6 ${
@@ -236,9 +315,10 @@ export default function CoursesExplorePage() {
                 <SlidersHorizontal className="w-4 h-4 text-[#e5a93b]" />
                 <span>Filters</span>
               </h3>
-              {(selectedBranch !== 'ALL' || selectedLevel !== 'ALL' || selectedPriceRange !== 'ALL' || minRating !== 0) && (
+              {activeFiltersCount > 0 && (
                 <button
                   onClick={() => {
+                    setSelectedCategory('ALL')
                     setSelectedBranch('ALL')
                     setSelectedLevel('ALL')
                     setSelectedPriceRange('ALL')
@@ -251,24 +331,89 @@ export default function CoursesExplorePage() {
               )}
             </div>
 
-            {/* Branch / Specialization */}
+            {/* Dynamic Category Filter */}
             <div className="space-y-2">
-              <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
-                Specialization / Branch
-              </h4>
-              <div className="space-y-1">
-                {branches.map((b) => (
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                  Category
+                </h4>
+                {selectedCategory !== 'ALL' && (
                   <button
-                    key={b.code}
-                    onClick={() => setSelectedBranch(b.code)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
-                      selectedBranch === b.code
+                    onClick={() => setSelectedCategory('ALL')}
+                    className="text-[10px] text-amber-700 hover:underline font-bold"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
+                <button
+                  onClick={() => setSelectedCategory('ALL')}
+                  className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                    selectedCategory === 'ALL'
+                      ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>All Categories</span>
+                  {selectedCategory === 'ALL' && <span className="w-2 h-2 rounded-full bg-[#dfa32b]" />}
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                      selectedCategory === cat.name
                         ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
                         : 'text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <span>{b.name}</span>
-                    {selectedBranch === b.code && <span className="w-2 h-2 rounded-full bg-[#dfa32b]" />}
+                    <span className="truncate">{cat.name}</span>
+                    {selectedCategory === cat.name && <span className="w-2 h-2 rounded-full bg-[#dfa32b] shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Branch / Specialization */}
+            <div className="space-y-2 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                  Specialization / Branch
+                </h4>
+                {selectedBranch !== 'ALL' && (
+                  <button
+                    onClick={() => setSelectedBranch('ALL')}
+                    className="text-[10px] text-amber-700 hover:underline font-bold"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
+                <button
+                  onClick={() => setSelectedBranch('ALL')}
+                  className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                    selectedBranch === 'ALL'
+                      ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>All Specializations</span>
+                  {selectedBranch === 'ALL' && <span className="w-2 h-2 rounded-full bg-[#dfa32b]" />}
+                </button>
+                {displayBranches.map((b: any) => (
+                  <button
+                    key={b.code || b.id}
+                    onClick={() => setSelectedBranch(b.code || b.name)}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                      selectedBranch === (b.code || b.name)
+                        ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="truncate">{b.name}</span>
+                    {selectedBranch === (b.code || b.name) && <span className="w-2 h-2 rounded-full bg-[#dfa32b] shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -284,7 +429,7 @@ export default function CoursesExplorePage() {
                   <button
                     key={lvl}
                     onClick={() => setSelectedLevel(lvl)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
                       selectedLevel === lvl
                         ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
                         : 'text-slate-600 hover:bg-slate-50'
@@ -300,19 +445,19 @@ export default function CoursesExplorePage() {
             {/* Price Filter */}
             <div className="space-y-2 pt-4 border-t border-slate-100">
               <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
-                Price
+                Price Range
               </h4>
               <div className="space-y-1">
                 {[
                   { id: 'ALL', label: 'All Prices' },
                   { id: 'under-1500', label: 'Under ₹1,500' },
-                  { id: '1500-2000', label: '₹1,500 - ₹2,000' },
+                  { id: '1500-2000', label: '₹1,500 – ₹2,000' },
                   { id: 'above-2000', label: 'Above ₹2,000' },
                 ].map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setSelectedPriceRange(p.id)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
                       selectedPriceRange === p.id
                         ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
                         : 'text-slate-600 hover:bg-slate-50'
@@ -324,59 +469,36 @@ export default function CoursesExplorePage() {
                 ))}
               </div>
             </div>
-
-            {/* Minimum Rating */}
-            <div className="space-y-2 pt-4 border-t border-slate-100">
-              <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
-                Minimum Rating
-              </h4>
-              <div className="space-y-1">
-                {[
-                  { r: 0, label: 'All Ratings' },
-                  { r: 4.5, label: '★ 4.5 & Above' },
-                  { r: 4.8, label: '★ 4.8 & Above' },
-                ].map((item) => (
-                  <button
-                    key={item.r}
-                    onClick={() => setMinRating(item.r)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
-                      minRating === item.r
-                        ? 'bg-amber-50 text-[#b87e1a] border border-[#dfa32b]/50'
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span>{item.label}</span>
-                    {minRating === item.r && <span className="w-2 h-2 rounded-full bg-[#dfa32b]" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
           </aside>
 
-          {/* RIGHT: Course Cards Grid */}
+          {/* RIGHT: Courses Results Column */}
           <div className="lg:col-span-9 space-y-6">
-            
-            {/* Results count & status */}
             <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-              <span>Showing {filteredCourses.length} engineering courses</span>
-              {searchQuery && (
-                <span className="text-[#07182e]">Results for &ldquo;{searchQuery}&rdquo;</span>
+              <span>Showing {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''}</span>
+              {selectedCategory !== 'ALL' && (
+                <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Filtered by Category: <strong>{selectedCategory}</strong>
+                </span>
               )}
             </div>
 
-            {filteredCourses.length === 0 ? (
-              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-amber-50 text-[#dfa32b] flex items-center justify-center mx-auto text-2xl">
-                  🔍
-                </div>
-                <h3 className="text-lg font-black text-[#07182e]">No courses match your filter criteria</h3>
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-64 rounded-3xl bg-slate-200/70 animate-pulse" />
+                ))}
+              </div>
+            ) : filteredCourses.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 p-8 space-y-4">
+                <BookOpen className="w-12 h-12 mx-auto text-slate-300" />
+                <h3 className="text-lg font-bold text-[#07182e]">No courses found matching your filters</h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Try clearing some filters or searching for broader terms like &ldquo;Python&rdquo;, &ldquo;Machine Learning&rdquo;, or &ldquo;Mechanical&rdquo;.
+                  Try clearing some filters or searching with different keywords.
                 </p>
                 <button
                   onClick={() => {
                     setSearchQuery('')
+                    setSelectedCategory('ALL')
                     setSelectedBranch('ALL')
                     setSelectedLevel('ALL')
                     setSelectedPriceRange('ALL')
@@ -400,15 +522,20 @@ export default function CoursesExplorePage() {
                 ))}
               </div>
             )}
-
           </div>
-
         </div>
-
       </main>
 
       <Footer />
       <BottomNav />
     </div>
+  )
+}
+
+export default function CoursesExplorePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f4f7fb] flex items-center justify-center text-slate-400 text-sm">Loading course marketplace...</div>}>
+      <CoursesExploreContent />
+    </Suspense>
   )
 }

@@ -144,6 +144,7 @@ export function DynamicHeroBanner({ initialBanners }: DynamicHeroBannerProps) {
                         src={currentBanner.mobile_image_url}
                         alt={currentBanner.title}
                         fill
+                        unoptimized
                         priority={currentIndex === 0}
                         sizes="100vw"
                         className="object-cover"
@@ -176,6 +177,7 @@ export function DynamicHeroBanner({ initialBanners }: DynamicHeroBannerProps) {
                               src={currentBanner.image_url}
                               alt=""
                               fill
+                              unoptimized
                               sizes="64px"
                               className="object-contain"
                             />
@@ -390,6 +392,7 @@ export function DynamicHeroBanner({ initialBanners }: DynamicHeroBannerProps) {
                         src={currentBanner.image_url}
                         alt={currentBanner.title}
                         fill
+                        unoptimized
                         priority={currentIndex === 0}
                         sizes="(max-width: 1280px) 450px, 512px"
                         className="object-contain drop-shadow-[0_18px_40px_rgba(9,38,83,0.18)]"

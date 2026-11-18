@@ -43,39 +43,41 @@ export default function HomePage() {
   const [filterActive, setFilterActive] = useState(false)
   const [faqOpen, setFaqOpen] = useState<number | null>(0)
 
-  // 4 Core Category Cards matching the mockup
-  const categories: CategoryData[] = [
-    {
-      id: 'cat-prog',
-      name: 'Programming',
-      subtitle: 'Code • Build • Innovate',
-      slug: 'programming',
-      iconType: 'programming',
-    },
-    {
-      id: 'cat-ds',
-      name: 'Data Science',
-      subtitle: 'Analyze • Predict • Grow',
-      slug: 'datascience',
-      iconType: 'datascience',
-    },
-    {
-      id: 'cat-design',
-      name: 'Design',
-      subtitle: 'Create • Inspire • Design',
-      slug: 'design',
-      iconType: 'design',
-    },
-    {
-      id: 'cat-biz',
-      name: 'Business',
-      subtitle: 'Plan • Grow • Succeed',
-      slug: 'business',
-      iconType: 'business',
-    },
-  ]
+  // Dynamic Categories from Admin & Supabase
+  const [categoriesList, setCategoriesList] = useState<CategoryData[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [showAllCategories, setShowAllCategories] = useState(false)
 
   const [coursesList, setCoursesList] = useState<CourseCardData[]>([])
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        setCategoriesLoading(true)
+        const res = await fetch('/api/categories')
+        if (res.ok) {
+          const json = await res.json()
+          const data = json.data || []
+          if (Array.isArray(data) && data.length > 0) {
+            setCategoriesList(data)
+            return
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load categories:', err)
+      } finally {
+        setCategoriesLoading(false)
+      }
+      // Fallback
+      setCategoriesList([
+        { id: 'cat-prog', name: 'Programming', subtitle: 'Code • Build • Innovate', slug: 'programming', iconType: 'programming' },
+        { id: 'cat-ds', name: 'Data Science', subtitle: 'Analyze • Predict • Grow', slug: 'datascience', iconType: 'datascience' },
+        { id: 'cat-design', name: 'Design', subtitle: 'Create • Inspire • Design', slug: 'design', iconType: 'design' },
+        { id: 'cat-biz', name: 'Business', subtitle: 'Plan • Grow • Succeed', slug: 'business', iconType: 'business' },
+      ])
+    }
+    loadCategories()
+  }, [])
 
   useEffect(() => {
     async function loadCourses() {
@@ -188,15 +190,50 @@ export default function HomePage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. 4 CORE CATEGORY CARDS (Programming, Data Science, Design, Business)    */}
+        {/* 5. DYNAMIC CATEGORIES SECTION (Admin & Supabase Controlled)                */}
         {/* ========================================================================= */}
-        <section className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-10 pb-2 sm:pb-6">
+        <section className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-8 pb-2 sm:pb-6">
           <div className="max-w-[1280px] mx-auto">
-            <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6">
-              {categories.map((cat) => (
-                <CategoryCard key={cat.id} category={cat} />
-              ))}
+            {/* Header row */}
+            <div className="flex items-center justify-between gap-4 mb-3 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="w-1.5 sm:w-2 h-5 sm:h-7 rounded-full bg-gradient-to-b from-[#dfa32b] to-[#f5cb68]" />
+                <h2 className="text-base sm:text-2xl font-black text-[#07182e] tracking-tight flex items-center gap-2">
+                  <span>Explore by Category</span>
+                  {categoriesList.length > 0 && (
+                    <span className="text-[10px] sm:text-xs font-bold text-amber-800 bg-amber-100/70 border border-amber-200 px-2 py-0.5 rounded-full">
+                      {categoriesList.length} Categories
+                    </span>
+                  )}
+                </h2>
+              </div>
+
+              {categoriesList.length > 4 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className="text-xs sm:text-sm font-extrabold text-[#092347] hover:text-[#b87e1a] flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <span>{showAllCategories ? 'Show Less' : `View All (${categoriesList.length})`}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showAllCategories ? 'rotate-180 text-[#b87e1a]' : ''}`} />
+                </button>
+              )}
             </div>
+
+            {/* Category Cards Grid */}
+            {categoriesLoading && categoriesList.length === 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-16 sm:h-20 bg-slate-200/70 animate-pulse rounded-2xl border border-slate-200" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3.5 md:gap-4">
+                {(showAllCategories ? categoriesList : categoriesList.slice(0, 8)).map((cat) => (
+                  <CategoryCard key={cat.id} category={cat} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
