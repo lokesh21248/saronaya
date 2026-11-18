@@ -164,7 +164,12 @@ function CoursesExploreContent() {
         let matchesBranch = true
         if (selectedBranch && selectedBranch !== 'ALL') {
           const target = selectedBranch.toLowerCase()
+          const rawCourse = coursesList.find((raw) => raw.id === c.id)
+          const courseBranches = (rawCourse?.branches || rawCourse?.selected_branches || []).map((b: string) =>
+            b.toLowerCase()
+          )
           matchesBranch =
+            courseBranches.includes(target) ||
             c.title.toLowerCase().includes(target) ||
             c.slug.toLowerCase().includes(target)
         }

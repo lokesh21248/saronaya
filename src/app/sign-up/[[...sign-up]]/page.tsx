@@ -61,11 +61,14 @@ export default function SignUpPage() {
 
   // Helper to determine branch code from course name
   const getBranchCode = (courseName: string): string => {
-    if (courseName.includes('AI') || courseName.includes('Data Science')) return 'AIDS'
+    if (courseName.includes('AI') || courseName.includes('Data Science') || courseName.includes('Machine Learning')) return 'AIML'
+    if (courseName.includes('IT') || courseName.includes('Information')) return 'IT'
     if (courseName.includes('ECE') || courseName.includes('Electronics')) return 'ECE'
     if (courseName.includes('EEE') || courseName.includes('Electrical')) return 'EEE'
     if (courseName.includes('MECH') || courseName.includes('Mechanical')) return 'MECH'
     if (courseName.includes('CIVIL') || courseName.includes('Civil')) return 'CIVIL'
+    if (courseName.includes('BCA')) return 'BCA'
+    if (courseName.includes('MCA')) return 'MCA'
     return 'CSE'
   }
 

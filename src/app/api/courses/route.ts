@@ -18,6 +18,10 @@ export async function GET(request: NextRequest) {
         *,
         category:categories(*),
         primary_instructor:primary_instructor_id(*),
+        course_branch_mapping(
+          branch_id,
+          academic_branches(id, code, branch_code, name)
+        ),
         course_sections(
           id,
           title,
@@ -40,14 +44,35 @@ export async function GET(request: NextRequest) {
 
     if (branch && branch !== 'ALL') {
       try {
-        const { data: mappings } = await supabaseAdmin
-          .from('course_branch_mappings')
-          .select('course_id, academic_branches!inner(code, branch_code)')
-          .or(`academic_branches.code.eq.${branch},academic_branches.branch_code.eq.${branch}`)
+        const { data: branchRow } = await supabaseAdmin
+          .from('academic_branches')
+          .select('id, code, branch_code')
+          .or(`code.ilike.${branch},branch_code.ilike.${branch}`)
+          .maybeSingle()
 
-        if (mappings && mappings.length > 0) {
-          const courseIds = mappings.map((m: any) => m.course_id)
-          query = query.in('id', courseIds)
+        if (branchRow) {
+          const { data: mappings } = await supabaseAdmin
+            .from('course_branch_mapping')
+            .select('course_id')
+            .eq('branch_id', branchRow.id)
+
+          let courseIds = (mappings || []).map((m: any) => m.course_id)
+
+          if (courseIds.length === 0) {
+            const { data: altMappings } = await supabaseAdmin
+              .from('course_branch_mappings')
+              .select('course_id')
+              .eq('branch_id', branchRow.id)
+            if (altMappings) {
+              courseIds = altMappings.map((m: any) => m.course_id)
+            }
+          }
+
+          if (courseIds.length > 0) {
+            query = query.in('id', courseIds)
+          } else {
+            return NextResponse.json({ success: true, data: [], total: 0 })
+          }
         }
       } catch (branchErr) {
         console.warn('Branch mapping query notice:', branchErr)
@@ -94,8 +119,18 @@ export async function GET(request: NextRequest) {
 
       const catName = c.category?.name || c.categories?.name || 'Engineering'
 
+      const branchCodes = Array.from(
+        new Set(
+          (c.course_branch_mapping || [])
+            .map((m: any) => m.academic_branches?.code || m.academic_branches?.branch_code)
+            .filter(Boolean)
+        )
+      )
+
       return {
         ...c,
+        branches: branchCodes,
+        selected_branches: branchCodes,
         category: c.category || c.categories || { name: catName, slug: c.category_id || 'engineering' },
         categories: c.category || c.categories || { name: catName, slug: c.category_id || 'engineering' },
         instructor: {
