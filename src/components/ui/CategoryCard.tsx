@@ -35,6 +35,8 @@ export interface CategoryData {
   slug: string
   icon?: string
   iconType?: string
+  thumbnail_url?: string | null
+  image_url?: string | null
   display_order?: number
 }
 
@@ -105,7 +107,10 @@ function getCategoryIcon(iconName?: string, catName?: string) {
 export function CategoryCard({ category, className = '' }: CategoryCardProps) {
   const { name, subtitle, description, slug, icon, iconType } = category
 
-  // 1. Check for dedicated 3D PNG mockups
+  // 1. Check if a custom image was uploaded by admin
+  const uploadedImage = category.thumbnail_url || category.image_url
+
+  // 2. Check for dedicated 3D PNG mockups
   const lowerName = name.toLowerCase()
   let pngSrc: string | null = null
 
@@ -137,7 +142,16 @@ export function CategoryCard({ category, className = '' }: CategoryCardProps) {
         {/* 3D Icon & Text */}
         <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3.5 min-w-0 w-full sm:w-auto">
           <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#f8fafc] p-1.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden shadow-xs border border-slate-100">
-            {pngSrc ? (
+            {uploadedImage ? (
+              <img
+                src={uploadedImage}
+                alt={name}
+                className="w-full h-full object-contain drop-shadow-sm"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : pngSrc ? (
               <img
                 src={pngSrc}
                 alt={name}

@@ -209,6 +209,7 @@ export interface Database {
           slug: string
           description: string | null
           icon: string | null
+          thumbnail_url: string | null
           sort_order: number
           is_active: boolean
           created_at: string
@@ -220,6 +221,7 @@ export interface Database {
           slug: string
           description?: string | null
           icon?: string | null
+          thumbnail_url?: string | null
           sort_order?: number
           is_active?: boolean
           created_at?: string
@@ -231,6 +233,7 @@ export interface Database {
           slug?: string
           description?: string | null
           icon?: string | null
+          thumbnail_url?: string | null
           sort_order?: number
           is_active?: boolean
           created_at?: string
