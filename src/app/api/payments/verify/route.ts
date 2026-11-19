@@ -22,10 +22,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update order status in Supabase
-    await supabaseAdmin
+    const { data: existingOrder } = await supabaseAdmin
       .from('orders')
       .update({ status: 'paid', updated_at: new Date().toISOString() })
       .eq('razorpay_order_id', orderId)
+      .select('id, student_id, total_amount, net_amount, currency')
+      .maybeSingle()
 
     // Activate enrollment
     if (userId && courseId) {
@@ -63,6 +65,23 @@ export async function POST(request: NextRequest) {
           purchased_at: new Date().toISOString(),
         }, { onConflict: 'student_id,course_id' })
       }
+    }
+
+    // Record in payments table for live admin ledger
+    try {
+      await supabaseAdmin.from('payments').upsert({
+        order_id: existingOrder?.id || null,
+        student_id: existingOrder?.student_id || null,
+        razorpay_payment_id: paymentId,
+        razorpay_order_id: orderId,
+        razorpay_signature: signature,
+        amount: existingOrder?.net_amount || existingOrder?.total_amount || 0,
+        currency: existingOrder?.currency || 'INR',
+        status: 'captured',
+        method: 'razorpay',
+      }, { onConflict: 'razorpay_payment_id' })
+    } catch (payErr) {
+      console.warn('Payment record insert warning:', payErr)
     }
 
     return NextResponse.json({

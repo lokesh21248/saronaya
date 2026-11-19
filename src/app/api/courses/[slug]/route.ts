@@ -55,12 +55,20 @@ export async function GET(
     }
 
     // Fetch eligible branches for this course
-    let eligibleBranches: string[] = ['ALL'];
+    let eligibleBranches: string[] = [];
     try {
-      const { data: branchMappings } = await supabaseAdmin
-        .from('course_branch_mappings')
+      let { data: branchMappings } = await supabaseAdmin
+        .from('course_branch_mapping')
         .select('academic_branches(code, branch_code, name, branch_name)')
         .eq('course_id', course.id);
+
+      if (!branchMappings || branchMappings.length === 0) {
+        const { data: pluralMappings } = await supabaseAdmin
+          .from('course_branch_mappings')
+          .select('academic_branches(code, branch_code, name, branch_name)')
+          .eq('course_id', course.id);
+        branchMappings = pluralMappings;
+      }
 
       if (branchMappings && branchMappings.length > 0) {
         eligibleBranches = branchMappings
